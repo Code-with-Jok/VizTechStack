@@ -103,3 +103,5 @@ yarn.lock
 *.pem
 *.key
 *.crt
+
+*.agents
