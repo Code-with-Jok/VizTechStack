@@ -1,0 +1,31 @@
+{
+  "extends": "../../tooling/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@viztechstack/types": [
+        "../../packages/types/src/index.ts"
+      ],
+      "@viztechstack/utils": [
+        "../../packages/utils/src/index.ts"
+      ],
+      "@viztechstack/api-client": [
+        "../../packages/api-client/src/index.ts"
+      ]
+    },
+    "incremental": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

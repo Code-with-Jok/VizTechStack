@@ -1,0 +1,11 @@
+{
+  "name": "@viztechstack/tailwind-config",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
+    "@tailwindcss/typography": "^0.5.16"
+  }
+}

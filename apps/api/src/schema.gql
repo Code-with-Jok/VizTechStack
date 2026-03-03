@@ -1,0 +1,112 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type ChapterEntity {
+  courseId: String!
+  description: String!
+  id: ID!
+  lessons: [LessonEntity!]
+  order: Float!
+  parentId: String
+  status: String!
+  title: String!
+  x: Float!
+  y: Float!
+}
+
+type ContentBlockEntity {
+  content: String!
+  id: ID!
+  language: String
+  lessonId: String!
+  order: Float!
+  title: String
+  type: String!
+}
+
+type CourseEntity {
+  chapters: [ChapterEntity!]
+  description: String!
+  icon: String!
+  id: ID!
+  slug: String!
+  title: String!
+}
+
+input CreateChapterInput {
+  courseId: String!
+  description: String!
+  order: Float!
+  parentId: String
+  status: String! = "available"
+  title: String!
+  x: Float!
+  y: Float!
+}
+
+input CreateContentBlockInput {
+  content: String!
+  language: String
+  lessonId: String!
+  order: Float!
+  title: String
+  type: String!
+}
+
+input CreateCourseInput {
+  description: String!
+  icon: String!
+  slug: String!
+  title: String!
+}
+
+input CreateLessonInput {
+  chapterId: String!
+  order: Float!
+  title: String!
+}
+
+type LessonEntity {
+  chapterId: String!
+  id: ID!
+  order: Float!
+  title: String!
+}
+
+type Mutation {
+  createChapter(input: CreateChapterInput!): ChapterEntity!
+  createContentBlock(input: CreateContentBlockInput!): ContentBlockEntity!
+  createCourse(input: CreateCourseInput!): CourseEntity!
+  createLesson(input: CreateLessonInput!): LessonEntity!
+  deleteChapter(id: ID!): Boolean!
+  deleteContentBlock(id: ID!): Boolean!
+  updateChapter(id: ID!, updates: UpdateChapterInput!): ChapterEntity!
+  updateContentBlock(id: ID!, updates: UpdateContentBlockInput!): ContentBlockEntity!
+}
+
+type Query {
+  chapters(courseId: ID!): [ChapterEntity!]!
+  contentBlocks(lessonId: ID!): [ContentBlockEntity!]!
+  course(id: ID!): CourseEntity
+  courseBySlug(slug: String!): CourseEntity
+  courses: [CourseEntity!]!
+  lessons(chapterId: ID!): [LessonEntity!]!
+}
+
+input UpdateChapterInput {
+  description: String
+  parentId: String
+  status: String
+  title: String
+  x: Float
+  y: Float
+}
+
+input UpdateContentBlockInput {
+  content: String
+  language: String
+  order: Float
+  title: String
+  type: String
+}

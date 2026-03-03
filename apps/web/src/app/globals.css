@@ -1,0 +1,113 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 20% 7%;
+    --foreground: 210 40% 95%;
+    --card: 220 18% 10%;
+    --card-foreground: 210 40% 95%;
+    --border: 220 16% 20%;
+    --input: 220 16% 20%;
+    --ring: 180 70% 50%;
+    --primary: 180 70% 50%;
+    --primary-foreground: 220 20% 5%;
+    --secondary: 220 16% 14%;
+    --secondary-foreground: 210 40% 80%;
+    --muted: 220 16% 14%;
+    --muted-foreground: 210 20% 50%;
+    --accent: 260 60% 60%;
+    --accent-foreground: 210 40% 95%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --radius: 0.75rem;
+    --node-bg: 220 20% 12%;
+    --node-border: 180 40% 30%;
+    --node-active: 180 70% 50%;
+    --node-completed: 150 60% 45%;
+
+    /* ── Viz3D Design System ──────────────────── */
+    /* HSL values — consumed by Tailwind */
+    --viz3d-html: 239 84% 67%; /* indigo  #6366f1 */
+    --viz3d-html-muted: 239 43% 25%;
+    --viz3d-component: 189 94% 43%; /* cyan    #06b6d4 */
+    --viz3d-component-muted: 189 50% 18%;
+    --viz3d-hook: 38 92% 50%; /* amber   #f59e0b */
+    --viz3d-hook-muted: 38 60% 20%;
+    --viz3d-state: 160 84% 39%; /* emerald #10b981 */
+    --viz3d-state-muted: 160 40% 15%;
+    --viz3d-text: 215 16% 47%; /* slate   #94a3b8 */
+    --viz3d-text-muted: 215 10% 25%;
+    --viz3d-edge: 244 76% 60%; /* indigo-dark #4f46e5 */
+    --viz3d-pulse: 271 81% 76%; /* purple  #c084fc */
+    --viz3d-canvas: 222 47% 3%; /* near-black canvas bg */
+
+    /* Hex exports — used directly in Three.js (no hsl wrapper needed) */
+    --viz3d-html-hex: #6366f1;
+    --viz3d-component-hex: #06b6d4;
+    --viz3d-hook-hex: #f59e0b;
+    --viz3d-state-hex: #10b981;
+    --viz3d-text-hex: #94a3b8;
+    --viz3d-edge-hex: #4f46e5;
+    --viz3d-pulse-hex: #c084fc;
+    --viz3d-canvas-hex: #050810;
+  }
+}
+
+@layer utilities {
+  .gradient-mesh {
+    background-image:
+      radial-gradient(at 40% 20%, hsl(180 70% 10% / 0.5) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(260 70% 10% / 0.4) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsl(220 70% 8% / 0.3) 0px, transparent 50%);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.15);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+
+  .interactive-block {
+    @apply border border-border/50 bg-card/50 backdrop-blur-sm;
+  }
+
+  .node-connector {
+    fill: none;
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+
+  /* Viz3D canvas wrapper */
+  .viz3d-canvas {
+    background: var(--viz3d-canvas-hex);
+    border-radius: 1rem;
+  }
+
+  /* Glow variants matching viz3d design system */
+  .glow-html {
+    box-shadow: 0 0 16px var(--viz3d-html-hex) / 0.4;
+  }
+  .glow-component {
+    box-shadow: 0 0 16px var(--viz3d-component-hex) / 0.4;
+  }
+  .glow-hook {
+    box-shadow: 0 0 16px var(--viz3d-hook-hex) / 0.4;
+  }
+  .glow-state {
+    box-shadow: 0 0 16px var(--viz3d-state-hex) / 0.4;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
+}
