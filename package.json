@@ -10,14 +10,17 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
   },
   "devDependencies": {
+    "prettier": "^3.5.0",
     "turbo": "^2.4.0",
-    "typescript": "^5.7.0",
-    "prettier": "^3.5.0"
+    "typescript": "^5.7.0"
   },
   "packageManager": "pnpm@9.15.0",
   "pnpm": {
     "overrides": {
       "@viztechstack/typescript-config": "workspace:*"
     }
+  },
+  "dependencies": {
+    "convex": "^1.32.0"
   }
 }
