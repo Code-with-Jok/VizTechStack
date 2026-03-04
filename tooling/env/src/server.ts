@@ -11,7 +11,7 @@ const serverEnvSchema = z.object({
   CONVEX_URL: z.string().url("CONVEX_URL must be a valid URL"),
 
   // Server
-  PORT: z.coerce.number().default(4000),
+  PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
@@ -33,9 +33,16 @@ function createServerEnv(): ServerEnv {
   return parsed.data;
 }
 
+let cachedServerEnv: ServerEnv | null = null;
+
 /**
  * Validated server environment variables.
- * Access via `serverEnv.CONVEX_URL` etc.
- * Will throw at import time if any required var is missing.
+ * Access via `getServerEnv().CONVEX_URL` etc.
+ * Will throw on first access if any required var is missing.
  */
-export const serverEnv = createServerEnv();
+export function getServerEnv(): ServerEnv {
+  if (!cachedServerEnv) {
+    cachedServerEnv = createServerEnv();
+  }
+  return cachedServerEnv;
+}

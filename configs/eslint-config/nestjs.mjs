@@ -17,6 +17,7 @@ export function createNestjsConfig({ tsconfigRootDir }) {
   return [
     ...base,
     {
+      files: ["**/*.spec.ts", "**/*.test.ts", "**/*.e2e-spec.ts"],
       languageOptions: {
         globals: {
           ...globals.jest,

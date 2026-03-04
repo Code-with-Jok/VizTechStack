@@ -36,6 +36,9 @@ const dependencyBoundaryRules = {
  * @returns {import("typescript-eslint").ConfigArray}
  */
 export function createBaseConfig({ tsconfigRootDir, sourceType = "module" }) {
+  if (!tsconfigRootDir) {
+    throw new Error("createBaseConfig requires tsconfigRootDir to be provided");
+  }
   return tseslint.config(
     {
       ignores: ["eslint.config.mjs", "dist/**", "node_modules/**"],

@@ -21,6 +21,16 @@
       "default": "./dist/client.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "server": [
+        "./dist/server.d.ts"
+      ],
+      "client": [
+        "./dist/client.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
@@ -33,5 +43,10 @@
     "@viztechstack/typescript-config": "workspace:*",
     "@types/node": "^22.10.7",
     "typescript": "^5.7.0"
-  }
+  },
+  "files": [
+    "dist",
+    "server.js",
+    "server.d.ts"
+  ]
 }

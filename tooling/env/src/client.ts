@@ -9,7 +9,10 @@ const clientEnvSchema = z.object({
     .string()
     .url("NEXT_PUBLIC_CONVEX_URL must be a valid URL")
     .optional(),
-  NEXT_PUBLIC_API_URL: z.string().url().optional(),
+  NEXT_PUBLIC_API_URL: z
+    .string()
+    .url("NEXT_PUBLIC_API_URL must be a valid URL")
+    .optional(),
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema>;

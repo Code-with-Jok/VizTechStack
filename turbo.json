@@ -7,14 +7,17 @@
       "inputs": [
         "src/**",
         "tsconfig.json",
-        "tsconfig.build.json",
-        "package.json"
+        "package.json",
+        "next.config.ts",
+        "postcss.config.mjs",
+        "components.json",
+        "nest-cli.json"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "lint": {
       "dependsOn": [],
-      "inputs": ["src/**", "eslint.config.mjs"],
+      "inputs": ["src/**", "test/**", "eslint.config.mjs"],
       "outputs": []
     },
     "typecheck": {

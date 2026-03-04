@@ -1,2 +1,2 @@
-export { serverEnv, type ServerEnv } from "./server";
-export { clientEnv, type ClientEnv } from "./client";
+export type { ServerEnv } from "./server";
+export type { ClientEnv } from "./client";
