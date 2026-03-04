@@ -16,8 +16,13 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "lint": {
-      "dependsOn": [],
+      "dependsOn": ["^build"],
       "inputs": ["src/**", "test/**", "eslint.config.mjs"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "test/**", "package.json"],
       "outputs": []
     },
     "typecheck": {

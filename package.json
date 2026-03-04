@@ -1,6 +1,9 @@
 {
   "name": "viztechstack",
   "private": true,
+  "engines": {
+    "node": ">=20.11.0"
+  },
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",

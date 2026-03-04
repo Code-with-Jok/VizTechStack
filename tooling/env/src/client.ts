@@ -34,8 +34,24 @@ function createClientEnv(): ClientEnv {
   return parsed.data;
 }
 
+let cachedClientEnv: ClientEnv | null = null;
+
+function getClientEnv(): ClientEnv {
+  if (!cachedClientEnv) {
+    cachedClientEnv = createClientEnv();
+  }
+  return cachedClientEnv;
+}
+
 /**
  * Validated client (public) environment variables.
  * Safe to use in browser code.
  */
-export const clientEnv = createClientEnv();
+export const clientEnv = {
+  get NEXT_PUBLIC_CONVEX_URL() {
+    return getClientEnv().NEXT_PUBLIC_CONVEX_URL;
+  },
+  get NEXT_PUBLIC_API_URL() {
+    return getClientEnv().NEXT_PUBLIC_API_URL;
+  },
+};

@@ -37,10 +37,25 @@ let cachedServerEnv: ServerEnv | null = null;
 
 /**
  * Validated server environment variables.
- * Access via `getServerEnv().CONVEX_URL` etc.
+ * Access via `serverEnv.CONVEX_URL` etc.
  * Will throw on first access if any required var is missing.
  */
-export function getServerEnv(): ServerEnv {
+export const serverEnv = {
+  get CONVEX_DEPLOYMENT() {
+    return getServerEnv().CONVEX_DEPLOYMENT;
+  },
+  get CONVEX_URL() {
+    return getServerEnv().CONVEX_URL;
+  },
+  get PORT() {
+    return getServerEnv().PORT;
+  },
+  get NODE_ENV() {
+    return getServerEnv().NODE_ENV;
+  },
+};
+
+function getServerEnv(): ServerEnv {
   if (!cachedServerEnv) {
     cachedServerEnv = createServerEnv();
   }

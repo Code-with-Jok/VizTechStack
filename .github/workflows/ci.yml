@@ -12,6 +12,8 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
+  pull-requests: write
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
