@@ -20,6 +20,12 @@ export default defineSchema({
     nodesJson: v.string(), // JSON string chứa SVG node definitions
     edgesJson: v.string(), // JSON string chứa connections giữa nodes
     topicCount: v.number(),
+    userId: v.optional(v.string()), // Optional for seeded data
+    status: v.union(
+      v.literal("public"),
+      v.literal("draft"),
+      v.literal("private")
+    ),
   })
     .index("by_slug", ["slug"])
     .index("by_category", ["category"]),

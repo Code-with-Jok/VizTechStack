@@ -104,4 +104,5 @@ yarn.lock
 *.key
 *.crt
 
-*.agents
+
+**/docsdev

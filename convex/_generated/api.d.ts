@@ -10,6 +10,7 @@
 
 import type * as progress from "../progress.js";
 import type * as roadmaps from "../roadmaps.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +21,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   progress: typeof progress;
   roadmaps: typeof roadmaps;
+  seed: typeof seed;
 }>;
 
 /**
