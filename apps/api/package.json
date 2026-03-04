@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@viztechstack/api",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@viztechstack/types": "workspace:*",
     "@apollo/server": "^5.4.0",
     "@nestjs/apollo": "^13.2.4",
     "@nestjs/common": "^11.0.1",
@@ -32,6 +33,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@viztechstack/eslint-config": "workspace:*",
     "@viztechstack/typescript-config": "workspace:*",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
