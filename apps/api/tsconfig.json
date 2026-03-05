@@ -15,6 +15,7 @@
     "src",
     "test",
     "../../convex/_generated/*.ts",
+    "../../convex/_generated/*.d.ts",
     "../../tooling/env/src/*.ts"
   ]
 }
