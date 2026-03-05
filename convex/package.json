@@ -1,0 +1,13 @@
+{
+  "name": "@viztechstack/convex",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./_generated/api.js",
+  "types": "./_generated/api.d.ts",
+  "exports": {
+    ".": "./_generated/api.js",
+    "./api": "./_generated/api.js",
+    "./server": "./_generated/server.js",
+    "./dataModel": "./_generated/dataModel.d.ts"
+  }
+}

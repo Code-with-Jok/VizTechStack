@@ -36,6 +36,7 @@
     "@nestjs/graphql": "^13.2.4",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.6",
+    "@viztechstack/convex": "workspace:*",
     "@viztechstack/env": "workspace:*",
     "@viztechstack/types": "workspace:*",
     "graphql": "^16.13.0",
