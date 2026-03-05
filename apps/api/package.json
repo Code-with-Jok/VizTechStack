@@ -85,6 +85,11 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@viztechstack/convex/(.*)$": "<rootDir>/../../../convex/_generated/$1",
+      "^@viztechstack/env/(.*)$": "<rootDir>/../../../tooling/env/dist/$1",
+      "^@viztechstack/env$": "<rootDir>/../../../tooling/env/dist/index"
+    }
   }
 }

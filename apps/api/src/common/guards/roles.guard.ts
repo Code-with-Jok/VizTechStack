@@ -39,10 +39,7 @@ export class RolesGuard implements CanActivate {
     const gqlContext = ctx.getContext<GraphQLContext>();
     const user = gqlContext.req?.user;
 
-    this.logger.debug('RolesGuard Check Started', {
-      requiredRoles,
-      userRole: user?.role,
-    });
+    this.logger.debug('RolesGuard Check Started');
 
     if (!user || !user.role) {
       this.logger.debug('Access Denied: No role found');
@@ -52,7 +49,7 @@ export class RolesGuard implements CanActivate {
     const hasRole = requiredRoles.includes(user.role);
     if (!hasRole) {
       this.logger.debug(
-        `Access Denied: User role ${user.role} not in ${requiredRoles}`,
+        `Access Denied: User role ${user.role} not in ${requiredRoles.join(', ')}`,
       );
       throw new ForbiddenException(
         `Access denied: Requires ${requiredRoles.join(' or ')} permission`,

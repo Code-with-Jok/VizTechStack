@@ -29,8 +29,11 @@ export class AppController {
     }
 
     try {
-      const result = await this.convex.client.mutation(api.seed.seed, {});
-      return { success: true, message: result as string };
+      const result = (await this.convex.client.mutation(
+        api.seed.seed,
+        {},
+      )) as string;
+      return { success: true, message: result };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);

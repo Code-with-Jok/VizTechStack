@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { verifyToken } from '@clerk/backend';
@@ -20,11 +21,12 @@ interface RequestWithUser {
   headers?: {
     authorization?: string;
   };
-  user?: any;
+  user?: ClerkJwtPayload & { role: string };
 }
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
+  private readonly logger = new Logger(ClerkAuthGuard.name);
   private readonly secretKey = process.env.CLERK_SECRET_KEY;
 
   constructor(private reflector: Reflector) {
@@ -66,8 +68,8 @@ export class ClerkAuthGuard implements CanActivate {
       };
 
       return true;
-    } catch (err) {
-      console.error('Clerk Auth Error:', err);
+    } catch {
+      this.logger.error('Clerk token verification failed');
       throw new UnauthorizedException('Invalid token');
     }
   }
