@@ -28,7 +28,9 @@ export default defineSchema({
     ),
   })
     .index("by_slug", ["slug"])
-    .index("by_category", ["category"]),
+    .index("by_category", ["category"])
+    .index("by_status", ["status"])
+    .index("by_category_status", ["category", "status"]),
 
   // Topics: nội dung chi tiết của mỗi node trong roadmap
   topics: defineTable({

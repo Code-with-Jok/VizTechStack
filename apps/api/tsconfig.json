@@ -1,7 +1,14 @@
 {
   "extends": "@viztechstack/typescript-config/nestjs.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "baseUrl": "./"
+    "outDir": "./build",
+    "baseUrl": "./",
+    "rootDir": "src",
+    "paths": {
+      "@viztechstack/env/server": ["../../tooling/env/dist/server"],
+      "@viztechstack/env/client": ["../../tooling/env/dist/client"],
+      "@viztechstack/env": ["../../tooling/env/dist/index"],
+      "@viztechstack/convex/*": ["../../convex/_generated/*"]
+    }
   }
 }

@@ -24,7 +24,11 @@ async function fetchRoadmaps() {
   const token = await getToken();
 
   try {
-    const res = await fetch("http://localhost:4000/graphql", {
+    const graphqlUrl =
+      process.env.GRAPHQL_URL || "http://localhost:4000/graphql";
+    if (!graphqlUrl)
+      throw new Error("Missing GRAPHQL_URL environment variable");
+    const res = await fetch(graphqlUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -163,16 +167,27 @@ export default async function AdminRoadmapPage() {
                         <Eye className="h-4 w-4 text-zinc-500" />
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="icon" className="h-9 w-9">
-                      <Settings className="h-4 w-4 text-zinc-500" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 hover:bg-red-500/10 hover:text-red-500"
+                    <Link href={`/admin/roadmap/${r.slug}/settings`}>
+                      <Button variant="ghost" size="icon" className="h-9 w-9">
+                        <Settings className="h-4 w-4 text-zinc-500" />
+                      </Button>
+                    </Link>
+                    <form
+                      action={async () => {
+                        "use server";
+                        console.log("Delete roadmap", r._id);
+                        // TODO: Implement actual deletion
+                      }}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 hover:bg-red-500/10 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </form>
                   </div>
                 </div>
               )

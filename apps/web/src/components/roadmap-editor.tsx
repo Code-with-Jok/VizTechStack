@@ -26,7 +26,10 @@ export function RoadmapEditor({ onChange }: RoadmapEditorProps) {
   const [newNodeLabel, setNewNodeLabel] = useState("");
 
   useEffect(() => {
-    onChange(JSON.stringify(nodes), JSON.stringify(edges), nodes.length);
+    const handler = setTimeout(() => {
+      onChange(JSON.stringify(nodes), JSON.stringify(edges), nodes.length);
+    }, 300);
+    return () => clearTimeout(handler);
   }, [nodes, edges, onChange]);
 
   const onConnect = useCallback(

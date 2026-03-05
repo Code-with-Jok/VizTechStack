@@ -1,13 +1,12 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Roadmap, CreateRoadmapInput } from './roadmap.schema';
+import { Roadmap, CreateRoadmapInput, RoadmapCategory } from './roadmap.schema';
 import { ConvexService } from '../../common/convex/convex.service';
 import { ClerkAuthGuard } from '../../common/guards/clerk-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-// We use any for api here to avoid strict path issues if convex generated code is missing
-// but we will cast it properly in production
-// import { api } from '../../../../../../convex/_generated/api';
+import { Public } from '../../common/decorators/public.decorator';
+import { api } from '@viztechstack/convex/api';
 
 @Resolver(() => Roadmap)
 @UseGuards(ClerkAuthGuard, RolesGuard)
@@ -15,11 +14,13 @@ export class RoadmapResolver {
   constructor(private readonly convex: ConvexService) {}
 
   @Query(() => [Roadmap])
+  @Public()
   async getRoadmaps(
-    @Args('category', { type: () => String, nullable: true }) category?: string,
+    @Args('category', { type: () => RoadmapCategory, nullable: true })
+    category?: RoadmapCategory,
   ): Promise<Roadmap[]> {
-    const roadmaps = (await this.convex.client.query('roadmaps:list' as any, {
-      category,
+    const roadmaps = (await this.convex.client.query(api.roadmaps.list, {
+      category: category as 'role' | 'skill' | 'best-practice' | undefined,
     })) as Array<Roadmap & { _id: string }>;
 
     return roadmaps.map((r) => ({
@@ -29,15 +30,13 @@ export class RoadmapResolver {
   }
 
   @Query(() => Roadmap, { nullable: true })
+  @Public()
   async getRoadmapBySlug(
     @Args('slug', { type: () => String }) slug: string,
   ): Promise<Roadmap | null> {
-    const roadmap = (await this.convex.client.query(
-      'roadmaps:getBySlug' as any,
-      {
-        slug,
-      },
-    )) as (Roadmap & { _id: string }) | null;
+    const roadmap = (await this.convex.client.query(api.roadmaps.getBySlug, {
+      slug,
+    })) as (Roadmap & { _id: string }) | null;
 
     if (!roadmap) return null;
     return {
@@ -56,10 +55,22 @@ export class RoadmapResolver {
     // Clerk identity context directly like on the frontend.
     // In a real monorepo, NestJS might use the Secret or we'd use convex-backend-sdk.
     // For this demo, we assume NestJS is a trusted server.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const roadmapId = await this.convex.client.mutation(
-      'roadmaps:createRoadmap' as any,
-      input,
+      api.roadmaps.createRoadmap,
+      {
+        slug: input.slug,
+        title: input.title,
+        description: input.description,
+        category: input.category as 'role' | 'skill' | 'best-practice',
+        difficulty: input.difficulty as
+          | 'beginner'
+          | 'intermediate'
+          | 'advanced',
+        topicCount: input.topicCount ?? 0,
+        nodesJson: input.nodesJson ?? '[]',
+        edgesJson: input.edgesJson ?? '[]',
+        status: (input.status ?? 'public') as 'public' | 'draft' | 'private',
+      },
     );
 
     return roadmapId as string;

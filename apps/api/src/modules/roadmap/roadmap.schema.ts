@@ -1,4 +1,32 @@
-import { ObjectType, Field, Int, InputType } from '@nestjs/graphql';
+import {
+  ObjectType,
+  Field,
+  Int,
+  InputType,
+  registerEnumType,
+} from '@nestjs/graphql';
+
+export enum RoadmapCategory {
+  ROLE = 'role',
+  SKILL = 'skill',
+  BEST_PRACTICE = 'best-practice',
+}
+
+export enum RoadmapDifficulty {
+  BEGINNER = 'beginner',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced',
+}
+
+export enum RoadmapStatus {
+  PUBLIC = 'public',
+  DRAFT = 'draft',
+  PRIVATE = 'private',
+}
+
+registerEnumType(RoadmapCategory, { name: 'RoadmapCategory' });
+registerEnumType(RoadmapDifficulty, { name: 'RoadmapDifficulty' });
+registerEnumType(RoadmapStatus, { name: 'RoadmapStatus' });
 
 @ObjectType()
 export class Roadmap {
@@ -14,11 +42,11 @@ export class Roadmap {
   @Field()
   description!: string;
 
-  @Field()
-  category!: string;
+  @Field(() => RoadmapCategory)
+  category!: RoadmapCategory;
 
-  @Field()
-  difficulty!: string;
+  @Field(() => RoadmapDifficulty)
+  difficulty!: RoadmapDifficulty;
 
   @Field(() => String, { nullable: true })
   nodesJson?: string;
@@ -29,8 +57,11 @@ export class Roadmap {
   @Field(() => Int, { nullable: true })
   topicCount?: number;
 
-  @Field()
-  status!: string;
+  @Field(() => RoadmapStatus, {
+    nullable: true,
+    defaultValue: RoadmapStatus.PUBLIC,
+  })
+  status!: RoadmapStatus;
 }
 
 @InputType()
@@ -44,11 +75,11 @@ export class CreateRoadmapInput {
   @Field()
   description!: string;
 
-  @Field()
-  category!: string;
+  @Field(() => RoadmapCategory)
+  category!: RoadmapCategory;
 
-  @Field()
-  difficulty!: string;
+  @Field(() => RoadmapDifficulty)
+  difficulty!: RoadmapDifficulty;
 
   @Field(() => String, { nullable: true, defaultValue: '[]' })
   nodesJson?: string;
@@ -59,6 +90,6 @@ export class CreateRoadmapInput {
   @Field(() => Int, { nullable: true, defaultValue: 0 })
   topicCount?: number;
 
-  @Field({ defaultValue: 'public' })
-  status?: string;
+  @Field(() => RoadmapStatus, { defaultValue: RoadmapStatus.PUBLIC })
+  status?: RoadmapStatus;
 }

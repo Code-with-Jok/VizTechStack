@@ -1,7 +1,9 @@
+import { serverEnv } from "@viztechstack/env/server";
+
 export default {
   providers: [
     {
-      domain: "https://summary-wren-91.clerk.accounts.dev",
+      domain: serverEnv.CLERK_JWT_ISSUER_DOMAIN,
       applicationID: "convex",
     },
   ],

@@ -22,13 +22,19 @@ const GET_ROADMAP = `
 
 async function fetchRoadmap(slug: string) {
   try {
-    const res = await fetch("http://127.0.0.1:4000/graphql", {
+    const graphqlUrl =
+      process.env.GRAPHQL_URL || "http://localhost:4000/graphql";
+    const res = await fetch(graphqlUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: GET_ROADMAP, variables: { slug } }),
       cache: "no-store",
     });
     const json = await res.json();
+    if (json.errors) {
+      console.error("GraphQL errors fetching roadmap:", json.errors);
+      return null;
+    }
     return json?.data?.getRoadmapBySlug || null;
   } catch (error) {
     console.error("Error fetching roadmap:", error);

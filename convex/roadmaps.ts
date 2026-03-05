@@ -68,17 +68,33 @@ export const list = query({
 
     let results;
     if (args.category !== undefined) {
-      results = await ctx.db
-        .query("roadmaps")
-        .withIndex("by_category", (q) => q.eq("category", args.category as any))
-        .collect();
+      if (isAdmin) {
+        results = await ctx.db
+          .query("roadmaps")
+          .withIndex("by_category", (q) =>
+            q.eq("category", args.category as any)
+          )
+          .collect();
+      } else {
+        results = await ctx.db
+          .query("roadmaps")
+          .withIndex("by_category_status", (q) =>
+            q.eq("category", args.category as any).eq("status", "public")
+          )
+          .collect();
+      }
     } else {
-      results = await ctx.db.query("roadmaps").collect();
+      if (isAdmin) {
+        results = await ctx.db.query("roadmaps").collect();
+      } else {
+        results = await ctx.db
+          .query("roadmaps")
+          .withIndex("by_status", (q) => q.eq("status", "public"))
+          .collect();
+      }
     }
 
-    // Filter by status if not admin
-    if (isAdmin) return results;
-    return results.filter((r) => r.status === "public");
+    return results;
   },
 });
 

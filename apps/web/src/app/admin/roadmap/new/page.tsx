@@ -38,7 +38,10 @@ export default function NewRoadmapPage() {
 
     try {
       const token = await getToken();
-      const res = await fetch("http://localhost:4000/graphql", {
+      const graphqlUrl =
+        process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:4000/graphql";
+      if (!graphqlUrl) throw new Error("Missing NEXT_PUBLIC_GRAPHQL_URL");
+      const res = await fetch(graphqlUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,8 +67,8 @@ export default function NewRoadmapPage() {
 
       router.push("/");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Failed to create roadmap");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create roadmap");
     } finally {
       setLoading(false);
     }

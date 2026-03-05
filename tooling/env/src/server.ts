@@ -15,6 +15,10 @@ const serverEnvSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
+  WEB_APP_ORIGIN: z.string().url().default("http://localhost:3000"),
+  CLERK_JWT_ISSUER_DOMAIN: z
+    .string()
+    .min(1, "CLERK_JWT_ISSUER_DOMAIN is required"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -52,6 +56,12 @@ export const serverEnv = {
   },
   get NODE_ENV() {
     return getServerEnv().NODE_ENV;
+  },
+  get WEB_APP_ORIGIN() {
+    return getServerEnv().WEB_APP_ORIGIN;
+  },
+  get CLERK_JWT_ISSUER_DOMAIN() {
+    return getServerEnv().CLERK_JWT_ISSUER_DOMAIN;
   },
 };
 

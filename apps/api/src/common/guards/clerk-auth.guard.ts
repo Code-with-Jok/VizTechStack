@@ -6,32 +6,63 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { verifyToken } from '@clerk/backend';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+
+interface ClerkJwtPayload {
+  metadata?: {
+    role?: string;
+  };
+  [key: string]: unknown;
+}
+
+interface RequestWithUser {
+  headers?: {
+    authorization?: string;
+  };
+  user?: any;
+}
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
-  private readonly secretKey = process.env.CLERK_SECRET_KEY || '';
+  private readonly secretKey = process.env.CLERK_SECRET_KEY;
+
+  constructor(private reflector: Reflector) {
+    if (!this.secretKey) {
+      throw new Error('CLERK_SECRET_KEY environment variable is required');
+    }
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const ctx = GqlExecutionContext.create(context);
-    const gqlReq = ctx.getContext().req;
+    const gqlReq = ctx.getContext<{ req: RequestWithUser }>().req;
 
     // Check for Authorization header
-    const authHeader = gqlReq?.headers?.authorization as string | undefined;
+    const authHeader = gqlReq.headers?.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return true;
+      throw new UnauthorizedException(
+        'Missing or malformed Authorization header',
+      );
     }
 
     const token = authHeader.split(' ')[1];
     try {
-      const sessionClaims = await verifyToken(token, {
+      const sessionClaims = (await verifyToken(token, {
         secretKey: this.secretKey,
-      });
+      })) as unknown as ClerkJwtPayload;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       gqlReq.user = {
         ...sessionClaims,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        role: (sessionClaims as any).metadata?.role || 'user',
+        role: sessionClaims.metadata?.role || 'user',
       };
 
       return true;

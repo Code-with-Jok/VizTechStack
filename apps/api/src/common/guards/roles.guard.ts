@@ -3,13 +3,26 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
+export interface GraphQLContext {
+  req: {
+    user?: {
+      id: string;
+      role?: string;
+      [key: string]: any;
+    };
+  };
+}
+
 @Injectable()
 export class RolesGuard implements CanActivate {
+  private readonly logger = new Logger(RolesGuard.name);
+
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -23,24 +36,22 @@ export class RolesGuard implements CanActivate {
     }
 
     const ctx = GqlExecutionContext.create(context);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const user = ctx.getContext().req?.user;
+    const gqlContext = ctx.getContext<GraphQLContext>();
+    const user = gqlContext.req?.user;
 
-    console.log('--- RolesGuard Check ---');
-    console.log('Required Roles:', requiredRoles);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    console.log('User Role:', user?.role);
+    this.logger.debug('RolesGuard Check Started', {
+      requiredRoles,
+      userRole: user?.role,
+    });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!user || !user.role) {
-      console.log('Access Denied: No role found');
+      this.logger.debug('Access Denied: No role found');
       throw new ForbiddenException('Access denied: No role assigned');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
     const hasRole = requiredRoles.includes(user.role);
     if (!hasRole) {
-      console.log(
+      this.logger.debug(
         `Access Denied: User role ${user.role} not in ${requiredRoles}`,
       );
       throw new ForbiddenException(
@@ -48,7 +59,7 @@ export class RolesGuard implements CanActivate {
       );
     }
 
-    console.log('Access Granted');
+    this.logger.debug('Access Granted');
     return true;
   }
 }

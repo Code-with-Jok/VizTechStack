@@ -79,8 +79,24 @@ export function RoadmapGraph({
     parsedEdges = defaultEdges;
   }
 
-  const [nodes, , onNodesChange] = useNodesState(parsedNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(parsedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(parsedEdges);
+
+  React.useEffect(() => {
+    let newNodes: Node[] = [];
+    let newEdges: Edge[] = [];
+    try {
+      const rawNodes = JSON.parse(initialNodesJson || "[]");
+      const rawEdges = JSON.parse(initialEdgesJson || "[]");
+      newNodes = rawNodes.length > 0 ? rawNodes : defaultNodes;
+      newEdges = rawEdges.length > 0 ? rawEdges : defaultEdges;
+    } catch {
+      newNodes = defaultNodes;
+      newEdges = defaultEdges;
+    }
+    setNodes(newNodes);
+    setEdges(newEdges);
+  }, [initialNodesJson, initialEdgesJson, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),

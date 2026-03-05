@@ -1,7 +1,16 @@
 import { mutation } from "./_generated/server";
+import { RegisteredMutation } from "convex/server";
 
-export const seed = mutation({
+export const seed: RegisteredMutation<"public", any, any> = mutation({
   handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated call to seed");
+
+    const role = (identity as any).publicMetadata?.role;
+    if (role !== "admin") {
+      throw new Error("Unauthorized: Only admins can seed data");
+    }
+
     const defaultRoadmaps = [
       {
         slug: "frontend",

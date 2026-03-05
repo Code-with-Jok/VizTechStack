@@ -7,8 +7,9 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (isAdmin) {
     const session = await auth();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const role = (session.sessionClaims as any)?.metadata?.role;
+    type ClerkSessionClaims = { metadata?: { role?: string } };
+    const claims = session.sessionClaims as ClerkSessionClaims | null;
+    const role = claims?.metadata?.role;
 
     if (role !== "admin") {
       // Nếu không phải admin, redirect về trang chủ

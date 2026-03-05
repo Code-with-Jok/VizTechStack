@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck } from "lucide-react";
 
+type ClerkSessionClaims = { metadata?: { role?: string } };
+
 const GET_ROADMAPS = `
   query GetRoadmaps {
     getRoadmaps {
@@ -30,7 +32,9 @@ async function fetchRoadmaps() {
   const token = await getToken();
 
   try {
-    const res = await fetch("http://localhost:4000/graphql", {
+    const graphqlUrl =
+      process.env.GRAPHQL_URL || "http://localhost:4000/graphql";
+    const res = await fetch(graphqlUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +54,9 @@ async function fetchRoadmaps() {
 export default async function Home() {
   const roadmaps = await fetchRoadmaps();
   const { sessionClaims } = await auth();
-  const isAdmin = (sessionClaims as any)?.metadata?.role === "admin";
+
+  const claims = sessionClaims as ClerkSessionClaims | null;
+  const isAdmin = claims?.metadata?.role === "admin";
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
