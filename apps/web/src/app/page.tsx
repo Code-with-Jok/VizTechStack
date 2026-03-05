@@ -95,14 +95,15 @@ export default async function Home() {
               roadmap.sh
             </Link>
             {isAdmin && (
-              <Link href="/admin/roadmap">
-                <Button
-                  variant="ghost"
-                  className="text-purple-600 font-bold hover:bg-purple-50 hover:text-purple-700"
-                >
+              <Button
+                asChild
+                variant="ghost"
+                className="text-purple-600 font-bold hover:bg-purple-50 hover:text-purple-700"
+              >
+                <Link href="/admin/roadmap">
                   <ShieldCheck className="mr-2 h-4 w-4" /> Admin Dashboard
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </div>
           <div className="flex items-center gap-4">
