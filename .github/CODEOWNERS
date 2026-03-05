@@ -1,0 +1,16 @@
+# Default owners
+* @Code-with-Jok
+
+# Governance and workflows
+.github/* @Code-with-Jok
+.github/workflows/* @Code-with-Jok
+.agents/* @Code-with-Jok
+docs/adr/* @Code-with-Jok
+
+# Applications
+apps/api/* @Code-with-Jok
+apps/web/* @Code-with-Jok
+
+# Shared contracts and data
+packages/shared/types/* @Code-with-Jok
+convex/* @Code-with-Jok

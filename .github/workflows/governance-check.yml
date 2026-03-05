@@ -1,0 +1,77 @@
+name: Governance Check (ADR + DORA)
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  adr-check:
+    name: ADR Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed paths
+        id: paths
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            architecture:
+              - 'apps/**'
+              - 'convex/**'
+              - 'packages/shared/types/**'
+              - 'turbo.json'
+              - 'pnpm-workspace.yaml'
+            adr:
+              - 'docs/adr/**'
+
+      - name: Validate ADR requirement
+        env:
+          HAS_ARCH_CHANGES: ${{ steps.paths.outputs.architecture }}
+          HAS_ADR_CHANGES: ${{ steps.paths.outputs.adr }}
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+          echo "Labels: $LABELS_JSON"
+          if echo "$LABELS_JSON" | grep -q '"architecture-impact"'; then
+            if [ "$HAS_ARCH_CHANGES" = "true" ] && [ "$HAS_ADR_CHANGES" != "true" ]; then
+              echo "ADR is required: architecture-impact label found but docs/adr/** was not changed."
+              exit 1
+            fi
+          fi
+          echo "ADR guard passed."
+
+  dora-check:
+    name: DORA Metadata Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR template sections
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          body="${PR_BODY:-}"
+          required_sections=(
+            "## Risk Profile"
+            "## Rollback Plan"
+            "## DORA Notes"
+            "## Speed / Quality / Cost Decision"
+            "## Technical Debt"
+          )
+
+          for section in "${required_sections[@]}"; do
+            if ! grep -Fq "$section" <<<"$body"; then
+              echo "Missing required section in PR body: $section"
+              exit 1
+            fi
+          done
+
+          echo "DORA metadata guard passed."
