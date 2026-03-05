@@ -29,9 +29,12 @@ export default async function Home() {
       revalidate: 120,
       tags: ["roadmaps-public"],
     });
+    console.log({ roadmapsPage });
+
     roadmaps = roadmapsPage.items;
   } catch {
     // Keep homepage available even when API is unreachable at build/runtime.
+    console.error("Failed to fetch roadmaps for homepage.");
   }
 
   const { sessionClaims } = await auth();
@@ -95,26 +98,25 @@ export default async function Home() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {roadmaps.map((r: RoadmapSummary) => (
-                <Link key={r._id} href={`/roadmap/${r.slug}`}>
-                  <Card className="h-full transition-all hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer flex flex-col">
-                    <CardHeader>
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant="secondary" className="capitalize">
-                          {r.category || "Role"}
-                        </Badge>
-                        <Badge variant="outline" className="capitalize text-xs">
-                          {r.difficulty || "Beginner"}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-xl">{r.title}</CardTitle>
-                      <CardDescription className="line-clamp-2 mt-2">
-                        {r.description}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              )
-            )}
+              <Link key={r._id} href={`/roadmap/${r.slug}`}>
+                <Card className="h-full transition-all hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer flex flex-col">
+                  <CardHeader>
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant="secondary" className="capitalize">
+                        {r.category || "Role"}
+                      </Badge>
+                      <Badge variant="outline" className="capitalize text-xs">
+                        {r.difficulty || "Beginner"}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-xl">{r.title}</CardTitle>
+                    <CardDescription className="line-clamp-2 mt-2">
+                      {r.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
           </div>
         )}
       </main>

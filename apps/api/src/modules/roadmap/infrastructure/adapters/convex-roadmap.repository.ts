@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { api } from '@viztechstack/convex';
-import type { Doc } from '@viztechstack/convex/dataModel';
 import { ConvexService } from '../../../../common/convex/convex.service';
 import { CreateRoadmapCommand } from '../../application/commands/create-roadmap.command';
 import { RoadmapRepository } from '../../application/ports/roadmap.repository';
@@ -25,7 +24,12 @@ interface RoadmapSummaryPayload {
   category: 'role' | 'skill' | 'best-practice';
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   topicCount: number;
-  status: 'public' | 'draft' | 'private';
+  status?: 'public' | 'draft' | 'private';
+}
+
+interface RoadmapRecordPayload extends RoadmapSummaryPayload {
+  nodesJson: string;
+  edgesJson: string;
 }
 
 interface RoadmapPaginatedPayload {
@@ -66,8 +70,45 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
         isDone: result.isDone,
       };
     } catch (error) {
+      if (this.shouldFallbackToLegacyList(error)) {
+        return this.listRoadmapsWithLegacyPayload(query);
+      }
+
       throw this.mapInfrastructureError(error, 'listRoadmaps');
     }
+  }
+
+  private async listRoadmapsWithLegacyPayload(
+    query: ListRoadmapsQuery,
+  ): Promise<RoadmapPageEntity> {
+    const legacyResult: unknown = await this.convexService.client.query(
+      api.roadmaps.list,
+      {
+        category: query.category,
+      },
+    );
+
+    if (!this.isLegacyRoadmapListPayload(legacyResult)) {
+      throw new RoadmapInfrastructureDomainError(
+        'Convex listRoadmaps legacy fallback returned an invalid payload.',
+        'listRoadmaps',
+      );
+    }
+
+    const limit = query.limit ?? 24;
+    const offset = this.decodeLegacyCursor(query.cursor);
+    const slicedItems = legacyResult.slice(offset, offset + limit);
+    const mappedItems = slicedItems.map((item) =>
+      this.mapRoadmapSummary(item, 'listRoadmaps'),
+    );
+    const nextOffset = offset + limit;
+    const hasMore = nextOffset < legacyResult.length;
+
+    return {
+      items: mappedItems,
+      nextCursor: hasMore ? this.encodeLegacyCursor(nextOffset) : null,
+      isDone: !hasMore,
+    };
   }
 
   async getRoadmapBySlug(
@@ -139,7 +180,7 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
       nodesJson: payload.nodesJson,
       edgesJson: payload.edgesJson,
       topicCount: payload.topicCount,
-      status: payload.status,
+      status: payload.status ?? 'public',
     };
   }
 
@@ -162,7 +203,7 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
       category: payload.category,
       difficulty: payload.difficulty,
       topicCount: payload.topicCount,
-      status: payload.status,
+      status: payload.status ?? 'public',
     };
   }
 
@@ -204,13 +245,48 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
         record.difficulty === 'intermediate' ||
         record.difficulty === 'advanced') &&
       typeof record.topicCount === 'number' &&
-      (record.status === 'public' ||
+      (record.status === undefined ||
+        record.status === 'public' ||
         record.status === 'draft' ||
         record.status === 'private')
     );
   }
 
-  private isRoadmapRecord(payload: unknown): payload is Doc<'roadmaps'> {
+  private isLegacyRoadmapListPayload(
+    payload: unknown,
+  ): payload is RoadmapSummaryPayload[] {
+    return (
+      Array.isArray(payload) &&
+      payload.every((item) => this.isRoadmapSummary(item))
+    );
+  }
+
+  private shouldFallbackToLegacyList(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      message.includes('extra field `paginationOpts`') &&
+      message.includes('not in the validator')
+    );
+  }
+
+  private decodeLegacyCursor(cursor: string | null | undefined): number {
+    if (!cursor || !cursor.startsWith('legacy:')) {
+      return 0;
+    }
+
+    const rawOffset = Number.parseInt(cursor.slice('legacy:'.length), 10);
+    if (Number.isNaN(rawOffset) || rawOffset < 0) {
+      return 0;
+    }
+
+    return rawOffset;
+  }
+
+  private encodeLegacyCursor(offset: number): string {
+    return `legacy:${offset}`;
+  }
+
+  private isRoadmapRecord(payload: unknown): payload is RoadmapRecordPayload {
     if (typeof payload !== 'object' || payload === null) {
       return false;
     }
@@ -231,7 +307,8 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
       typeof record.nodesJson === 'string' &&
       typeof record.edgesJson === 'string' &&
       typeof record.topicCount === 'number' &&
-      (record.status === 'public' ||
+      (record.status === undefined ||
+        record.status === 'public' ||
         record.status === 'draft' ||
         record.status === 'private')
     );

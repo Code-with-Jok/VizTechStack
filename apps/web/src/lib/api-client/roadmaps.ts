@@ -1,8 +1,10 @@
 import {
   CreateRoadmapInputSchema,
+  type RoadmapDifficulty,
   RoadmapDetailSchema,
   RoadmapPageInputSchema,
   RoadmapPageSchema,
+  type RoadmapStatus,
   type CreateRoadmapInput,
   type RoadmapCategory,
   type RoadmapDetail,
@@ -69,7 +71,7 @@ interface CreateRoadmapResponse {
 
 interface GetRoadmapsPageVariables {
   input: {
-    category?: RoadmapCategory;
+    category?: GraphqlRoadmapCategory;
     cursor?: string | null;
     limit: number;
   };
@@ -80,7 +82,7 @@ interface GetRoadmapBySlugVariables {
 }
 
 interface CreateRoadmapVariables {
-  input: CreateRoadmapInput;
+  input: GraphqlCreateRoadmapInput;
 }
 
 interface ServerRoadmapsPageOptions {
@@ -116,7 +118,7 @@ export async function getRoadmapsPageServer(
     query: GET_ROADMAPS_PAGE_QUERY,
     variables: {
       input: {
-        category: input.category,
+        category: mapCategoryToGraphql(input.category),
         cursor: input.cursor ?? null,
         limit: input.limit,
       },
@@ -132,7 +134,7 @@ export async function getRoadmapsPageServer(
         : undefined,
   });
 
-  return RoadmapPageSchema.parse(response.getRoadmapsPage);
+  return RoadmapPageSchema.parse(normalizeRoadmapPageResponse(response.getRoadmapsPage));
 }
 
 export async function getRoadmapBySlugServer(
@@ -158,7 +160,7 @@ export async function getRoadmapBySlugServer(
     return null;
   }
 
-  return RoadmapDetailSchema.parse(response.getRoadmapBySlug);
+  return RoadmapDetailSchema.parse(normalizeRoadmapRecord(response.getRoadmapBySlug));
 }
 
 export async function createRoadmapClient(
@@ -173,11 +175,137 @@ export async function createRoadmapClient(
   >({
     query: CREATE_ROADMAP_MUTATION,
     variables: {
-      input: parsedInput,
+      input: mapCreateRoadmapInputToGraphql(parsedInput),
     },
     token,
     cache: 'no-store',
   });
 
   return response.createRoadmap;
+}
+
+type GraphqlRoadmapCategory = 'ROLE' | 'SKILL' | 'BEST_PRACTICE';
+type GraphqlRoadmapDifficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+type GraphqlRoadmapStatus = 'PUBLIC' | 'DRAFT' | 'PRIVATE';
+
+interface GraphqlCreateRoadmapInput extends Omit<CreateRoadmapInput, 'category' | 'difficulty' | 'status'> {
+  category: GraphqlRoadmapCategory;
+  difficulty: GraphqlRoadmapDifficulty;
+  status: GraphqlRoadmapStatus;
+}
+
+function mapCreateRoadmapInputToGraphql(input: CreateRoadmapInput): GraphqlCreateRoadmapInput {
+  return {
+    ...input,
+    category: mapRequiredCategoryToGraphql(input.category),
+    difficulty: mapDifficultyToGraphql(input.difficulty),
+    status: mapStatusToGraphql(input.status),
+  };
+}
+
+function mapRequiredCategoryToGraphql(category: RoadmapCategory): GraphqlRoadmapCategory {
+  switch (category) {
+    case 'role':
+      return 'ROLE';
+    case 'skill':
+      return 'SKILL';
+    case 'best-practice':
+      return 'BEST_PRACTICE';
+  }
+}
+
+function mapCategoryToGraphql(category?: RoadmapCategory): GraphqlRoadmapCategory | undefined {
+  if (!category) {
+    return undefined;
+  }
+  return mapRequiredCategoryToGraphql(category);
+}
+
+function mapDifficultyToGraphql(difficulty: RoadmapDifficulty): GraphqlRoadmapDifficulty {
+  switch (difficulty) {
+    case 'beginner':
+      return 'BEGINNER';
+    case 'intermediate':
+      return 'INTERMEDIATE';
+    case 'advanced':
+      return 'ADVANCED';
+  }
+}
+
+function mapStatusToGraphql(status: RoadmapStatus): GraphqlRoadmapStatus {
+  switch (status) {
+    case 'public':
+      return 'PUBLIC';
+    case 'draft':
+      return 'DRAFT';
+    case 'private':
+      return 'PRIVATE';
+  }
+}
+
+function mapCategoryFromGraphql(category: unknown): unknown {
+  switch (category) {
+    case 'ROLE':
+      return 'role';
+    case 'SKILL':
+      return 'skill';
+    case 'BEST_PRACTICE':
+      return 'best-practice';
+    default:
+      return category;
+  }
+}
+
+function mapDifficultyFromGraphql(difficulty: unknown): unknown {
+  switch (difficulty) {
+    case 'BEGINNER':
+      return 'beginner';
+    case 'INTERMEDIATE':
+      return 'intermediate';
+    case 'ADVANCED':
+      return 'advanced';
+    default:
+      return difficulty;
+  }
+}
+
+function mapStatusFromGraphql(status: unknown): unknown {
+  switch (status) {
+    case 'PUBLIC':
+      return 'public';
+    case 'DRAFT':
+      return 'draft';
+    case 'PRIVATE':
+      return 'private';
+    default:
+      return status;
+  }
+}
+
+function normalizeRoadmapPageResponse(payload: unknown): unknown {
+  if (!isRecord(payload) || !Array.isArray(payload.items)) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    items: payload.items.map((item) => normalizeRoadmapRecord(item)),
+  };
+}
+
+function normalizeRoadmapRecord(payload: unknown): unknown {
+  if (!isRecord(payload)) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    category: mapCategoryFromGraphql(payload.category),
+    difficulty: mapDifficultyFromGraphql(payload.difficulty),
+    status: mapStatusFromGraphql(payload.status),
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
