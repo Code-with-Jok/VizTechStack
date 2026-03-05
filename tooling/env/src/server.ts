@@ -27,11 +27,14 @@ function createServerEnv(): ServerEnv {
   const parsed = serverEnvSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    console.error(
-      "❌ Invalid server environment variables:",
-      parsed.error.flatten().fieldErrors
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    console.error("❌ Invalid server environment variables:");
+    Object.entries(fieldErrors).forEach(([field, errors]) => {
+      console.error(`  - ${field}: ${errors?.join(", ")}`);
+    });
+    throw new Error(
+      `Invalid server environment variables: ${Object.keys(fieldErrors).join(", ")}`
     );
-    throw new Error("Invalid server environment variables");
   }
 
   return parsed.data;
