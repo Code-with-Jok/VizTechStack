@@ -20,9 +20,17 @@ export default defineSchema({
     nodesJson: v.string(), // JSON string chứa SVG node definitions
     edgesJson: v.string(), // JSON string chứa connections giữa nodes
     topicCount: v.number(),
+    userId: v.optional(v.string()), // Optional for seeded data
+    status: v.union(
+      v.literal("public"),
+      v.literal("draft"),
+      v.literal("private")
+    ),
   })
     .index("by_slug", ["slug"])
-    .index("by_category", ["category"]),
+    .index("by_category", ["category"])
+    .index("by_status", ["status"])
+    .index("by_category_status", ["category", "status"]),
 
   // Topics: nội dung chi tiết của mỗi node trong roadmap
   topics: defineTable({
