@@ -31,12 +31,10 @@ async function fetchRoadmaps() {
 
   try {
     const graphqlUrl = process.env.GRAPHQL_URL;
-    if (!graphqlUrl) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("GRAPHQL_URL missing, falling back to localhost");
-      } else {
-        throw new Error("GRAPHQL_URL environment variable is required");
-      }
+    if (!graphqlUrl && process.env.NODE_ENV === "production") {
+      throw new Error(
+        "GRAPHQL_URL environment variable is required in production"
+      );
     }
 
     const finalUrl = graphqlUrl || "http://localhost:4000/graphql";
