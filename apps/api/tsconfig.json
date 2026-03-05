@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "./",
-    "rootDir": ".",
     "paths": {
       "@viztechstack/env/server": ["../../tooling/env/dist/server"],
       "@viztechstack/env/client": ["../../tooling/env/dist/client"],
@@ -12,5 +11,10 @@
       "@viztechstack/convex/*": ["../../convex/_generated/*"]
     }
   },
-  "include": ["src", "test"]
+  "include": [
+    "src",
+    "test",
+    "../../convex/_generated/*.ts",
+    "../../tooling/env/src/*.ts"
+  ]
 }

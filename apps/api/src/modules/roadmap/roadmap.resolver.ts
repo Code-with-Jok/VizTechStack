@@ -6,7 +6,7 @@ import { ClerkAuthGuard } from '../../common/guards/clerk-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { api } from '@viztechstack/convex/api';
+import { api } from '../../../../convex/_generated/api';
 
 @Resolver(() => Roadmap)
 @UseGuards(ClerkAuthGuard, RolesGuard)
