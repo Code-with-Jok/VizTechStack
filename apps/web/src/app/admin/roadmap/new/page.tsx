@@ -62,7 +62,11 @@ export default function NewRoadmapPage() {
       const json = await res.json();
 
       if (json.errors && json.errors.length > 0) {
-        throw new Error(json.errors[0].message);
+        throw new Error(
+          `GraphQL Errors: ${json.errors
+            .map((e: { message: string }) => e.message)
+            .join(", ")}`
+        );
       }
 
       router.push("/");

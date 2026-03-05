@@ -22,23 +22,40 @@ const GET_ROADMAP = `
 
 async function fetchRoadmap(slug: string) {
   try {
-    const graphqlUrl =
-      process.env.GRAPHQL_URL || "http://localhost:4000/graphql";
-    const res = await fetch(graphqlUrl, {
+    const graphqlUrl = process.env.GRAPHQL_URL;
+    if (!graphqlUrl) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("GRAPHQL_URL missing, falling back to localhost");
+      } else {
+        throw new Error("GRAPHQL_URL environment variable is required");
+      }
+    }
+
+    const finalUrl = graphqlUrl || "http://localhost:4000/graphql";
+
+    const res = await fetch(finalUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: GET_ROADMAP, variables: { slug } }),
       cache: "no-store",
     });
-    const json = await res.json();
-    if (json.errors) {
-      console.error("GraphQL errors fetching roadmap:", json.errors);
-      return null;
+
+    if (!res.ok) {
+      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     }
+
+    const json = await res.json();
+
+    if (json.errors) {
+      throw new Error(
+        `GraphQL Errors: ${json.errors.map((e: { message: string }) => e.message).join(", ")}`
+      );
+    }
+
     return json?.data?.getRoadmapBySlug || null;
   } catch (error) {
     console.error("Error fetching roadmap:", error);
-    return null;
+    throw error;
   }
 }
 

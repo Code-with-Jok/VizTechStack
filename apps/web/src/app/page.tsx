@@ -30,9 +30,18 @@ async function fetchRoadmaps() {
   const token = await getToken();
 
   try {
-    const graphqlUrl =
-      process.env.GRAPHQL_URL || "http://localhost:4000/graphql";
-    const res = await fetch(graphqlUrl, {
+    const graphqlUrl = process.env.GRAPHQL_URL;
+    if (!graphqlUrl) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("GRAPHQL_URL missing, falling back to localhost");
+      } else {
+        throw new Error("GRAPHQL_URL environment variable is required");
+      }
+    }
+
+    const finalUrl = graphqlUrl || "http://localhost:4000/graphql";
+
+    const res = await fetch(finalUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,11 +50,23 @@ async function fetchRoadmaps() {
       body: JSON.stringify({ query: GET_ROADMAPS }),
       cache: "no-store",
     });
+
+    if (!res.ok) {
+      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    }
+
     const json = await res.json();
+
+    if (json.errors) {
+      throw new Error(
+        `GraphQL Errors: ${json.errors.map((e: { message: string }) => e.message).join(", ")}`
+      );
+    }
+
     return json?.data?.getRoadmaps || [];
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
-    return [];
+    throw error;
   }
 }
 

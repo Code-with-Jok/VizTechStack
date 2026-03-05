@@ -18,7 +18,7 @@ const serverEnvSchema = z.object({
   WEB_APP_ORIGIN: z.string().url().default("http://localhost:3000"),
   CLERK_JWT_ISSUER_DOMAIN: z
     .string()
-    .min(1, "CLERK_JWT_ISSUER_DOMAIN is required"),
+    .url("CLERK_JWT_ISSUER_DOMAIN must be a valid URL"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

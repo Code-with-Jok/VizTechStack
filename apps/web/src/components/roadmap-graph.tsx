@@ -72,8 +72,10 @@ export function RoadmapGraph({
   try {
     const rawNodes = JSON.parse(initialNodesJson || "[]");
     const rawEdges = JSON.parse(initialEdgesJson || "[]");
-    parsedNodes = rawNodes.length > 0 ? rawNodes : defaultNodes;
-    parsedEdges = rawEdges.length > 0 ? rawEdges : defaultEdges;
+    parsedNodes =
+      Array.isArray(rawNodes) && rawNodes.length > 0 ? rawNodes : defaultNodes;
+    parsedEdges =
+      Array.isArray(rawEdges) && rawEdges.length > 0 ? rawEdges : defaultEdges;
   } catch {
     parsedNodes = defaultNodes;
     parsedEdges = defaultEdges;
@@ -88,8 +90,14 @@ export function RoadmapGraph({
     try {
       const rawNodes = JSON.parse(initialNodesJson || "[]");
       const rawEdges = JSON.parse(initialEdgesJson || "[]");
-      newNodes = rawNodes.length > 0 ? rawNodes : defaultNodes;
-      newEdges = rawEdges.length > 0 ? rawEdges : defaultEdges;
+      newNodes =
+        Array.isArray(rawNodes) && rawNodes.length > 0
+          ? rawNodes
+          : defaultNodes;
+      newEdges =
+        Array.isArray(rawEdges) && rawEdges.length > 0
+          ? rawEdges
+          : defaultEdges;
     } catch {
       newNodes = defaultNodes;
       newEdges = defaultEdges;
