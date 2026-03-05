@@ -2,7 +2,7 @@ import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConvexService } from './common/convex/convex.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { api } from '@viztechstack/convex';
+import { api } from '../../../convex/_generated/api';
 
 @Controller()
 export class AppController {

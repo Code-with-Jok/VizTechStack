@@ -15,7 +15,7 @@ module.exports = function (options, webpack) {
         '@viztechstack/env': path.resolve(__dirname, '../../tooling/env/dist'),
         '@viztechstack/convex': path.resolve(
           __dirname,
-          '../../convex/_generated',
+          '../../convex/_generated/api',
         ),
       },
       extensions: ['.js', '.json', '.ts'],
