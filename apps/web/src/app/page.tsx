@@ -11,8 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck } from "lucide-react";
 
-type ClerkSessionClaims = { metadata?: { role?: string } };
-
 const GET_ROADMAPS = `
   query GetRoadmaps {
     getRoadmaps {
@@ -49,6 +47,12 @@ async function fetchRoadmaps() {
     console.error("Error fetching roadmaps:", error);
     return [];
   }
+}
+
+interface ClerkSessionClaims {
+  metadata?: {
+    role?: string;
+  };
 }
 
 export default async function Home() {

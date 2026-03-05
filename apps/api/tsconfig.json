@@ -10,5 +10,6 @@
       "@viztechstack/env": ["../../tooling/env/dist/index"],
       "@viztechstack/convex/*": ["../../convex/_generated/*"]
     }
-  }
+  },
+  "include": ["src"]
 }
