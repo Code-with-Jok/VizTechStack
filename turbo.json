@@ -1,6 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "globalEnv": [
+    "NEXT_PUBLIC_CONVEX_URL",
+    "NEXT_PUBLIC_API_URL",
+    "CONVEX_DEPLOYMENT",
+    "CONVEX_URL",
+    "PORT",
+    "NODE_ENV",
+    "WEB_APP_ORIGIN",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "CONVEX_SITE_URL",
+    "CLERK_SECRET_KEY",
+    "GRAPHQL_URL",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
