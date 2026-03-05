@@ -1,6 +1,20 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+function getRole(identity: unknown): string | undefined {
+  if (typeof identity !== "object" || identity === null) {
+    return undefined;
+  }
+
+  const metadata = Reflect.get(identity, "publicMetadata");
+  if (typeof metadata !== "object" || metadata === null) {
+    return undefined;
+  }
+
+  const role = Reflect.get(metadata, "role");
+  return typeof role === "string" ? role : undefined;
+}
+
 export const createRoadmap = mutation({
   args: {
     slug: v.string(),
@@ -32,7 +46,7 @@ export const createRoadmap = mutation({
     }
 
     // Role check: Only admin can create
-    const role = (identity as any).publicMetadata?.role;
+    const role = getRole(identity);
     if (role !== "admin") {
       throw new Error("Unauthorized: Only admins can manage roadmaps.");
     }
@@ -63,23 +77,22 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    const role = (identity as any)?.publicMetadata?.role;
+    const role = getRole(identity);
     const isAdmin = role === "admin";
+    const category = args.category;
 
     let results;
-    if (args.category !== undefined) {
+    if (category !== undefined) {
       if (isAdmin) {
         results = await ctx.db
           .query("roadmaps")
-          .withIndex("by_category", (q) =>
-            q.eq("category", args.category as any)
-          )
+          .withIndex("by_category", (q) => q.eq("category", category))
           .collect();
       } else {
         results = await ctx.db
           .query("roadmaps")
           .withIndex("by_category_status", (q) =>
-            q.eq("category", args.category as any).eq("status", "public")
+            q.eq("category", category).eq("status", "public")
           )
           .collect();
       }
@@ -111,7 +124,7 @@ export const getBySlug = query({
     if (roadmap.status === "public") return roadmap;
 
     const identity = await ctx.auth.getUserIdentity();
-    const role = (identity as any)?.publicMetadata?.role;
+    const role = getRole(identity);
     if (role === "admin") return roadmap;
 
     return null; // Restricted

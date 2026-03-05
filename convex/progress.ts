@@ -1,4 +1,5 @@
 import { query, mutation } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 
 export const getUserProgress = query({
@@ -10,7 +11,7 @@ export const getUserProgress = query({
     if (!identity) {
       throw new Error("Unauthenticated call to getUserProgress");
     }
-    const userId = identity.subject as any; // Using subject as the user identifier in DB
+    const userId = identity.subject as Id<"users">;
 
     return await ctx.db
       .query("progress")
@@ -36,7 +37,7 @@ export const updateProgress = mutation({
     if (!identity) {
       throw new Error("Unauthenticated call to updateProgress");
     }
-    const userId = identity.subject as any;
+    const userId = identity.subject as Id<"users">;
 
     // Tìm progress hiện có bằng composite index mới
     const existing = await ctx.db

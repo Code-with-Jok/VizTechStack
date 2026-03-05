@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConvexHttpClient } from 'convex/browser';
-import { serverEnv } from '../../../../../tooling/env/src/server';
+import { serverEnv } from '@viztechstack/env/server';
 
 @Injectable()
 export class ConvexService implements OnModuleInit {

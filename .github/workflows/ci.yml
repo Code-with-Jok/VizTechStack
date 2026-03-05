@@ -46,7 +46,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies
@@ -57,6 +57,9 @@ jobs:
 
       - name: Lint
         run: pnpm turbo lint
+
+      - name: Check explicit any
+        run: pnpm check:no-any
 
       - name: Typecheck
         run: pnpm turbo typecheck
@@ -83,7 +86,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies

@@ -56,6 +56,17 @@ yarn.lock
 # ==============================
 **/*.tsbuildinfo
 
+# Generated artifacts accidentally emitted in source directories
+tooling/env/src/*.js
+tooling/env/src/*.js.map
+tooling/env/src/*.d.ts
+tooling/env/src/*.d.ts.map
+tooling/env/server.d.ts
+convex/*.js
+convex/*.js.map
+convex/*.d.ts
+convex/*.d.ts.map
+
 # ==============================
 # IDE / Editor
 # ==============================
