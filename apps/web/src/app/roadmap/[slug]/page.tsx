@@ -3,61 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-
-const GET_ROADMAP = `
-  query GetRoadmapBySlug($slug: String!) {
-    getRoadmapBySlug(slug: $slug) {
-      _id
-      slug
-      title
-      description
-      category
-      difficulty
-      nodesJson
-      edgesJson
-      topicCount
-    }
-  }
-`;
-
-async function fetchRoadmap(slug: string) {
-  try {
-    const graphqlUrl = process.env.GRAPHQL_URL;
-    if (!graphqlUrl) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("GRAPHQL_URL missing, falling back to localhost");
-      } else {
-        throw new Error("GRAPHQL_URL environment variable is required");
-      }
-    }
-
-    const finalUrl = graphqlUrl || "http://localhost:4000/graphql";
-
-    const res = await fetch(finalUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: GET_ROADMAP, variables: { slug } }),
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-    }
-
-    const json = await res.json();
-
-    if (json.errors) {
-      throw new Error(
-        `GraphQL Errors: ${json.errors.map((e: { message: string }) => e.message).join(", ")}`
-      );
-    }
-
-    return json?.data?.getRoadmapBySlug || null;
-  } catch (error) {
-    console.error("Error fetching roadmap:", error);
-    throw error;
-  }
-}
+import { getRoadmapBySlugServer } from "@/lib/api-client/roadmaps";
 
 import { RoadmapGraph } from "@/components/roadmap-graph";
 
@@ -67,7 +13,12 @@ export default async function RoadmapDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const slug = (await params).slug;
-  const roadmap = await fetchRoadmap(slug);
+  const roadmap = await getRoadmapBySlugServer({
+    slug,
+    cache: "force-cache",
+    revalidate: 180,
+    tags: [`roadmap:${slug}`],
+  });
 
   if (!roadmap) {
     return (

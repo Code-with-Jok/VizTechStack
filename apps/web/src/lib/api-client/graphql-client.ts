@@ -1,0 +1,123 @@
+interface GraphqlErrorItem {
+  message?: unknown;
+}
+
+interface GraphqlEnvelope<TData> {
+  data?: TData;
+  errors?: GraphqlErrorItem[];
+}
+
+interface GraphqlRequestOptions<TVariables> {
+  query: string;
+  variables?: TVariables;
+  token?: string;
+  cache?: RequestCache;
+  next?: {
+    revalidate?: number;
+    tags?: string[];
+  };
+}
+
+export class GraphqlRequestError extends Error {
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'GraphqlRequestError';
+    this.status = status;
+  }
+}
+
+export async function executeServerGraphql<TData, TVariables = undefined>(
+  options: GraphqlRequestOptions<TVariables>,
+): Promise<TData> {
+  const endpoint = resolveServerGraphqlEndpoint();
+  return executeGraphql(endpoint, options);
+}
+
+export async function executeClientGraphql<TData, TVariables = undefined>(
+  options: GraphqlRequestOptions<TVariables>,
+): Promise<TData> {
+  const endpoint = resolveClientGraphqlEndpoint();
+  return executeGraphql(endpoint, options);
+}
+
+async function executeGraphql<TData, TVariables>(
+  endpoint: string,
+  options: GraphqlRequestOptions<TVariables>,
+): Promise<TData> {
+  const requestInit: RequestInit & {
+    next?: {
+      revalidate?: number;
+      tags?: string[];
+    };
+  } = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+    },
+    body: JSON.stringify({
+      query: options.query,
+      variables: options.variables,
+    }),
+    cache: options.cache,
+    next: options.next,
+  };
+
+  const response = await fetch(endpoint, requestInit);
+
+  if (!response.ok) {
+    throw new GraphqlRequestError(
+      `GraphQL request failed: ${response.status} ${response.statusText}`,
+      response.status,
+    );
+  }
+
+  const envelope = (await response.json()) as GraphqlEnvelope<TData>;
+
+  if (Array.isArray(envelope.errors) && envelope.errors.length > 0) {
+    const message = envelope.errors
+      .map((error) =>
+        typeof error.message === 'string' ? error.message : 'Unknown GraphQL error',
+      )
+      .join(', ');
+
+    throw new GraphqlRequestError(`GraphQL error: ${message}`, response.status);
+  }
+
+  if (!('data' in envelope) || envelope.data === undefined) {
+    throw new GraphqlRequestError('GraphQL response did not include data.');
+  }
+
+  return envelope.data;
+}
+
+function resolveServerGraphqlEndpoint(): string {
+  const configuredEndpoint =
+    process.env.GRAPHQL_URL ?? process.env.NEXT_PUBLIC_GRAPHQL_URL;
+
+  if (configuredEndpoint) {
+    return configuredEndpoint;
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:4000/graphql';
+  }
+
+  throw new GraphqlRequestError('GRAPHQL_URL is required in non-development environments.');
+}
+
+function resolveClientGraphqlEndpoint(): string {
+  if (process.env.NEXT_PUBLIC_GRAPHQL_URL) {
+    return process.env.NEXT_PUBLIC_GRAPHQL_URL;
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:4000/graphql';
+  }
+
+  throw new GraphqlRequestError(
+    'NEXT_PUBLIC_GRAPHQL_URL is required in non-development environments.',
+  );
+}

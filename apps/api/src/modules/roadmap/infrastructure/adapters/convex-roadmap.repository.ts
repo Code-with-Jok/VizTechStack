@@ -6,7 +6,10 @@ import { CreateRoadmapCommand } from '../../application/commands/create-roadmap.
 import { RoadmapRepository } from '../../application/ports/roadmap.repository';
 import { GetRoadmapBySlugQuery } from '../../application/queries/get-roadmap-by-slug.query';
 import { ListRoadmapsQuery } from '../../application/queries/list-roadmaps.query';
-import { RoadmapEntity } from '../../domain/entities/roadmap.entity';
+import {
+  RoadmapEntity,
+  RoadmapPageEntity,
+} from '../../domain/entities/roadmap.entity';
 import {
   RoadmapAuthorizationDomainError,
   RoadmapDomainError,
@@ -14,27 +17,54 @@ import {
   RoadmapValidationDomainError,
 } from '../../domain/errors/roadmap-domain-error';
 
+interface RoadmapSummaryPayload {
+  _id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: 'role' | 'skill' | 'best-practice';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  topicCount: number;
+  status: 'public' | 'draft' | 'private';
+}
+
+interface RoadmapPaginatedPayload {
+  page: RoadmapSummaryPayload[];
+  continueCursor: string;
+  isDone: boolean;
+}
+
 @Injectable()
 export class ConvexRoadmapRepository implements RoadmapRepository {
   constructor(private readonly convexService: ConvexService) {}
 
-  async listRoadmaps(query: ListRoadmapsQuery): Promise<RoadmapEntity[]> {
+  async listRoadmaps(query: ListRoadmapsQuery): Promise<RoadmapPageEntity> {
     try {
       const result: unknown = await this.convexService.client.query(
         api.roadmaps.list,
         {
           category: query.category,
+          paginationOpts: {
+            numItems: query.limit ?? 24,
+            cursor: query.cursor ?? null,
+          },
         },
       );
 
-      if (!Array.isArray(result)) {
+      if (!this.isRoadmapPaginatedPayload(result)) {
         throw new RoadmapInfrastructureDomainError(
-          'Convex listRoadmaps returned an invalid payload.',
+          'Convex listRoadmaps returned an invalid paginated payload.',
           'listRoadmaps',
         );
       }
 
-      return result.map((item) => this.mapRoadmapRecord(item, 'listRoadmaps'));
+      return {
+        items: result.page.map((item) =>
+          this.mapRoadmapSummary(item, 'listRoadmaps'),
+        ),
+        nextCursor: result.isDone ? null : result.continueCursor,
+        isDone: result.isDone,
+      };
     } catch (error) {
       throw this.mapInfrastructureError(error, 'listRoadmaps');
     }
@@ -55,7 +85,7 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
         return null;
       }
 
-      return this.mapRoadmapRecord(result, 'getRoadmapBySlug');
+      return this.mapRoadmapDetail(result, 'getRoadmapBySlug');
     } catch (error) {
       throw this.mapInfrastructureError(error, 'getRoadmapBySlug');
     }
@@ -91,7 +121,7 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
     }
   }
 
-  private mapRoadmapRecord(payload: unknown, operation: string): RoadmapEntity {
+  private mapRoadmapDetail(payload: unknown, operation: string): RoadmapEntity {
     if (!this.isRoadmapRecord(payload)) {
       throw new RoadmapInfrastructureDomainError(
         `Convex ${operation} returned malformed roadmap data.`,
@@ -111,6 +141,73 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
       topicCount: payload.topicCount,
       status: payload.status,
     };
+  }
+
+  private mapRoadmapSummary(
+    payload: unknown,
+    operation: string,
+  ): RoadmapEntity {
+    if (!this.isRoadmapSummary(payload)) {
+      throw new RoadmapInfrastructureDomainError(
+        `Convex ${operation} returned malformed roadmap summary data.`,
+        operation,
+      );
+    }
+
+    return {
+      id: payload._id,
+      slug: payload.slug,
+      title: payload.title,
+      description: payload.description,
+      category: payload.category,
+      difficulty: payload.difficulty,
+      topicCount: payload.topicCount,
+      status: payload.status,
+    };
+  }
+
+  private isRoadmapPaginatedPayload(
+    payload: unknown,
+  ): payload is RoadmapPaginatedPayload {
+    if (typeof payload !== 'object' || payload === null) {
+      return false;
+    }
+
+    const record = payload as Record<string, unknown>;
+    if (
+      !Array.isArray(record.page) ||
+      typeof record.continueCursor !== 'string' ||
+      typeof record.isDone !== 'boolean'
+    ) {
+      return false;
+    }
+
+    return record.page.every((item) => this.isRoadmapSummary(item));
+  }
+
+  private isRoadmapSummary(payload: unknown): payload is RoadmapSummaryPayload {
+    if (typeof payload !== 'object' || payload === null) {
+      return false;
+    }
+
+    const record = payload as Record<string, unknown>;
+
+    return (
+      typeof record._id === 'string' &&
+      typeof record.slug === 'string' &&
+      typeof record.title === 'string' &&
+      typeof record.description === 'string' &&
+      (record.category === 'role' ||
+        record.category === 'skill' ||
+        record.category === 'best-practice') &&
+      (record.difficulty === 'beginner' ||
+        record.difficulty === 'intermediate' ||
+        record.difficulty === 'advanced') &&
+      typeof record.topicCount === 'number' &&
+      (record.status === 'public' ||
+        record.status === 'draft' ||
+        record.status === 'private')
+    );
   }
 
   private isRoadmapRecord(payload: unknown): payload is Doc<'roadmaps'> {

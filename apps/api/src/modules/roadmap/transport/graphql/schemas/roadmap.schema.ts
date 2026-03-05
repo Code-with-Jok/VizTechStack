@@ -65,6 +65,30 @@ export class Roadmap {
 }
 
 @InputType()
+export class RoadmapPageInput {
+  @Field(() => RoadmapCategory, { nullable: true })
+  category?: RoadmapCategory;
+
+  @Field(() => String, { nullable: true })
+  cursor?: string;
+
+  @Field(() => Int, { nullable: true, defaultValue: 24 })
+  limit?: number;
+}
+
+@ObjectType()
+export class RoadmapPage {
+  @Field(() => [Roadmap])
+  items!: Roadmap[];
+
+  @Field(() => String, { nullable: true })
+  nextCursor!: string | null;
+
+  @Field(() => Boolean)
+  hasMore!: boolean;
+}
+
+@InputType()
 export class CreateRoadmapInput {
   @Field()
   slug!: string;

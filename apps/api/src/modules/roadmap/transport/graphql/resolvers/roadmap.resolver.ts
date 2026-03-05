@@ -9,11 +9,15 @@ import {
   mapCategoryInputToDomain,
   mapCreateRoadmapInputToCommand,
   mapRoadmapEntityToGraphql,
+  mapRoadmapPageEntityToGraphql,
+  mapRoadmapPageInputToQuery,
 } from '../mappers/roadmap-graphql.mapper';
 import {
   CreateRoadmapInput,
   Roadmap,
   RoadmapCategory,
+  RoadmapPage,
+  RoadmapPageInput,
 } from '../schemas/roadmap.schema';
 import { RoadmapDomainExceptionFilter } from '../filters/roadmap-domain-exception.filter';
 
@@ -31,11 +35,28 @@ export class RoadmapResolver {
     @Args('category', { type: () => RoadmapCategory, nullable: true })
     category?: RoadmapCategory,
   ): Promise<Roadmap[]> {
-    const roadmaps = await this.roadmapApplicationService.listRoadmaps({
+    const roadmapPage = await this.roadmapApplicationService.listRoadmaps({
       category: mapCategoryInputToDomain(category),
+      limit: 24,
+      cursor: null,
     });
 
-    return roadmaps.map((roadmap) => mapRoadmapEntityToGraphql(roadmap));
+    return roadmapPage.items.map((roadmap) =>
+      mapRoadmapEntityToGraphql(roadmap),
+    );
+  }
+
+  @Query(() => RoadmapPage)
+  @Public()
+  async getRoadmapsPage(
+    @Args('input', { type: () => RoadmapPageInput, nullable: true })
+    input?: RoadmapPageInput,
+  ): Promise<RoadmapPage> {
+    const roadmapPage = await this.roadmapApplicationService.listRoadmaps(
+      mapRoadmapPageInputToQuery(input),
+    );
+
+    return mapRoadmapPageEntityToGraphql(roadmapPage);
   }
 
   @Query(() => Roadmap, { nullable: true })

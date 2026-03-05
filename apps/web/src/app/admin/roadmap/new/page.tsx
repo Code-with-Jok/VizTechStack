@@ -3,19 +3,25 @@
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import type {
+  CreateRoadmapInput,
+  RoadmapCategory,
+  RoadmapDifficulty,
+  RoadmapStatus,
+} from "@viztechstack/types";
 import { RoadmapEditor } from "@/components/roadmap-editor";
 import Link from "next/link";
+import { createRoadmapClient } from "@/lib/api-client/roadmaps";
 
-const CREATE_ROADMAP_MUTATION = `
-  mutation CreateRoadmap($input: CreateRoadmapInput!) {
-    createRoadmap(input: $input)
-  }
-`;
+type RoadmapFormState = Pick<
+  CreateRoadmapInput,
+  "title" | "slug" | "description" | "category" | "difficulty" | "status"
+>;
 
 export default function NewRoadmapPage() {
   const router = useRouter();
   const { getToken } = useAuth();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RoadmapFormState>({
     title: "",
     slug: "",
     description: "",
@@ -38,36 +44,17 @@ export default function NewRoadmapPage() {
 
     try {
       const token = await getToken();
-      const graphqlUrl =
-        process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:4000/graphql";
-      if (!graphqlUrl) throw new Error("Missing NEXT_PUBLIC_GRAPHQL_URL");
-      const res = await fetch(graphqlUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          query: CREATE_ROADMAP_MUTATION,
-          variables: {
-            input: {
-              ...formData,
-              ...graphData,
-            },
-          },
-        }),
-        cache: "no-store",
-      });
-
-      const json = await res.json();
-
-      if (json.errors && json.errors.length > 0) {
-        throw new Error(
-          `GraphQL Errors: ${json.errors
-            .map((e: { message: string }) => e.message)
-            .join(", ")}`
-        );
+      if (!token) {
+        throw new Error("Missing access token");
       }
+
+      await createRoadmapClient(
+        {
+          ...formData,
+          ...graphData,
+        },
+        token
+      );
 
       router.push("/");
       router.refresh();
@@ -177,7 +164,10 @@ export default function NewRoadmapPage() {
                 className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
                 value={formData.category}
                 onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
+                  setFormData({
+                    ...formData,
+                    category: e.target.value as RoadmapCategory,
+                  })
                 }
               >
                 <option value="role">Role (Nghề nghiệp)</option>
@@ -193,7 +183,10 @@ export default function NewRoadmapPage() {
                 className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
                 value={formData.difficulty}
                 onChange={(e) =>
-                  setFormData({ ...formData, difficulty: e.target.value })
+                  setFormData({
+                    ...formData,
+                    difficulty: e.target.value as RoadmapDifficulty,
+                  })
                 }
               >
                 <option value="beginner">Beginner (Ngôn ngữ)</option>
@@ -210,7 +203,10 @@ export default function NewRoadmapPage() {
                 className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 dark:text-zinc-50 font-bold"
                 value={formData.status}
                 onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
+                  setFormData({
+                    ...formData,
+                    status: e.target.value as RoadmapStatus,
+                  })
                 }
               >
                 <option value="public" className="text-green-500 font-bold">

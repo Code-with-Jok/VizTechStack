@@ -1,8 +1,10 @@
 import { CreateRoadmapCommand } from '../../../application/commands/create-roadmap.command';
+import { ListRoadmapsQuery } from '../../../application/queries/list-roadmaps.query';
 import {
   RoadmapCategory as DomainRoadmapCategory,
   RoadmapDifficulty as DomainRoadmapDifficulty,
   RoadmapEntity,
+  RoadmapPageEntity,
   RoadmapStatus as DomainRoadmapStatus,
 } from '../../../domain/entities/roadmap.entity';
 import {
@@ -10,6 +12,8 @@ import {
   Roadmap,
   RoadmapCategory,
   RoadmapDifficulty,
+  RoadmapPage,
+  RoadmapPageInput,
   RoadmapStatus,
 } from '../schemas/roadmap.schema';
 
@@ -25,6 +29,16 @@ export function mapRoadmapEntityToGraphql(entity: RoadmapEntity): Roadmap {
     edgesJson: entity.edgesJson,
     topicCount: entity.topicCount,
     status: mapDomainStatusToGraphql(entity.status),
+  };
+}
+
+export function mapRoadmapPageEntityToGraphql(
+  entity: RoadmapPageEntity,
+): RoadmapPage {
+  return {
+    items: entity.items.map((item) => mapRoadmapEntityToGraphql(item)),
+    nextCursor: entity.nextCursor,
+    hasMore: !entity.isDone,
   };
 }
 
@@ -58,6 +72,16 @@ export function mapCreateRoadmapInputToCommand(
     edgesJson: input.edgesJson ?? '[]',
     topicCount: input.topicCount ?? 0,
     status: mapStatusInputToDomain(input.status),
+  };
+}
+
+export function mapRoadmapPageInputToQuery(
+  input?: RoadmapPageInput,
+): ListRoadmapsQuery {
+  return {
+    category: mapCategoryInputToDomain(input?.category),
+    cursor: input?.cursor ?? null,
+    limit: input?.limit ?? 24,
   };
 }
 
@@ -102,6 +126,8 @@ function mapDomainCategoryToGraphql(
     case 'best-practice':
       return RoadmapCategory.BEST_PRACTICE;
   }
+
+  throw new Error(`Unsupported roadmap category: ${String(category)}`);
 }
 
 function mapDomainDifficultyToGraphql(
@@ -115,6 +141,8 @@ function mapDomainDifficultyToGraphql(
     case 'advanced':
       return RoadmapDifficulty.ADVANCED;
   }
+
+  throw new Error(`Unsupported roadmap difficulty: ${String(difficulty)}`);
 }
 
 function mapDomainStatusToGraphql(status: DomainRoadmapStatus): RoadmapStatus {
@@ -126,4 +154,6 @@ function mapDomainStatusToGraphql(status: DomainRoadmapStatus): RoadmapStatus {
     case 'private':
       return RoadmapStatus.PRIVATE;
   }
+
+  throw new Error(`Unsupported roadmap status: ${String(status)}`);
 }

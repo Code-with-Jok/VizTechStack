@@ -73,7 +73,22 @@ export const seed: RegisteredMutation<
     }
 
     for (const roadmap of defaultRoadmaps) {
-      await ctx.db.insert("roadmaps", roadmap);
+      const createdAt = Date.now();
+      const roadmapId = await ctx.db.insert("roadmaps", {
+        ...roadmap,
+        createdAt,
+      });
+      await ctx.db.insert("roadmapSummaries", {
+        roadmapId,
+        slug: roadmap.slug,
+        title: roadmap.title,
+        description: roadmap.description,
+        category: roadmap.category,
+        difficulty: roadmap.difficulty,
+        topicCount: roadmap.topicCount,
+        status: roadmap.status,
+        createdAt,
+      });
     }
 
     return "Seeded 3 roadmaps successfully!";

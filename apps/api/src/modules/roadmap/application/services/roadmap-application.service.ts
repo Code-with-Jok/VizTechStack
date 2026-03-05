@@ -4,7 +4,10 @@ import { ROADMAP_REPOSITORY } from '../ports/roadmap.repository';
 import type { RoadmapRepository } from '../ports/roadmap.repository';
 import { GetRoadmapBySlugQuery } from '../queries/get-roadmap-by-slug.query';
 import { ListRoadmapsQuery } from '../queries/list-roadmaps.query';
-import { RoadmapEntity } from '../../domain/entities/roadmap.entity';
+import {
+  RoadmapEntity,
+  RoadmapPageEntity,
+} from '../../domain/entities/roadmap.entity';
 import { RoadmapValidationDomainError } from '../../domain/errors/roadmap-domain-error';
 import {
   validateCreateRoadmapInput,
@@ -18,8 +21,28 @@ export class RoadmapApplicationService {
     private readonly roadmapRepository: RoadmapRepository,
   ) {}
 
-  listRoadmaps(query: ListRoadmapsQuery): Promise<RoadmapEntity[]> {
-    return this.roadmapRepository.listRoadmaps(query);
+  listRoadmaps(query: ListRoadmapsQuery): Promise<RoadmapPageEntity> {
+    const limit = query.limit ?? 24;
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new RoadmapValidationDomainError(
+        'Limit must be an integer between 1 and 100.',
+        'listRoadmaps',
+      );
+    }
+
+    const cursor = query.cursor ?? null;
+    if (cursor !== null && cursor.trim().length === 0) {
+      throw new RoadmapValidationDomainError(
+        'Cursor must not be an empty string.',
+        'listRoadmaps',
+      );
+    }
+
+    return this.roadmapRepository.listRoadmaps({
+      category: query.category,
+      limit,
+      cursor,
+    });
   }
 
   async getRoadmapBySlug(
