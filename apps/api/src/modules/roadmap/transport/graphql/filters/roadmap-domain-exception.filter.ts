@@ -4,28 +4,18 @@ import { randomUUID } from 'node:crypto';
 import { GraphQLError } from 'graphql';
 import { RoadmapDomainError } from '../../../domain/errors/roadmap-domain-error';
 
-interface GraphqlRequestContext {
-  req?: {
-    user?: {
-      sub?: string;
-    };
-  };
-}
-
 @Catch(RoadmapDomainError)
 export class RoadmapDomainExceptionFilter implements GqlExceptionFilter {
   private readonly logger = new Logger(RoadmapDomainExceptionFilter.name);
 
   catch(exception: RoadmapDomainError, host: ArgumentsHost): GraphQLError {
     const gqlHost = GqlArgumentsHost.create(host);
-    const context = gqlHost.getContext<GraphqlRequestContext>();
+    gqlHost.getContext();
     const traceId = randomUUID();
-    const userId = context.req?.user?.sub ?? 'anonymous';
 
     this.logger.error(
       JSON.stringify({
         traceId,
-        userId,
         module: exception.module,
         operation: exception.operation,
         severity: exception.severity,
@@ -34,13 +24,18 @@ export class RoadmapDomainExceptionFilter implements GqlExceptionFilter {
       }),
     );
 
-    return new GraphQLError(exception.message, {
+    // Infrastructure/authorization errors (high severity) → generic client message
+    // to avoid leaking internal details. Validation errors (low) → pass through.
+    const isHighSeverity = exception.severity === 'high';
+
+    const clientMessage = isHighSeverity
+      ? 'An internal error occurred. Please try again later.'
+      : exception.message;
+
+    return new GraphQLError(clientMessage, {
       extensions: {
         traceId,
         code: exception.code,
-        module: exception.module,
-        operation: exception.operation,
-        severity: exception.severity,
       },
     });
   }
