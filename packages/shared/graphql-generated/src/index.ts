@@ -5,7 +5,14 @@
 export * from './types';
 
 // Zod validation schemas for runtime validation
-export * from './zod-schemas';
+// Note: Only exporting schemas that exist in zod-schemas.ts
+export {
+  RoadmapCategorySchema,
+  RoadmapDifficultySchema,
+  RoadmapStatusSchema,
+  RoadmapPageInputSchema,
+  CreateRoadmapInputSchema,
+} from './zod-schemas';
 
 // Note: operations.ts and hooks.ts will be generated
 // when you add GraphQL queries/mutations to your code
