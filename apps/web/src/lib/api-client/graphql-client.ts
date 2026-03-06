@@ -31,8 +31,22 @@ export class GraphqlRequestError extends Error {
 export async function executeServerGraphql<TData, TVariables = undefined>(
   options: GraphqlRequestOptions<TVariables>,
 ): Promise<TData> {
-  const endpoint = resolveServerGraphqlEndpoint();
-  return executeGraphql(endpoint, options);
+  const endpoints = resolveServerGraphqlEndpoints();
+  let lastError: unknown;
+
+  for (const endpoint of endpoints) {
+    try {
+      return await executeGraphql(endpoint, options);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+
+  throw new GraphqlRequestError('GraphQL request failed for all configured server endpoints.');
 }
 
 export async function executeClientGraphql<TData, TVariables = undefined>(
@@ -93,16 +107,35 @@ async function executeGraphql<TData, TVariables>(
   return envelope.data;
 }
 
-function resolveServerGraphqlEndpoint(): string {
-  const configuredEndpoint =
-    process.env.GRAPHQL_URL ?? process.env.NEXT_PUBLIC_GRAPHQL_URL;
+function resolveServerGraphqlEndpoints(): string[] {
+  const endpoints = new Set<string>();
+  const configuredEndpoint = process.env.GRAPHQL_URL;
+  const publicConfiguredEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_URL;
+  const explicitFallbackEndpoint = process.env.GRAPHQL_URL_FALLBACK;
 
   if (configuredEndpoint) {
-    return configuredEndpoint;
+    endpoints.add(configuredEndpoint);
+  }
+
+  if (publicConfiguredEndpoint) {
+    endpoints.add(publicConfiguredEndpoint);
+  }
+
+  if (explicitFallbackEndpoint) {
+    endpoints.add(explicitFallbackEndpoint);
+  }
+
+  // Safety fallback for Vercel previews where preview API URLs may be protected.
+  if (process.env.VERCEL === '1') {
+    endpoints.add('https://viz-tech-stack-api.vercel.app/graphql');
+  }
+
+  if (endpoints.size > 0) {
+    return Array.from(endpoints);
   }
 
   if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:4000/graphql';
+    return ['http://localhost:4000/graphql'];
   }
 
   throw new GraphqlRequestError('GRAPHQL_URL is required in non-development environments.');
