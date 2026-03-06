@@ -1,0 +1,11 @@
+{
+  "name": "@viztechstack/graphql-schema",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No build step for schema package\"",
+    "typecheck": "echo \"No typecheck step for schema package\"",
+    "clean": "echo \"No clean step for schema package\"",
+    "lint": "echo \"No lint config yet\""
+  }
+}

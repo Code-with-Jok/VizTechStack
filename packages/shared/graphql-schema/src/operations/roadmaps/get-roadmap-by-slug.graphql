@@ -1,0 +1,14 @@
+query GetRoadmapBySlug($slug: String!) {
+  getRoadmapBySlug(slug: $slug) {
+    _id
+    slug
+    title
+    description
+    category
+    difficulty
+    topicCount
+    status
+    nodesJson
+    edgesJson
+  }
+}

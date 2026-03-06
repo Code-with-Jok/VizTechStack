@@ -1,0 +1,16 @@
+query GetRoadmapsPage($input: RoadmapPageInput) {
+  getRoadmapsPage(input: $input) {
+    items {
+      _id
+      slug
+      title
+      description
+      category
+      difficulty
+      topicCount
+      status
+    }
+    nextCursor
+    hasMore
+  }
+}

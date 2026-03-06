@@ -1,0 +1,12 @@
+query GetRoadmapsLegacy {
+  getRoadmaps {
+    _id
+    slug
+    title
+    description
+    category
+    difficulty
+    topicCount
+    status
+  }
+}
