@@ -108,7 +108,7 @@ export function RoadmapGraph({
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   return (

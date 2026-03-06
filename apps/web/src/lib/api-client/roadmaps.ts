@@ -9,12 +9,12 @@ import {
   type RoadmapCategory,
   type RoadmapDetail,
   type RoadmapPage,
-} from '@viztechstack/types';
+} from "@viztechstack/types";
 import {
   executeClientGraphql,
   executeServerGraphql,
   GraphqlRequestError,
-} from './graphql-client';
+} from "./graphql-client";
 
 const GET_ROADMAPS_PAGE_QUERY = `
   query GetRoadmapsPage($input: RoadmapPageInput) {
@@ -214,7 +214,9 @@ export async function getRoadmapBySlugServer(
     return null;
   }
 
-  return RoadmapDetailSchema.parse(normalizeRoadmapRecord(response.getRoadmapBySlug));
+  return RoadmapDetailSchema.parse(
+    normalizeRoadmapRecord(response.getRoadmapBySlug),
+  );
 }
 
 export async function createRoadmapClient(
@@ -232,23 +234,28 @@ export async function createRoadmapClient(
       input: mapCreateRoadmapInputToGraphql(parsedInput),
     },
     token,
-    cache: 'no-store',
+    cache: "no-store",
   });
 
   return response.createRoadmap;
 }
 
-type GraphqlRoadmapCategory = 'ROLE' | 'SKILL' | 'BEST_PRACTICE';
-type GraphqlRoadmapDifficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-type GraphqlRoadmapStatus = 'PUBLIC' | 'DRAFT' | 'PRIVATE';
+type GraphqlRoadmapCategory = "ROLE" | "SKILL" | "BEST_PRACTICE";
+type GraphqlRoadmapDifficulty = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+type GraphqlRoadmapStatus = "PUBLIC" | "DRAFT" | "PRIVATE";
 
-interface GraphqlCreateRoadmapInput extends Omit<CreateRoadmapInput, 'category' | 'difficulty' | 'status'> {
+interface GraphqlCreateRoadmapInput extends Omit<
+  CreateRoadmapInput,
+  "category" | "difficulty" | "status"
+> {
   category: GraphqlRoadmapCategory;
   difficulty: GraphqlRoadmapDifficulty;
   status: GraphqlRoadmapStatus;
 }
 
-function mapCreateRoadmapInputToGraphql(input: CreateRoadmapInput): GraphqlCreateRoadmapInput {
+function mapCreateRoadmapInputToGraphql(
+  input: CreateRoadmapInput,
+): GraphqlCreateRoadmapInput {
   return {
     ...input,
     category: mapRequiredCategoryToGraphql(input.category),
@@ -257,54 +264,60 @@ function mapCreateRoadmapInputToGraphql(input: CreateRoadmapInput): GraphqlCreat
   };
 }
 
-function mapRequiredCategoryToGraphql(category: RoadmapCategory): GraphqlRoadmapCategory {
+function mapRequiredCategoryToGraphql(
+  category: RoadmapCategory,
+): GraphqlRoadmapCategory {
   switch (category) {
-    case 'role':
-      return 'ROLE';
-    case 'skill':
-      return 'SKILL';
-    case 'best-practice':
-      return 'BEST_PRACTICE';
+    case "role":
+      return "ROLE";
+    case "skill":
+      return "SKILL";
+    case "best-practice":
+      return "BEST_PRACTICE";
   }
 }
 
-function mapCategoryToGraphql(category?: RoadmapCategory): GraphqlRoadmapCategory | undefined {
+function mapCategoryToGraphql(
+  category?: RoadmapCategory,
+): GraphqlRoadmapCategory | undefined {
   if (!category) {
     return undefined;
   }
   return mapRequiredCategoryToGraphql(category);
 }
 
-function mapDifficultyToGraphql(difficulty: RoadmapDifficulty): GraphqlRoadmapDifficulty {
+function mapDifficultyToGraphql(
+  difficulty: RoadmapDifficulty,
+): GraphqlRoadmapDifficulty {
   switch (difficulty) {
-    case 'beginner':
-      return 'BEGINNER';
-    case 'intermediate':
-      return 'INTERMEDIATE';
-    case 'advanced':
-      return 'ADVANCED';
+    case "beginner":
+      return "BEGINNER";
+    case "intermediate":
+      return "INTERMEDIATE";
+    case "advanced":
+      return "ADVANCED";
   }
 }
 
 function mapStatusToGraphql(status: RoadmapStatus): GraphqlRoadmapStatus {
   switch (status) {
-    case 'public':
-      return 'PUBLIC';
-    case 'draft':
-      return 'DRAFT';
-    case 'private':
-      return 'PRIVATE';
+    case "public":
+      return "PUBLIC";
+    case "draft":
+      return "DRAFT";
+    case "private":
+      return "PRIVATE";
   }
 }
 
 function mapCategoryFromGraphql(category: unknown): unknown {
   switch (category) {
-    case 'ROLE':
-      return 'role';
-    case 'SKILL':
-      return 'skill';
-    case 'BEST_PRACTICE':
-      return 'best-practice';
+    case "ROLE":
+      return "role";
+    case "SKILL":
+      return "skill";
+    case "BEST_PRACTICE":
+      return "best-practice";
     default:
       return category;
   }
@@ -312,12 +325,12 @@ function mapCategoryFromGraphql(category: unknown): unknown {
 
 function mapDifficultyFromGraphql(difficulty: unknown): unknown {
   switch (difficulty) {
-    case 'BEGINNER':
-      return 'beginner';
-    case 'INTERMEDIATE':
-      return 'intermediate';
-    case 'ADVANCED':
-      return 'advanced';
+    case "BEGINNER":
+      return "beginner";
+    case "INTERMEDIATE":
+      return "intermediate";
+    case "ADVANCED":
+      return "advanced";
     default:
       return difficulty;
   }
@@ -325,12 +338,12 @@ function mapDifficultyFromGraphql(difficulty: unknown): unknown {
 
 function mapStatusFromGraphql(status: unknown): unknown {
   switch (status) {
-    case 'PUBLIC':
-      return 'public';
-    case 'DRAFT':
-      return 'draft';
-    case 'PRIVATE':
-      return 'private';
+    case "PUBLIC":
+      return "public";
+    case "DRAFT":
+      return "draft";
+    case "PRIVATE":
+      return "private";
     default:
       return status;
   }
@@ -361,5 +374,5 @@ function normalizeRoadmapRecord(payload: unknown): unknown {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

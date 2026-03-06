@@ -35,8 +35,9 @@ Recommended:
 2. Add read model for listing pages (summary table/materialized projection).
 3. Introduce graph snapshot table (`roadmap_versions`) and lazy-load graph payload.
 4. Add cache policy:
-  - public list pages: short revalidate window.
-  - admin and mutable pages: no-store.
+
+- public list pages: short revalidate window.
+- admin and mutable pages: no-store.
 
 Debt warning:
 
@@ -85,12 +86,16 @@ infra/
 Monorepo changes:
 
 1. Add `turbo` pipeline tasks per deployable unit:
-  - `build:api`, `build:web`, `deploy:api`, `deploy:web`, `deploy:convex`.
+
+- `build:api`, `build:web`, `deploy:api`, `deploy:web`, `deploy:convex`.
+
 2. Use `--filter` in CI/CD to deploy only changed services.
 3. Add independent release manifests per service:
-  - `apps/api/release.yaml`
-  - `apps/web/release.yaml`
-  - `convex/release.yaml`
+
+- `apps/api/release.yaml`
+- `apps/web/release.yaml`
+- `convex/release.yaml`
+
 4. Add contract tests between services before independent deploy.
 
 ## 4) Business Alignment (Real-time roadmap experience)

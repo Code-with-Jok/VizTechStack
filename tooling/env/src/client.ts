@@ -26,7 +26,7 @@ function createClientEnv(): ClientEnv {
   if (!parsed.success) {
     console.error(
       "❌ Invalid client environment variables:",
-      parsed.error.flatten().fieldErrors
+      parsed.error.flatten().fieldErrors,
     );
     throw new Error("Invalid client environment variables");
   }

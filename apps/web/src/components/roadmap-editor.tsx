@@ -34,7 +34,7 @@ export function RoadmapEditor({ onChange }: RoadmapEditorProps) {
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   const addNode = () => {
@@ -65,7 +65,7 @@ export function RoadmapEditor({ onChange }: RoadmapEditorProps) {
           };
         }
         return node;
-      })
+      }),
     );
   };
 
@@ -74,8 +74,8 @@ export function RoadmapEditor({ onChange }: RoadmapEditorProps) {
     setNodes((nds) => nds.filter((n) => n.id !== selectedNode.id));
     setEdges((eds) =>
       eds.filter(
-        (e) => e.source !== selectedNode.id && e.target !== selectedNode.id
-      )
+        (e) => e.source !== selectedNode.id && e.target !== selectedNode.id,
+      ),
     );
   };
 

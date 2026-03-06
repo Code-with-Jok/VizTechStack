@@ -23,7 +23,7 @@ export class GraphqlRequestError extends Error {
 
   constructor(message: string, status?: number) {
     super(message);
-    this.name = 'GraphqlRequestError';
+    this.name = "GraphqlRequestError";
     this.status = status;
   }
 }
@@ -46,7 +46,9 @@ export async function executeServerGraphql<TData, TVariables = undefined>(
     throw lastError;
   }
 
-  throw new GraphqlRequestError('GraphQL request failed for all configured server endpoints.');
+  throw new GraphqlRequestError(
+    "GraphQL request failed for all configured server endpoints.",
+  );
 }
 
 export async function executeClientGraphql<TData, TVariables = undefined>(
@@ -66,9 +68,9 @@ async function executeGraphql<TData, TVariables>(
       tags?: string[];
     };
   } = {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
     },
     body: JSON.stringify({
@@ -93,15 +95,17 @@ async function executeGraphql<TData, TVariables>(
   if (Array.isArray(envelope.errors) && envelope.errors.length > 0) {
     const message = envelope.errors
       .map((error) =>
-        typeof error.message === 'string' ? error.message : 'Unknown GraphQL error',
+        typeof error.message === "string"
+          ? error.message
+          : "Unknown GraphQL error",
       )
-      .join(', ');
+      .join(", ");
 
     throw new GraphqlRequestError(`GraphQL error: ${message}`, response.status);
   }
 
-  if (!('data' in envelope) || envelope.data === undefined) {
-    throw new GraphqlRequestError('GraphQL response did not include data.');
+  if (!("data" in envelope) || envelope.data === undefined) {
+    throw new GraphqlRequestError("GraphQL response did not include data.");
   }
 
   return envelope.data;
@@ -126,19 +130,21 @@ function resolveServerGraphqlEndpoints(): string[] {
   }
 
   // Safety fallback for Vercel previews where preview API URLs may be protected.
-  if (process.env.VERCEL === '1') {
-    endpoints.add('https://viz-tech-stack-api.vercel.app/graphql');
+  if (process.env.VERCEL === "1") {
+    endpoints.add("https://viz-tech-stack-api.vercel.app/graphql");
   }
 
   if (endpoints.size > 0) {
     return Array.from(endpoints);
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    return ['http://localhost:4000/graphql'];
+  if (process.env.NODE_ENV === "development") {
+    return ["http://localhost:4000/graphql"];
   }
 
-  throw new GraphqlRequestError('GRAPHQL_URL is required in non-development environments.');
+  throw new GraphqlRequestError(
+    "GRAPHQL_URL is required in non-development environments.",
+  );
 }
 
 function resolveClientGraphqlEndpoint(): string {
@@ -146,11 +152,11 @@ function resolveClientGraphqlEndpoint(): string {
     return process.env.NEXT_PUBLIC_GRAPHQL_URL;
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:4000/graphql';
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:4000/graphql";
   }
 
   throw new GraphqlRequestError(
-    'NEXT_PUBLIC_GRAPHQL_URL is required in non-development environments.',
+    "NEXT_PUBLIC_GRAPHQL_URL is required in non-development environments.",
   );
 }

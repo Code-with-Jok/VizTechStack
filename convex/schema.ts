@@ -10,12 +10,12 @@ export default defineSchema({
     category: v.union(
       v.literal("role"),
       v.literal("skill"),
-      v.literal("best-practice")
+      v.literal("best-practice"),
     ),
     difficulty: v.union(
       v.literal("beginner"),
       v.literal("intermediate"),
-      v.literal("advanced")
+      v.literal("advanced"),
     ),
     nodesJson: v.string(), // JSON string chứa SVG node definitions
     edgesJson: v.string(), // JSON string chứa connections giữa nodes
@@ -25,7 +25,7 @@ export default defineSchema({
     status: v.union(
       v.literal("public"),
       v.literal("draft"),
-      v.literal("private")
+      v.literal("private"),
     ),
   })
     .index("by_slug", ["slug"])
@@ -41,19 +41,19 @@ export default defineSchema({
     category: v.union(
       v.literal("role"),
       v.literal("skill"),
-      v.literal("best-practice")
+      v.literal("best-practice"),
     ),
     difficulty: v.union(
       v.literal("beginner"),
       v.literal("intermediate"),
-      v.literal("advanced")
+      v.literal("advanced"),
     ),
     topicCount: v.number(),
     createdAt: v.number(),
     status: v.union(
       v.literal("public"),
       v.literal("draft"),
-      v.literal("private")
+      v.literal("private"),
     ),
   })
     .index("by_roadmap_id", ["roadmapId"])
@@ -61,7 +61,11 @@ export default defineSchema({
     .index("by_created_at", ["createdAt"])
     .index("by_status_created_at", ["status", "createdAt"])
     .index("by_category_created_at", ["category", "createdAt"])
-    .index("by_category_status_created_at", ["category", "status", "createdAt"]),
+    .index("by_category_status_created_at", [
+      "category",
+      "status",
+      "createdAt",
+    ]),
 
   // Topics: nội dung chi tiết của mỗi node trong roadmap
   topics: defineTable({
@@ -76,9 +80,9 @@ export default defineSchema({
         type: v.union(
           v.literal("article"),
           v.literal("video"),
-          v.literal("course")
+          v.literal("course"),
         ),
-      })
+      }),
     ),
   }).index("by_roadmap", ["roadmapId"]),
 
@@ -98,7 +102,7 @@ export default defineSchema({
     status: v.union(
       v.literal("done"),
       v.literal("in-progress"),
-      v.literal("skipped")
+      v.literal("skipped"),
     ),
   })
     .index("by_user_roadmap", ["userId", "roadmapId"])

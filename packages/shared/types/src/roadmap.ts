@@ -22,22 +22,26 @@ export type RoadmapCategory = z.infer<typeof RoadmapCategorySchema>;
 export type RoadmapDifficulty = z.infer<typeof RoadmapDifficultySchema>;
 export type RoadmapStatus = z.infer<typeof RoadmapStatusSchema>;
 
-export const RoadmapGraphNodeSchema = z.object({
-  id: z.string(),
-  position: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  data: z.record(z.unknown()),
-  type: z.string().optional(),
-}).passthrough();
+export const RoadmapGraphNodeSchema = z
+  .object({
+    id: z.string(),
+    position: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
+    data: z.record(z.unknown()),
+    type: z.string().optional(),
+  })
+  .passthrough();
 
-export const RoadmapGraphEdgeSchema = z.object({
-  id: z.string().optional(),
-  source: z.string(),
-  target: z.string(),
-  label: z.string().optional(),
-}).passthrough();
+export const RoadmapGraphEdgeSchema = z
+  .object({
+    id: z.string().optional(),
+    source: z.string(),
+    target: z.string(),
+    label: z.string().optional(),
+  })
+  .passthrough();
 
 export const RoadmapSummarySchema = z.object({
   _id: z.string(),

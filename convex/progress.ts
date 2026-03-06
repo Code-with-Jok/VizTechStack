@@ -31,7 +31,7 @@ export const getUserProgress = query({
     return await ctx.db
       .query("progress")
       .withIndex("by_user_roadmap", (q) =>
-        q.eq("userId", userId).eq("roadmapId", args.roadmapId)
+        q.eq("userId", userId).eq("roadmapId", args.roadmapId),
       )
       .collect();
   },
@@ -44,7 +44,7 @@ export const updateProgress = mutation({
     status: v.union(
       v.literal("done"),
       v.literal("in-progress"),
-      v.literal("skipped")
+      v.literal("skipped"),
     ),
   },
   handler: async (ctx, args) => {
@@ -76,7 +76,7 @@ export const updateProgress = mutation({
         q
           .eq("userId", userId)
           .eq("roadmapId", args.roadmapId)
-          .eq("nodeId", args.nodeId)
+          .eq("nodeId", args.nodeId),
       )
       .unique();
 

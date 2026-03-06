@@ -26,16 +26,17 @@ Hệ thống Git Hooks sử dụng **Husky** phối hợp với **Commitlint** v
   - Đảm bảo lịch sử git sạch sẽ, dễ dàng cho việc auto-generate changelog.
 
 ### 3. Integrated Flow Diagram (Flowchart)
+
 ```mermaid
 flowchart TD
     Start([Bắt đầu Commit]) --> TriggerPre[Husky: Trigger pre-commit]
     TriggerPre --> Turbo[Chạy: turbo lint typecheck]
-    
+
     Turbo -- "❌ Có lỗi" --> FailPre[Dừng: Sửa lỗi code trước khi commit]
     Turbo -- "✅ Pass" --> TriggerMsg[Husky: Trigger commit-msg]
-    
+
     TriggerMsg --> CL[Commitlint: Check định dạng message]
-    
+
     CL -- "❌ Sai format" --> FailMsg[Dừng: Sửa message theo chuẩn Conventional]
     CL -- "✅ Đúng format" --> Success([🎉 Hoàn tất: Commit được tạo])
 

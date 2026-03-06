@@ -12,7 +12,10 @@
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen --watch",
+    "codegen:check": "graphql-codegen --dry-run"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.3",

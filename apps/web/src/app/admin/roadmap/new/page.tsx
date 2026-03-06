@@ -53,7 +53,7 @@ export default function NewRoadmapPage() {
           ...formData,
           ...graphData,
         },
-        token
+        token,
       );
 
       router.push("/");
@@ -69,7 +69,7 @@ export default function NewRoadmapPage() {
     (nodes: string, edges: string, count: number) => {
       setGraphData({ nodesJson: nodes, edgesJson: edges, topicCount: count });
     },
-    []
+    [],
   );
 
   return (

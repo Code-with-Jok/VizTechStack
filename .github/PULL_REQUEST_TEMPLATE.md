@@ -49,4 +49,3 @@ Describe exact rollback steps if deploy fails.
 - [ ] I followed `.agents/rules/decision-framework.md`
 - [ ] I followed `.agents/rules/zero-debt-engineering.md`
 - [ ] If architecture changed, I added/updated ADR in `docs/adr/`
-

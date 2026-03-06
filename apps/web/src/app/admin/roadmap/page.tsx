@@ -73,81 +73,80 @@ export default async function AdminRoadmapPage() {
             </div>
           ) : (
             roadmaps.map((r: RoadmapSummary) => (
-                <div
-                  key={r._id}
-                  className="glass-card p-5 rounded-2xl flex items-center justify-between group hover:border-purple-500/50 transition-all duration-300"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 font-bold border border-purple-500/20">
-                      {r.title.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="text-lg font-bold dark:text-zinc-50">
-                          {r.title}
-                        </h3>
-                        <Badge
-                          className={
-                            r.status === "public"
-                              ? "bg-green-500/10 text-green-500 border-green-500/20"
-                              : r.status === "draft"
-                                ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                                : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
-                          }
-                          variant="outline"
-                        >
-                          {r.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-xs text-zinc-500 font-mono">
-                          {r.slug}
-                        </span>
-                        <span className="text-zinc-300 dark:text-zinc-800">
-                          •
-                        </span>
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] h-4 uppercase"
-                        >
-                          {r.category}
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] h-4 uppercase"
-                        >
-                          {r.difficulty}
-                        </Badge>
-                      </div>
-                    </div>
+              <div
+                key={r._id}
+                className="glass-card p-5 rounded-2xl flex items-center justify-between group hover:border-purple-500/50 transition-all duration-300"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 font-bold border border-purple-500/20">
+                    {r.title.charAt(0)}
                   </div>
-
-                  <div className="flex items-center space-x-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <Link href={`/roadmap/${r.slug}`}>
-                      <Button variant="ghost" size="icon" className="h-9 w-9">
-                        <Eye className="h-4 w-4 text-zinc-500" />
-                      </Button>
-                    </Link>
-                    <Link href={`/admin/roadmap/${r.slug}/settings`}>
-                      <Button variant="ghost" size="icon" className="h-9 w-9">
-                        <Settings className="h-4 w-4 text-zinc-500" />
-                      </Button>
-                    </Link>
-                    <div title="Delete unavailable">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 opacity-50 cursor-not-allowed"
-                        disabled
-                        aria-disabled="true"
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-lg font-bold dark:text-zinc-50">
+                        {r.title}
+                      </h3>
+                      <Badge
+                        className={
+                          r.status === "public"
+                            ? "bg-green-500/10 text-green-500 border-green-500/20"
+                            : r.status === "draft"
+                              ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                              : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
+                        }
+                        variant="outline"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        {r.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs text-zinc-500 font-mono">
+                        {r.slug}
+                      </span>
+                      <span className="text-zinc-300 dark:text-zinc-800">
+                        •
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] h-4 uppercase"
+                      >
+                        {r.category}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] h-4 uppercase"
+                      >
+                        {r.difficulty}
+                      </Badge>
                     </div>
                   </div>
                 </div>
-              )
-            )
+
+                <div className="flex items-center space-x-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                  <Link href={`/roadmap/${r.slug}`}>
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Eye className="h-4 w-4 text-zinc-500" />
+                    </Button>
+                  </Link>
+                  <Link href={`/admin/roadmap/${r.slug}/settings`}>
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Settings className="h-4 w-4 text-zinc-500" />
+                    </Button>
+                  </Link>
+                  <div title="Delete unavailable">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 opacity-50 cursor-not-allowed"
+                      disabled
+                      aria-disabled="true"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </main>

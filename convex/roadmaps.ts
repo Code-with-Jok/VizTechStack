@@ -33,12 +33,12 @@ export const createRoadmap = mutation({
     category: v.union(
       v.literal("role"),
       v.literal("skill"),
-      v.literal("best-practice")
+      v.literal("best-practice"),
     ),
     difficulty: v.union(
       v.literal("beginner"),
       v.literal("intermediate"),
-      v.literal("advanced")
+      v.literal("advanced"),
     ),
     topicCount: v.number(),
     nodesJson: v.string(),
@@ -46,7 +46,7 @@ export const createRoadmap = mutation({
     status: v.union(
       v.literal("public"),
       v.literal("draft"),
-      v.literal("private")
+      v.literal("private"),
     ),
   },
   handler: async (ctx, args) => {
@@ -93,7 +93,11 @@ export const createRoadmap = mutation({
 export const list = query({
   args: {
     category: v.optional(
-      v.union(v.literal("role"), v.literal("skill"), v.literal("best-practice"))
+      v.union(
+        v.literal("role"),
+        v.literal("skill"),
+        v.literal("best-practice"),
+      ),
     ),
     paginationOpts: v.optional(paginationOptsValidator),
   },
@@ -203,7 +207,7 @@ export const verifyRoadmapSummaryConsistency = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error(
-        "Unauthenticated call to verifyRoadmapSummaryConsistency"
+        "Unauthenticated call to verifyRoadmapSummaryConsistency",
       );
     }
 
@@ -213,7 +217,7 @@ export const verifyRoadmapSummaryConsistency = query({
     const summaries = await ctx.db.query("roadmapSummaries").collect();
 
     const summaryRoadmapIds = new Set(
-      summaries.map((summary) => String(summary.roadmapId))
+      summaries.map((summary) => String(summary.roadmapId)),
     );
 
     const missingSlugs = roadmaps
@@ -237,7 +241,7 @@ async function paginateRoadmapSummaries(
     category: RoadmapCategory | undefined;
     isAdmin: boolean;
     paginationOpts: PaginationOptions;
-  }
+  },
 ): Promise<PaginationResult<Doc<"roadmapSummaries">>> {
   const { category, isAdmin, paginationOpts } = options;
 
@@ -253,7 +257,7 @@ async function paginateRoadmapSummaries(
     return ctx.db
       .query("roadmapSummaries")
       .withIndex("by_category_status_created_at", (q) =>
-        q.eq("category", category).eq("status", "public")
+        q.eq("category", category).eq("status", "public"),
       )
       .order("desc")
       .paginate(paginationOpts);
@@ -275,7 +279,7 @@ async function paginateRoadmapSummaries(
 }
 
 function mapRoadmapSummary(
-  summary: Doc<"roadmapSummaries">
+  summary: Doc<"roadmapSummaries">,
 ): RoadmapSummaryListItem {
   return {
     _id: summary.roadmapId,

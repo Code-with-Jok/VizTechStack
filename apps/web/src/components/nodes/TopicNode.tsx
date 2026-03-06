@@ -44,7 +44,7 @@ export const TopicNode = memo(
         <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl opacity-0 hover:opacity-10 transition-opacity pointer-events-none" />
       </div>
     );
-  }
+  },
 );
 
 TopicNode.displayName = "TopicNode";
