@@ -17,6 +17,9 @@ import {
   RoadmapStatus,
 } from '../schemas/roadmap.schema';
 
+const MAX_ROADMAPS_PAGE_LIMIT = 100;
+const MIN_ROADMAPS_PAGE_LIMIT = 1;
+
 export function mapRoadmapEntityToGraphql(entity: RoadmapEntity): Roadmap {
   return {
     _id: entity.id,
@@ -78,10 +81,15 @@ export function mapCreateRoadmapInputToCommand(
 export function mapRoadmapPageInputToQuery(
   input?: RoadmapPageInput,
 ): ListRoadmapsQuery {
+  const boundedLimit = Math.max(
+    MIN_ROADMAPS_PAGE_LIMIT,
+    Math.min(input?.limit ?? 24, MAX_ROADMAPS_PAGE_LIMIT),
+  );
+
   return {
     category: mapCategoryInputToDomain(input?.category),
     cursor: input?.cursor ?? null,
-    limit: input?.limit ?? 24,
+    limit: boundedLimit,
   };
 }
 

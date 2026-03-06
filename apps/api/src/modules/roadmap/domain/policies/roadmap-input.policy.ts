@@ -35,9 +35,13 @@ export function validateCreateRoadmapInput(
     );
   }
 
-  if (input.topicCount < 0) {
+  if (
+    !Number.isFinite(input.topicCount) ||
+    !Number.isInteger(input.topicCount) ||
+    input.topicCount < 0
+  ) {
     throw new RoadmapValidationDomainError(
-      'Topic count must be a non-negative number.',
+      'Topic count must be a finite non-negative integer.',
       'createRoadmap',
     );
   }
@@ -55,12 +59,13 @@ export function validateRoadmapSlug(slug: string, operation: string): void {
   }
 }
 
-function assertJsonArray(rawValue: string, fieldName: string): void {
+function assertJsonArray(rawValue: string, fieldName: string): unknown[] {
   try {
     const parsed: unknown = JSON.parse(rawValue);
     if (!Array.isArray(parsed)) {
       throw new Error('Expected JSON array.');
     }
+    return parsed;
   } catch {
     throw new RoadmapValidationDomainError(
       `${fieldName} must be a valid JSON array string.`,

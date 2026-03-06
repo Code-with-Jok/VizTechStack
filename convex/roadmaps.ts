@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import { getRole } from "./_utils";
 
 type RoadmapCategory = "role" | "skill" | "best-practice";
 
@@ -17,20 +18,6 @@ type RoadmapSummaryListItem = {
   topicCount: number;
   status: "public" | "draft" | "private";
 };
-
-function getRole(identity: unknown): string | undefined {
-  if (typeof identity !== "object" || identity === null) {
-    return undefined;
-  }
-
-  const metadata = Reflect.get(identity, "publicMetadata");
-  if (typeof metadata !== "object" || metadata === null) {
-    return undefined;
-  }
-
-  const role = Reflect.get(metadata, "role");
-  return typeof role === "string" ? role : undefined;
-}
 
 function assertAdmin(identity: unknown, operation: string): void {
   if (getRole(identity) !== "admin") {
@@ -215,7 +202,9 @@ export const verifyRoadmapSummaryConsistency = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthenticated call to verifyRoadmapSummaryConsistency");
+      throw new Error(
+        "Unauthenticated call to verifyRoadmapSummaryConsistency"
+      );
     }
 
     assertAdmin(identity, "verifyRoadmapSummaryConsistency");
@@ -248,7 +237,7 @@ async function paginateRoadmapSummaries(
     category: RoadmapCategory | undefined;
     isAdmin: boolean;
     paginationOpts: PaginationOptions;
-  },
+  }
 ): Promise<PaginationResult<Doc<"roadmapSummaries">>> {
   const { category, isAdmin, paginationOpts } = options;
 
@@ -285,7 +274,9 @@ async function paginateRoadmapSummaries(
     .paginate(paginationOpts);
 }
 
-function mapRoadmapSummary(summary: Doc<"roadmapSummaries">): RoadmapSummaryListItem {
+function mapRoadmapSummary(
+  summary: Doc<"roadmapSummaries">
+): RoadmapSummaryListItem {
   return {
     _id: summary.roadmapId,
     slug: summary.slug,

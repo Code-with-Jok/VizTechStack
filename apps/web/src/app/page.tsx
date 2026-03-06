@@ -32,9 +32,9 @@ export default async function Home() {
     console.log({ roadmapsPage });
 
     roadmaps = roadmapsPage.items;
-  } catch {
+  } catch (error) {
     // Keep homepage available even when API is unreachable at build/runtime.
-    console.error("Failed to fetch roadmaps for homepage.");
+    console.error("Failed to fetch roadmaps for homepage.", error);
   }
 
   const { sessionClaims } = await auth();

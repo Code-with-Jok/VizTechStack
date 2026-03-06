@@ -245,6 +245,8 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
         record.difficulty === 'intermediate' ||
         record.difficulty === 'advanced') &&
       typeof record.topicCount === 'number' &&
+      Number.isInteger(record.topicCount) &&
+      record.topicCount >= 0 &&
       (record.status === undefined ||
         record.status === 'public' ||
         record.status === 'draft' ||
@@ -307,6 +309,8 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
       typeof record.nodesJson === 'string' &&
       typeof record.edgesJson === 'string' &&
       typeof record.topicCount === 'number' &&
+      Number.isInteger(record.topicCount) &&
+      record.topicCount >= 0 &&
       (record.status === undefined ||
         record.status === 'public' ||
         record.status === 'draft' ||
