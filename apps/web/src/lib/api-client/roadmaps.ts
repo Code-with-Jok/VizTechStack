@@ -13,6 +13,7 @@ import {
 import {
   executeClientGraphql,
   executeServerGraphql,
+  GraphqlRequestError,
 } from './graphql-client';
 
 const GET_ROADMAPS_PAGE_QUERY = `
@@ -30,6 +31,21 @@ const GET_ROADMAPS_PAGE_QUERY = `
       }
       nextCursor
       hasMore
+    }
+  }
+`;
+
+const GET_ROADMAPS_LEGACY_QUERY = `
+  query GetRoadmapsLegacy {
+    getRoadmaps {
+      _id
+      slug
+      title
+      description
+      category
+      difficulty
+      topicCount
+      status
     }
   }
 `;
@@ -59,6 +75,10 @@ const CREATE_ROADMAP_MUTATION = `
 
 interface GetRoadmapsPageResponse {
   getRoadmapsPage: unknown;
+}
+
+interface GetRoadmapsLegacyResponse {
+  getRoadmaps: unknown;
 }
 
 interface GetRoadmapBySlugResponse {
@@ -111,30 +131,64 @@ export async function getRoadmapsPageServer(
     limit: options.limit,
   });
 
-  const response = await executeServerGraphql<
-    GetRoadmapsPageResponse,
-    GetRoadmapsPageVariables
-  >({
-    query: GET_ROADMAPS_PAGE_QUERY,
-    variables: {
-      input: {
-        category: mapCategoryToGraphql(input.category),
-        cursor: input.cursor ?? null,
-        limit: input.limit,
+  try {
+    const response = await executeServerGraphql<
+      GetRoadmapsPageResponse,
+      GetRoadmapsPageVariables
+    >({
+      query: GET_ROADMAPS_PAGE_QUERY,
+      variables: {
+        input: {
+          category: mapCategoryToGraphql(input.category),
+          cursor: input.cursor ?? null,
+          limit: input.limit,
+        },
       },
-    },
-    token: options.token,
-    cache: options.cache,
-    next:
-      options.revalidate !== undefined || options.tags !== undefined
-        ? {
-            revalidate: options.revalidate,
-            tags: options.tags,
-          }
-        : undefined,
-  });
+      token: options.token,
+      cache: options.cache,
+      next:
+        options.revalidate !== undefined || options.tags !== undefined
+          ? {
+              revalidate: options.revalidate,
+              tags: options.tags,
+            }
+          : undefined,
+    });
 
-  return RoadmapPageSchema.parse(normalizeRoadmapPageResponse(response.getRoadmapsPage));
+    return RoadmapPageSchema.parse(
+      normalizeRoadmapPageResponse(response.getRoadmapsPage),
+    );
+  } catch (error) {
+    if (!(error instanceof GraphqlRequestError)) {
+      throw error;
+    }
+
+    const legacyResponse = await executeServerGraphql<
+      GetRoadmapsLegacyResponse,
+      undefined
+    >({
+      query: GET_ROADMAPS_LEGACY_QUERY,
+      token: options.token,
+      cache: options.cache,
+      next:
+        options.revalidate !== undefined || options.tags !== undefined
+          ? {
+              revalidate: options.revalidate,
+              tags: options.tags,
+            }
+          : undefined,
+    });
+
+    const normalizedItems = Array.isArray(legacyResponse.getRoadmaps)
+      ? legacyResponse.getRoadmaps.map((item) => normalizeRoadmapRecord(item))
+      : legacyResponse.getRoadmaps;
+
+    return RoadmapPageSchema.parse({
+      items: normalizedItems,
+      nextCursor: null,
+      hasMore: false,
+    });
+  }
 }
 
 export async function getRoadmapBySlugServer(
