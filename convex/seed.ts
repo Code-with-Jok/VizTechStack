@@ -1,19 +1,6 @@
 import { mutation } from "./_generated/server";
 import type { RegisteredMutation } from "convex/server";
-
-function getRole(identity: unknown): string | undefined {
-  if (typeof identity !== "object" || identity === null) {
-    return undefined;
-  }
-
-  const metadata = Reflect.get(identity, "publicMetadata");
-  if (typeof metadata !== "object" || metadata === null) {
-    return undefined;
-  }
-
-  const role = Reflect.get(metadata, "role");
-  return typeof role === "string" ? role : undefined;
-}
+import { getRole } from "./_utils";
 
 export const seed: RegisteredMutation<
   "public",

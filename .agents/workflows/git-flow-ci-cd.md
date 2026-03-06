@@ -1,5 +1,5 @@
 ---
-description:
+description: CI/CD workflow for Git Flow-based branch management and deployment
 ---
 
 # Git Flow and CI/CD Workflow
@@ -33,7 +33,6 @@ Agent must also run before PR:
 2. `pnpm turbo build --filter='./packages/**'`
 3. `pnpm turbo build --filter='./apps/**'`
 4. `pnpm turbo build`
-5. `pnpm turbo start`
 
 ## 3) CI Stages (Pull Request)
 

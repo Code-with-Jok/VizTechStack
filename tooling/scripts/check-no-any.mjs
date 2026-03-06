@@ -1,34 +1,34 @@
-import { readdir, readFile } from 'node:fs/promises';
-import path from 'node:path';
-import process from 'node:process';
-import ts from 'typescript';
+import { readdir, readFile, stat } from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+import ts from "typescript";
 
 const projectRoot = process.cwd();
 
 const includeRoots = [
-  'apps/api/src',
-  'apps/web/src',
-  'convex',
-  'packages/shared/types/src',
-  'tooling/env/src',
+  "apps/api/src",
+  "apps/web/src",
+  "convex",
+  "packages/shared/types/src",
+  "tooling/env/src",
 ];
 
 const ignoredDirs = new Set([
-  'node_modules',
-  'dist',
-  '.next',
-  'out',
-  'coverage',
-  '.turbo',
-  '_generated',
+  "node_modules",
+  "dist",
+  ".next",
+  "out",
+  "coverage",
+  ".turbo",
+  "_generated",
 ]);
 
 const issues = [];
 
 function isTypeScriptFile(filePath) {
   return (
-    (filePath.endsWith('.ts') || filePath.endsWith('.tsx')) &&
-    !filePath.endsWith('.d.ts')
+    (filePath.endsWith(".ts") || filePath.endsWith(".tsx")) &&
+    !filePath.endsWith(".d.ts")
   );
 }
 
@@ -37,7 +37,7 @@ async function walkDir(relativeDir) {
   const entries = await readdir(absoluteDir, { withFileTypes: true });
 
   for (const entry of entries) {
-    if (entry.name.startsWith('.')) {
+    if (entry.name.startsWith(".")) {
       continue;
     }
 
@@ -78,8 +78,8 @@ function findAnyKeywords(sourceFile) {
 
 async function inspectFile(relativePath) {
   const absolutePath = path.join(projectRoot, relativePath);
-  const content = await readFile(absolutePath, 'utf8');
-  const scriptKind = relativePath.endsWith('.tsx')
+  const content = await readFile(absolutePath, "utf8");
+  const scriptKind = relativePath.endsWith(".tsx")
     ? ts.ScriptKind.TSX
     : ts.ScriptKind.TS;
 
@@ -96,18 +96,31 @@ async function inspectFile(relativePath) {
 
 async function main() {
   for (const root of includeRoots) {
+    const absoluteRoot = path.join(projectRoot, root);
+    try {
+      const dirStat = await stat(absoluteRoot);
+      if (!dirStat.isDirectory()) {
+        console.warn(`check-no-any: skipping '${root}' (not a directory).`);
+        continue;
+      }
+    } catch {
+      console.warn(`check-no-any: skipping '${root}' (does not exist).`);
+      continue;
+    }
     await walkDir(root);
   }
 
   if (issues.length > 0) {
-    console.error('Found explicit `any` usage in the following locations:');
+    console.error("Found explicit `any` usage in the following locations:");
     for (const issue of issues) {
       console.error(`- ${issue.file}:${issue.line}:${issue.column}`);
     }
     process.exit(1);
   }
 
-  console.log('No explicit `any` keyword usage found in guarded source directories.');
+  console.log(
+    "No explicit `any` keyword usage found in guarded source directories."
+  );
 }
 
 main().catch((error) => {

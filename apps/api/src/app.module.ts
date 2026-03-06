@@ -10,13 +10,11 @@ import { RoadmapModule } from './modules/roadmap/roadmap.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath:
-        process.env.NODE_ENV === 'production'
-          ? undefined
-          : ['.env.local', '.env'],
-    }),
+    ConfigModule.forRoot(
+      process.env.NODE_ENV === 'production'
+        ? { isGlobal: true, ignoreEnvFile: true }
+        : { isGlobal: true, envFilePath: ['.env.local', '.env'] },
+    ),
     ConvexModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

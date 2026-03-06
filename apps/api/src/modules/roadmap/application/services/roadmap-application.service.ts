@@ -61,13 +61,15 @@ export class RoadmapApplicationService {
   }
 
   async createRoadmap(command: CreateRoadmapCommand): Promise<string> {
-    validateCreateRoadmapInput(command);
-
-    return this.roadmapRepository.createRoadmap({
+    const normalizedCommand: CreateRoadmapCommand = {
       ...command,
       slug: command.slug.trim(),
       title: command.title.trim(),
       description: command.description.trim(),
-    });
+    };
+
+    validateCreateRoadmapInput(normalizedCommand);
+
+    return this.roadmapRepository.createRoadmap(normalizedCommand);
   }
 }

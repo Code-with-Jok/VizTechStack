@@ -11,7 +11,22 @@ export const getUserProgress = query({
     if (!identity) {
       throw new Error("Unauthenticated call to getUserProgress");
     }
-    const userId = identity.subject as Id<"users">;
+
+    const email = identity.email;
+    if (!email) {
+      throw new Error("Identity does not have an email address");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (!user) {
+      throw new Error(`User not found for email: ${email}`);
+    }
+
+    const userId: Id<"users"> = user._id;
 
     return await ctx.db
       .query("progress")
@@ -37,7 +52,22 @@ export const updateProgress = mutation({
     if (!identity) {
       throw new Error("Unauthenticated call to updateProgress");
     }
-    const userId = identity.subject as Id<"users">;
+
+    const email = identity.email;
+    if (!email) {
+      throw new Error("Identity does not have an email address");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (!user) {
+      throw new Error(`User not found for email: ${email}`);
+    }
+
+    const userId: Id<"users"> = user._id;
 
     // Tìm progress hiện có bằng composite index mới
     const existing = await ctx.db

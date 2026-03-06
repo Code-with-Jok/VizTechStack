@@ -49,9 +49,7 @@ export class ClerkAuthGuard implements CanActivate {
         );
         this.hasLoggedMissingSecret = true;
       }
-      throw new UnauthorizedException(
-        'Auth is misconfigured: CLERK_SECRET_KEY is required for protected operations.',
-      );
+      throw new UnauthorizedException('Authentication is unavailable.');
     }
 
     const ctx = GqlExecutionContext.create(context);
