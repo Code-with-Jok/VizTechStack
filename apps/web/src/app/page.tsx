@@ -1,5 +1,6 @@
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import type { RoadmapSummary } from "@viztechstack/types";
 import Link from "next/link";
 import {
   Card,
@@ -10,63 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck } from "lucide-react";
-
-const GET_ROADMAPS = `
-  query GetRoadmaps {
-    getRoadmaps {
-      _id
-      slug
-      title
-      description
-      category
-      difficulty
-      topicCount
-    }
-  }
-`;
-
-async function fetchRoadmaps() {
-  const { getToken } = await auth();
-  const token = await getToken();
-
-  try {
-    const graphqlUrl = process.env.GRAPHQL_URL;
-    if (!graphqlUrl && process.env.NODE_ENV === "production") {
-      throw new Error(
-        "GRAPHQL_URL environment variable is required in production"
-      );
-    }
-
-    const finalUrl = graphqlUrl || "http://localhost:4000/graphql";
-
-    const res = await fetch(finalUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ query: GET_ROADMAPS }),
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-    }
-
-    const json = await res.json();
-
-    if (json.errors) {
-      throw new Error(
-        `GraphQL Errors: ${json.errors.map((e: { message: string }) => e.message).join(", ")}`
-      );
-    }
-
-    return json?.data?.getRoadmaps || [];
-  } catch (error) {
-    console.error("Error fetching roadmaps:", error);
-    throw error;
-  }
-}
+import { getRoadmapsPageServer } from "@/lib/api-client/roadmaps";
 
 interface ClerkSessionClaims {
   metadata?: {
@@ -75,7 +20,23 @@ interface ClerkSessionClaims {
 }
 
 export default async function Home() {
-  const roadmaps = await fetchRoadmaps();
+  let roadmaps: RoadmapSummary[] = [];
+
+  try {
+    const roadmapsPage = await getRoadmapsPageServer({
+      limit: 24,
+      cache: "force-cache",
+      revalidate: 120,
+      tags: ["roadmaps-public"],
+    });
+    console.log({ roadmapsPage });
+
+    roadmaps = roadmapsPage.items;
+  } catch {
+    // Keep homepage available even when API is unreachable at build/runtime.
+    console.error("Failed to fetch roadmaps for homepage.");
+  }
+
   const { sessionClaims } = await auth();
 
   const claims = sessionClaims as ClerkSessionClaims | null;
@@ -136,35 +97,26 @@ export default async function Home() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {roadmaps.map(
-              (r: {
-                _id: string;
-                slug: string;
-                title: string;
-                description: string;
-                category: string;
-                difficulty: string;
-              }) => (
-                <Link key={r._id} href={`/roadmap/${r.slug}`}>
-                  <Card className="h-full transition-all hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer flex flex-col">
-                    <CardHeader>
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant="secondary" className="capitalize">
-                          {r.category || "Role"}
-                        </Badge>
-                        <Badge variant="outline" className="capitalize text-xs">
-                          {r.difficulty || "Beginner"}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-xl">{r.title}</CardTitle>
-                      <CardDescription className="line-clamp-2 mt-2">
-                        {r.description}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              )
-            )}
+            {roadmaps.map((r: RoadmapSummary) => (
+              <Link key={r._id} href={`/roadmap/${r.slug}`}>
+                <Card className="h-full transition-all hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer flex flex-col">
+                  <CardHeader>
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant="secondary" className="capitalize">
+                        {r.category || "Role"}
+                      </Badge>
+                      <Badge variant="outline" className="capitalize text-xs">
+                        {r.difficulty || "Beginner"}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-xl">{r.title}</CardTitle>
+                    <CardDescription className="line-clamp-2 mt-2">
+                      {r.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
           </div>
         )}
       </main>

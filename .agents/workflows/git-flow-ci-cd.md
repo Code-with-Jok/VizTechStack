@@ -1,3 +1,7 @@
+---
+description:
+---
+
 # Git Flow and CI/CD Workflow
 
 This workflow applies to all code changes from branch creation to production.
@@ -28,6 +32,8 @@ Agent must also run before PR:
 1. `pnpm turbo test --filter='./apps/**'`
 2. `pnpm turbo build --filter='./packages/**'`
 3. `pnpm turbo build --filter='./apps/**'`
+4. `pnpm turbo build`
+5. `pnpm turbo start`
 
 ## 3) CI Stages (Pull Request)
 

@@ -1,12 +1,30 @@
 import { mutation } from "./_generated/server";
-import { RegisteredMutation } from "convex/server";
+import type { RegisteredMutation } from "convex/server";
 
-export const seed: RegisteredMutation<"public", any, any> = mutation({
+function getRole(identity: unknown): string | undefined {
+  if (typeof identity !== "object" || identity === null) {
+    return undefined;
+  }
+
+  const metadata = Reflect.get(identity, "publicMetadata");
+  if (typeof metadata !== "object" || metadata === null) {
+    return undefined;
+  }
+
+  const role = Reflect.get(metadata, "role");
+  return typeof role === "string" ? role : undefined;
+}
+
+export const seed: RegisteredMutation<
+  "public",
+  Record<string, never>,
+  Promise<string>
+> = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthenticated call to seed");
 
-    const role = (identity as any).publicMetadata?.role;
+    const role = getRole(identity);
     if (role !== "admin") {
       throw new Error("Unauthorized: Only admins can seed data");
     }
@@ -55,7 +73,22 @@ export const seed: RegisteredMutation<"public", any, any> = mutation({
     }
 
     for (const roadmap of defaultRoadmaps) {
-      await ctx.db.insert("roadmaps", roadmap);
+      const createdAt = Date.now();
+      const roadmapId = await ctx.db.insert("roadmaps", {
+        ...roadmap,
+        createdAt,
+      });
+      await ctx.db.insert("roadmapSummaries", {
+        roadmapId,
+        slug: roadmap.slug,
+        title: roadmap.title,
+        description: roadmap.description,
+        category: roadmap.category,
+        difficulty: roadmap.difficulty,
+        topicCount: roadmap.topicCount,
+        status: roadmap.status,
+        createdAt,
+      });
     }
 
     return "Seeded 3 roadmaps successfully!";

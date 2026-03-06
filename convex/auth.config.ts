@@ -1,9 +1,11 @@
-import { serverEnv } from "@viztechstack/env/server";
+const fallbackIssuerDomain = "https://dummy.clerk.accounts.dev";
+const issuerDomain =
+  process.env.CLERK_JWT_ISSUER_DOMAIN ?? fallbackIssuerDomain;
 
 export default {
   providers: [
     {
-      domain: serverEnv.CLERK_JWT_ISSUER_DOMAIN,
+      domain: issuerDomain,
       applicationID: "convex",
     },
   ],

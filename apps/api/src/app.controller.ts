@@ -2,7 +2,7 @@ import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConvexService } from './common/convex/convex.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { api } from '../../../convex/_generated/api';
+import { api } from '@viztechstack/convex';
 
 @Controller()
 export class AppController {
@@ -29,10 +29,7 @@ export class AppController {
     }
 
     try {
-      const result = (await this.convex.client.mutation(
-        api.seed.seed,
-        {},
-      )) as string;
+      const result = await this.convex.client.mutation(api.seed.seed, {});
       return { success: true, message: result };
     } catch (error) {
       const errorMessage =

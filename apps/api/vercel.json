@@ -1,5 +1,5 @@
 {
   "version": 2,
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @viztechstack/api build"
+  "buildCommand": "pnpm turbo build --filter=@viztechstack/api..."
 }

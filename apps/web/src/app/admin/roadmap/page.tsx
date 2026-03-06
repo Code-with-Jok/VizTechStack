@@ -1,71 +1,21 @@
 import { auth } from "@clerk/nextjs/server";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import type { RoadmapSummary } from "@viztechstack/types";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Settings, Eye, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-const GET_ROADMAPS = `
-  query GetRoadmaps {
-    getRoadmaps {
-      _id
-      slug
-      title
-      category
-      difficulty
-      topicCount
-      status
-    }
-  }
-`;
-
-async function fetchRoadmaps() {
-  const { getToken } = await auth();
-  const token = await getToken();
-
-  try {
-    const graphqlUrl = process.env.GRAPHQL_URL;
-    if (!graphqlUrl) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("GRAPHQL_URL missing, falling back to localhost");
-      } else {
-        throw new Error("GRAPHQL_URL environment variable is required");
-      }
-    }
-
-    const finalUrl = graphqlUrl || "http://localhost:4000/graphql";
-
-    const res = await fetch(finalUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ query: GET_ROADMAPS }),
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-    }
-
-    const json = await res.json();
-
-    if (json.errors) {
-      throw new Error(
-        `GraphQL Errors: ${json.errors.map((e: { message: string }) => e.message).join(", ")}`
-      );
-    }
-
-    return json?.data?.getRoadmaps || [];
-  } catch (error) {
-    console.error("Error fetching roadmaps:", error);
-    throw error;
-  }
-}
+import { getRoadmapsPageServer } from "@/lib/api-client/roadmaps";
 
 export default async function AdminRoadmapPage() {
-  const roadmaps = await fetchRoadmaps();
+  const { getToken } = await auth();
+  const token = await getToken();
+  const roadmapsPage = await getRoadmapsPageServer({
+    token: token ?? undefined,
+    cache: "no-store",
+    limit: 100,
+  });
+  const roadmaps = roadmapsPage.items;
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
@@ -122,15 +72,7 @@ export default async function AdminRoadmapPage() {
               hoặc chạy script Seed.
             </div>
           ) : (
-            roadmaps.map(
-              (r: {
-                _id: string;
-                title: string;
-                slug: string;
-                category: string;
-                difficulty: string;
-                status: string;
-              }) => (
+            roadmaps.map((r: RoadmapSummary) => (
                 <div
                   key={r._id}
                   className="glass-card p-5 rounded-2xl flex items-center justify-between group hover:border-purple-500/50 transition-all duration-300"

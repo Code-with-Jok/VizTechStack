@@ -1,5 +1,42 @@
-import { mutation, query } from "./_generated/server";
+import type { PaginationOptions, PaginationResult } from "convex/server";
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+
+type RoadmapCategory = "role" | "skill" | "best-practice";
+
+type RoadmapSummaryListItem = {
+  _id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: RoadmapCategory;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  topicCount: number;
+  status: "public" | "draft" | "private";
+};
+
+function getRole(identity: unknown): string | undefined {
+  if (typeof identity !== "object" || identity === null) {
+    return undefined;
+  }
+
+  const metadata = Reflect.get(identity, "publicMetadata");
+  if (typeof metadata !== "object" || metadata === null) {
+    return undefined;
+  }
+
+  const role = Reflect.get(metadata, "role");
+  return typeof role === "string" ? role : undefined;
+}
+
+function assertAdmin(identity: unknown, operation: string): void {
+  if (getRole(identity) !== "admin") {
+    throw new Error(`Unauthorized: admin role is required for ${operation}.`);
+  }
+}
 
 export const createRoadmap = mutation({
   args: {
@@ -31,13 +68,8 @@ export const createRoadmap = mutation({
       throw new Error("Unauthenticated call to createRoadmap");
     }
 
-    // Role check: Only admin can create
-    const role = (identity as any).publicMetadata?.role;
-    if (role !== "admin") {
-      throw new Error("Unauthorized: Only admins can manage roadmaps.");
-    }
+    assertAdmin(identity, "createRoadmap");
 
-    // Check for duplicate slug
     const existing = await ctx.db
       .query("roadmaps")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
@@ -47,10 +79,26 @@ export const createRoadmap = mutation({
       throw new Error(`Roadmap with slug '${args.slug}' already exists.`);
     }
 
+    const createdAt = Date.now();
+
     const roadmapId = await ctx.db.insert("roadmaps", {
       ...args,
       userId: identity.subject,
+      createdAt,
     });
+
+    await ctx.db.insert("roadmapSummaries", {
+      roadmapId,
+      slug: args.slug,
+      title: args.title,
+      description: args.description,
+      category: args.category,
+      difficulty: args.difficulty,
+      topicCount: args.topicCount,
+      status: args.status,
+      createdAt,
+    });
+
     return roadmapId;
   },
 });
@@ -60,41 +108,29 @@ export const list = query({
     category: v.optional(
       v.union(v.literal("role"), v.literal("skill"), v.literal("best-practice"))
     ),
+    paginationOpts: v.optional(paginationOptsValidator),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    const role = (identity as any)?.publicMetadata?.role;
-    const isAdmin = role === "admin";
+    const isAdmin = getRole(identity) === "admin";
+    const paginationOpts = args.paginationOpts ?? {
+      numItems: 24,
+      cursor: null,
+    };
 
-    let results;
-    if (args.category !== undefined) {
-      if (isAdmin) {
-        results = await ctx.db
-          .query("roadmaps")
-          .withIndex("by_category", (q) =>
-            q.eq("category", args.category as any)
-          )
-          .collect();
-      } else {
-        results = await ctx.db
-          .query("roadmaps")
-          .withIndex("by_category_status", (q) =>
-            q.eq("category", args.category as any).eq("status", "public")
-          )
-          .collect();
-      }
-    } else {
-      if (isAdmin) {
-        results = await ctx.db.query("roadmaps").collect();
-      } else {
-        results = await ctx.db
-          .query("roadmaps")
-          .withIndex("by_status", (q) => q.eq("status", "public"))
-          .collect();
-      }
-    }
+    const paginated = await paginateRoadmapSummaries(ctx, {
+      category: args.category,
+      isAdmin,
+      paginationOpts,
+    });
 
-    return results;
+    return {
+      page: paginated.page.map((summary) => mapRoadmapSummary(summary)),
+      continueCursor: paginated.continueCursor,
+      isDone: paginated.isDone,
+      splitCursor: paginated.splitCursor,
+      pageStatus: paginated.pageStatus,
+    };
   },
 });
 
@@ -111,9 +147,153 @@ export const getBySlug = query({
     if (roadmap.status === "public") return roadmap;
 
     const identity = await ctx.auth.getUserIdentity();
-    const role = (identity as any)?.publicMetadata?.role;
-    if (role === "admin") return roadmap;
+    if (getRole(identity) === "admin") return roadmap;
 
-    return null; // Restricted
+    return null;
   },
 });
+
+export const backfillRoadmapSummaries = mutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated call to backfillRoadmapSummaries");
+    }
+
+    assertAdmin(identity, "backfillRoadmapSummaries");
+
+    const roadmaps = await ctx.db.query("roadmaps").collect();
+    const summariesBefore = await ctx.db.query("roadmapSummaries").collect();
+
+    let inserted = 0;
+
+    for (const roadmap of roadmaps) {
+      const existingSummary = await ctx.db
+        .query("roadmapSummaries")
+        .withIndex("by_roadmap_id", (q) => q.eq("roadmapId", roadmap._id))
+        .unique();
+
+      if (existingSummary) {
+        continue;
+      }
+
+      inserted += 1;
+
+      if (args.dryRun) {
+        continue;
+      }
+
+      await ctx.db.insert("roadmapSummaries", {
+        roadmapId: roadmap._id,
+        slug: roadmap.slug,
+        title: roadmap.title,
+        description: roadmap.description,
+        category: roadmap.category,
+        difficulty: roadmap.difficulty,
+        topicCount: roadmap.topicCount,
+        status: roadmap.status,
+        createdAt: roadmap.createdAt ?? roadmap._creationTime,
+      });
+    }
+
+    return {
+      roadmapCount: roadmaps.length,
+      summaryCountBefore: summariesBefore.length,
+      inserted,
+      dryRun: args.dryRun ?? false,
+    };
+  },
+});
+
+export const verifyRoadmapSummaryConsistency = query({
+  args: {
+    sampleSize: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated call to verifyRoadmapSummaryConsistency");
+    }
+
+    assertAdmin(identity, "verifyRoadmapSummaryConsistency");
+
+    const roadmaps = await ctx.db.query("roadmaps").collect();
+    const summaries = await ctx.db.query("roadmapSummaries").collect();
+
+    const summaryRoadmapIds = new Set(
+      summaries.map((summary) => String(summary.roadmapId))
+    );
+
+    const missingSlugs = roadmaps
+      .filter((roadmap) => !summaryRoadmapIds.has(String(roadmap._id)))
+      .map((roadmap) => roadmap.slug);
+
+    const sampleSize = Math.max(1, Math.floor(args.sampleSize ?? 10));
+
+    return {
+      roadmapCount: roadmaps.length,
+      summaryCount: summaries.length,
+      missingCount: missingSlugs.length,
+      missingSlugs: missingSlugs.slice(0, sampleSize),
+    };
+  },
+});
+
+async function paginateRoadmapSummaries(
+  ctx: QueryCtx,
+  options: {
+    category: RoadmapCategory | undefined;
+    isAdmin: boolean;
+    paginationOpts: PaginationOptions;
+  },
+): Promise<PaginationResult<Doc<"roadmapSummaries">>> {
+  const { category, isAdmin, paginationOpts } = options;
+
+  if (category) {
+    if (isAdmin) {
+      return ctx.db
+        .query("roadmapSummaries")
+        .withIndex("by_category_created_at", (q) => q.eq("category", category))
+        .order("desc")
+        .paginate(paginationOpts);
+    }
+
+    return ctx.db
+      .query("roadmapSummaries")
+      .withIndex("by_category_status_created_at", (q) =>
+        q.eq("category", category).eq("status", "public")
+      )
+      .order("desc")
+      .paginate(paginationOpts);
+  }
+
+  if (isAdmin) {
+    return ctx.db
+      .query("roadmapSummaries")
+      .withIndex("by_created_at")
+      .order("desc")
+      .paginate(paginationOpts);
+  }
+
+  return ctx.db
+    .query("roadmapSummaries")
+    .withIndex("by_status_created_at", (q) => q.eq("status", "public"))
+    .order("desc")
+    .paginate(paginationOpts);
+}
+
+function mapRoadmapSummary(summary: Doc<"roadmapSummaries">): RoadmapSummaryListItem {
+  return {
+    _id: summary.roadmapId,
+    slug: summary.slug,
+    title: summary.title,
+    description: summary.description,
+    category: summary.category,
+    difficulty: summary.difficulty,
+    topicCount: summary.topicCount,
+    status: summary.status,
+  };
+}

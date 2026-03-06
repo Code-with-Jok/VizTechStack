@@ -21,6 +21,7 @@ export default defineSchema({
     edgesJson: v.string(), // JSON string chứa connections giữa nodes
     topicCount: v.number(),
     userId: v.optional(v.string()), // Optional for seeded data
+    createdAt: v.optional(v.number()),
     status: v.union(
       v.literal("public"),
       v.literal("draft"),
@@ -31,6 +32,36 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_status", ["status"])
     .index("by_category_status", ["category", "status"]),
+
+  roadmapSummaries: defineTable({
+    roadmapId: v.id("roadmaps"),
+    slug: v.string(),
+    title: v.string(),
+    description: v.string(),
+    category: v.union(
+      v.literal("role"),
+      v.literal("skill"),
+      v.literal("best-practice")
+    ),
+    difficulty: v.union(
+      v.literal("beginner"),
+      v.literal("intermediate"),
+      v.literal("advanced")
+    ),
+    topicCount: v.number(),
+    createdAt: v.number(),
+    status: v.union(
+      v.literal("public"),
+      v.literal("draft"),
+      v.literal("private")
+    ),
+  })
+    .index("by_roadmap_id", ["roadmapId"])
+    .index("by_slug", ["slug"])
+    .index("by_created_at", ["createdAt"])
+    .index("by_status_created_at", ["status", "createdAt"])
+    .index("by_category_created_at", ["category", "createdAt"])
+    .index("by_category_status_created_at", ["category", "status", "createdAt"]),
 
   // Topics: nội dung chi tiết của mỗi node trong roadmap
   topics: defineTable({

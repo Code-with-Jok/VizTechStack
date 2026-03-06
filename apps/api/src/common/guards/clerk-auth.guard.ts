@@ -28,12 +28,9 @@ interface RequestWithUser {
 export class ClerkAuthGuard implements CanActivate {
   private readonly logger = new Logger(ClerkAuthGuard.name);
   private readonly secretKey = process.env.CLERK_SECRET_KEY;
+  private hasLoggedMissingSecret = false;
 
-  constructor(private reflector: Reflector) {
-    if (!this.secretKey) {
-      throw new Error('CLERK_SECRET_KEY environment variable is required');
-    }
-  }
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -43,6 +40,18 @@ export class ClerkAuthGuard implements CanActivate {
 
     if (isPublic) {
       return true;
+    }
+
+    if (!this.secretKey) {
+      if (!this.hasLoggedMissingSecret) {
+        this.logger.error(
+          'CLERK_SECRET_KEY is missing. Protected GraphQL operations are unavailable.',
+        );
+        this.hasLoggedMissingSecret = true;
+      }
+      throw new UnauthorizedException(
+        'Auth is misconfigured: CLERK_SECRET_KEY is required for protected operations.',
+      );
     }
 
     const ctx = GqlExecutionContext.create(context);

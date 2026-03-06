@@ -3,9 +3,18 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConvexService } from './common/convex/convex.service';
 
+interface MockConvexClient {
+  mutation: jest.Mock;
+  query: jest.Mock;
+}
+
+interface MockConvexService {
+  client: MockConvexClient;
+}
+
 describe('AppController', () => {
   let appController: AppController;
-  let mockConvexService: Record<string, any>;
+  let mockConvexService: MockConvexService;
 
   beforeEach(async () => {
     mockConvexService = {
