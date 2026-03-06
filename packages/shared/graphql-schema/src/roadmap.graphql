@@ -1,0 +1,64 @@
+enum RoadmapCategory {
+  ROLE
+  SKILL
+  BEST_PRACTICE
+}
+
+enum RoadmapDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum RoadmapStatus {
+  PUBLIC
+  DRAFT
+  PRIVATE
+}
+
+type Roadmap {
+  _id: ID!
+  slug: String!
+  title: String!
+  description: String!
+  category: RoadmapCategory!
+  difficulty: RoadmapDifficulty!
+  topicCount: Int!
+  status: RoadmapStatus!
+  nodesJson: String
+  edgesJson: String
+}
+
+type RoadmapPage {
+  items: [Roadmap!]!
+  nextCursor: String
+  hasMore: Boolean!
+}
+
+input RoadmapPageInput {
+  category: RoadmapCategory
+  cursor: String
+  limit: Int
+}
+
+type Query {
+  getRoadmaps(category: RoadmapCategory): [Roadmap!]!
+  getRoadmapsPage(input: RoadmapPageInput): RoadmapPage!
+  getRoadmapBySlug(slug: String!): Roadmap
+}
+
+input CreateRoadmapInput {
+  slug: String!
+  title: String!
+  description: String!
+  category: RoadmapCategory!
+  difficulty: RoadmapDifficulty!
+  topicCount: Int!
+  nodesJson: String
+  edgesJson: String
+  status: RoadmapStatus
+}
+
+type Mutation {
+  createRoadmap(input: CreateRoadmapInput!): ID!
+}
