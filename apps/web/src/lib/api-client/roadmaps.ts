@@ -18,9 +18,9 @@ import {
 
 const GET_ROADMAPS_PAGE_QUERY = `
   query GetRoadmapsPage($input: RoadmapPageInput) {
-    getRoadmapsPage(input: $input) {
+    listRoadmaps(input: $input) {
       items {
-        _id
+        id
         slug
         title
         description
@@ -30,22 +30,25 @@ const GET_ROADMAPS_PAGE_QUERY = `
         status
       }
       nextCursor
-      hasMore
+      isDone
     }
   }
 `;
 
 const GET_ROADMAPS_LEGACY_QUERY = `
   query GetRoadmapsLegacy {
-    getRoadmaps {
-      _id
-      slug
-      title
-      description
-      category
-      difficulty
-      topicCount
-      status
+    listRoadmaps(input: {limit: 100}) {
+      items {
+        id
+        slug
+        title
+        description
+        category
+        difficulty
+        topicCount
+        status
+      }
+      isDone
     }
   }
 `;
@@ -53,7 +56,7 @@ const GET_ROADMAPS_LEGACY_QUERY = `
 const GET_ROADMAP_BY_SLUG_QUERY = `
   query GetRoadmapBySlug($slug: String!) {
     getRoadmapBySlug(slug: $slug) {
-      _id
+      id
       slug
       title
       description
@@ -61,24 +64,57 @@ const GET_ROADMAP_BY_SLUG_QUERY = `
       difficulty
       topicCount
       status
-      nodesJson
-      edgesJson
+      nodes {
+        id
+        type
+        position {
+          x
+          y
+        }
+        data {
+          label
+          topicId
+          isReusedSkillNode
+          originalRoadmapId
+        }
+      }
+      edges {
+        id
+        source
+        target
+        type
+      }
     }
   }
 `;
 
 const CREATE_ROADMAP_MUTATION = `
   mutation CreateRoadmap($input: CreateRoadmapInput!) {
-    createRoadmap(input: $input)
+    createRoadmap(input: $input) {
+      id
+      slug
+      title
+      description
+      category
+      difficulty
+      topicCount
+      status
+    }
+  }
+`;
+
+const DELETE_ROADMAP_MUTATION = `
+  mutation DeleteRoadmap($id: ID!) {
+    deleteRoadmap(id: $id)
   }
 `;
 
 interface GetRoadmapsPageResponse {
-  getRoadmapsPage: unknown;
+  listRoadmaps: unknown;
 }
 
 interface GetRoadmapsLegacyResponse {
-  getRoadmaps: unknown;
+  listRoadmaps: unknown;
 }
 
 interface GetRoadmapBySlugResponse {
@@ -86,7 +122,20 @@ interface GetRoadmapBySlugResponse {
 }
 
 interface CreateRoadmapResponse {
-  createRoadmap: string;
+  createRoadmap: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    topicCount: number;
+    status: string;
+  };
+}
+
+interface DeleteRoadmapResponse {
+  deleteRoadmap: boolean;
 }
 
 interface GetRoadmapsPageVariables {
@@ -103,6 +152,10 @@ interface GetRoadmapBySlugVariables {
 
 interface CreateRoadmapVariables {
   input: GraphqlCreateRoadmapInput;
+}
+
+interface DeleteRoadmapVariables {
+  id: string;
 }
 
 interface ServerRoadmapsPageOptions {
@@ -149,14 +202,14 @@ export async function getRoadmapsPageServer(
       next:
         options.revalidate !== undefined || options.tags !== undefined
           ? {
-              revalidate: options.revalidate,
-              tags: options.tags,
-            }
+            revalidate: options.revalidate,
+            tags: options.tags,
+          }
           : undefined,
     });
 
     return RoadmapPageSchema.parse(
-      normalizeRoadmapPageResponse(response.getRoadmapsPage),
+      normalizeRoadmapPageResponse(response.listRoadmaps),
     );
   } catch (error) {
     if (!(error instanceof GraphqlRequestError)) {
@@ -173,21 +226,15 @@ export async function getRoadmapsPageServer(
       next:
         options.revalidate !== undefined || options.tags !== undefined
           ? {
-              revalidate: options.revalidate,
-              tags: options.tags,
-            }
+            revalidate: options.revalidate,
+            tags: options.tags,
+          }
           : undefined,
     });
 
-    const normalizedItems = Array.isArray(legacyResponse.getRoadmaps)
-      ? legacyResponse.getRoadmaps.map((item) => normalizeRoadmapRecord(item))
-      : legacyResponse.getRoadmaps;
-
-    return RoadmapPageSchema.parse({
-      items: normalizedItems,
-      nextCursor: null,
-      hasMore: false,
-    });
+    return RoadmapPageSchema.parse(
+      normalizeRoadmapPageResponse(legacyResponse.listRoadmaps),
+    );
   }
 }
 
@@ -204,9 +251,9 @@ export async function getRoadmapBySlugServer(
     next:
       options.revalidate !== undefined || options.tags !== undefined
         ? {
-            revalidate: options.revalidate,
-            tags: options.tags,
-          }
+          revalidate: options.revalidate,
+          tags: options.tags,
+        }
         : undefined,
   });
 
@@ -235,25 +282,57 @@ export async function createRoadmapClient(
     cache: 'no-store',
   });
 
-  return response.createRoadmap;
+  return response.createRoadmap.slug;
+}
+
+export async function deleteRoadmapClient(
+  id: string,
+  token?: string,
+): Promise<boolean> {
+  const response = await executeClientGraphql<
+    DeleteRoadmapResponse,
+    DeleteRoadmapVariables
+  >({
+    query: DELETE_ROADMAP_MUTATION,
+    variables: { id },
+    token,
+    cache: 'no-store',
+  });
+
+  return response.deleteRoadmap;
 }
 
 type GraphqlRoadmapCategory = 'ROLE' | 'SKILL' | 'BEST_PRACTICE';
 type GraphqlRoadmapDifficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 type GraphqlRoadmapStatus = 'PUBLIC' | 'DRAFT' | 'PRIVATE';
 
-interface GraphqlCreateRoadmapInput extends Omit<CreateRoadmapInput, 'category' | 'difficulty' | 'status'> {
+interface GraphqlCreateRoadmapInput {
+  slug: string;
+  title: string;
+  description: string;
   category: GraphqlRoadmapCategory;
   difficulty: GraphqlRoadmapDifficulty;
   status: GraphqlRoadmapStatus;
+  nodes: unknown[];
+  edges: unknown[];
+  topicCount: number;
 }
 
 function mapCreateRoadmapInputToGraphql(input: CreateRoadmapInput): GraphqlCreateRoadmapInput {
+  // Parse nodesJson and edgesJson strings into arrays for GraphQL
+  const nodes = JSON.parse(input.nodesJson || '[]');
+  const edges = JSON.parse(input.edgesJson || '[]');
+
   return {
-    ...input,
+    slug: input.slug,
+    title: input.title,
+    description: input.description,
     category: mapRequiredCategoryToGraphql(input.category),
     difficulty: mapDifficultyToGraphql(input.difficulty),
     status: mapStatusToGraphql(input.status),
+    nodes,
+    edges,
+    topicCount: input.topicCount,
   };
 }
 
@@ -352,12 +431,26 @@ function normalizeRoadmapRecord(payload: unknown): unknown {
     return payload;
   }
 
-  return {
+  const normalized: Record<string, unknown> = {
     ...payload,
     category: mapCategoryFromGraphql(payload.category),
     difficulty: mapDifficultyFromGraphql(payload.difficulty),
     status: mapStatusFromGraphql(payload.status),
   };
+
+  // Transform nodes array to nodesJson string if present
+  if (Array.isArray(payload.nodes)) {
+    normalized.nodesJson = JSON.stringify(payload.nodes);
+    delete normalized.nodes;
+  }
+
+  // Transform edges array to edgesJson string if present
+  if (Array.isArray(payload.edges)) {
+    normalized.edgesJson = JSON.stringify(payload.edges);
+    delete normalized.edges;
+  }
+
+  return normalized;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

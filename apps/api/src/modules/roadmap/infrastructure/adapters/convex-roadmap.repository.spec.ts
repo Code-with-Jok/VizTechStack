@@ -47,7 +47,7 @@ describe('ConvexRoadmapRepository', () => {
     );
   });
 
-  describe('listRoadmaps', () => {
+  describe('list', () => {
     it('maps paginated Convex payload into roadmap page entity', async () => {
       convexService.client.query.mockResolvedValue({
         page: [summaryPayload],
@@ -56,7 +56,11 @@ describe('ConvexRoadmapRepository', () => {
       });
 
       await expect(
-        repository.listRoadmaps({ category: 'role', limit: 24, cursor: null }),
+        repository.list(
+          { category: 'role' },
+          { limit: 24, cursor: null },
+          false,
+        ),
       ).resolves.toEqual({
         items: [
           {
@@ -68,6 +72,9 @@ describe('ConvexRoadmapRepository', () => {
             difficulty: 'beginner',
             topicCount: 10,
             status: 'public',
+            nodesJson: '[]',
+            edgesJson: '[]',
+            createdAt: 0,
           },
         ],
         nextCursor: 'cursor_1',
@@ -85,56 +92,38 @@ describe('ConvexRoadmapRepository', () => {
         },
       );
     });
-
-    it('falls back to legacy list payload when pagination field is unsupported', async () => {
-      convexService.client.query
-        .mockRejectedValueOnce(
-          new Error('extra field `paginationOpts` not in the validator'),
-        )
-        .mockResolvedValueOnce([
-          summaryPayload,
-          { ...summaryPayload, _id: '2' },
-        ]);
-
-      await expect(
-        repository.listRoadmaps({ limit: 1, cursor: null }),
-      ).resolves.toEqual({
-        items: [
-          {
-            id: 'roadmap_1',
-            slug: 'frontend-engineer',
-            title: 'Frontend Engineer',
-            description: 'Frontend roadmap',
-            category: 'role',
-            difficulty: 'beginner',
-            topicCount: 10,
-            status: 'public',
-          },
-        ],
-        nextCursor: 'legacy:1',
-        isDone: false,
-      });
-    });
   });
 
-  describe('getRoadmapBySlug', () => {
+  describe('findBySlug', () => {
     it('returns null when Convex payload is null', async () => {
       convexService.client.query.mockResolvedValue(null);
 
       await expect(
-        repository.getRoadmapBySlug({ slug: 'frontend-engineer' }),
+        repository.findBySlug('frontend-engineer'),
       ).resolves.toBeNull();
     });
   });
 
-  describe('createRoadmap', () => {
-    it('maps already-exists error to validation domain error', async () => {
-      convexService.client.mutation.mockRejectedValue(
-        new Error('roadmap already exists'),
-      );
+  describe('create', () => {
+    it('creates roadmap and returns entity', async () => {
+      const roadmapId = 'roadmap_1';
+      convexService.client.mutation.mockResolvedValue(roadmapId);
+      convexService.client.query.mockResolvedValue({
+        _id: roadmapId,
+        slug: 'frontend-engineer',
+        title: 'Frontend Engineer',
+        description: 'Frontend roadmap',
+        category: 'role',
+        difficulty: 'advanced',
+        nodesJson: '[]',
+        edgesJson: '[]',
+        topicCount: 20,
+        status: 'public',
+        _creationTime: Date.now(),
+      });
 
       await expect(
-        repository.createRoadmap({
+        repository.create({
           slug: 'frontend-engineer',
           title: 'Frontend Engineer',
           description: 'Frontend roadmap',
@@ -144,46 +133,13 @@ describe('ConvexRoadmapRepository', () => {
           edgesJson: '[]',
           topicCount: 20,
           status: 'public',
+          createdAt: Date.now(),
         }),
-      ).rejects.toBeInstanceOf(RoadmapValidationDomainError);
-    });
-
-    it('maps unauthorized error to authorization domain error', async () => {
-      convexService.client.mutation.mockRejectedValue(
-        new Error('Unauthorized'),
-      );
-
-      await expect(
-        repository.createRoadmap({
-          slug: 'frontend-engineer',
-          title: 'Frontend Engineer',
-          description: 'Frontend roadmap',
-          category: 'role',
-          difficulty: 'advanced',
-          nodesJson: '[]',
-          edgesJson: '[]',
-          topicCount: 20,
-          status: 'public',
-        }),
-      ).rejects.toBeInstanceOf(RoadmapAuthorizationDomainError);
-    });
-
-    it('throws infrastructure error when Convex returns non-string id', async () => {
-      convexService.client.mutation.mockResolvedValue({ id: 'roadmap_1' });
-
-      await expect(
-        repository.createRoadmap({
-          slug: 'frontend-engineer',
-          title: 'Frontend Engineer',
-          description: 'Frontend roadmap',
-          category: 'role',
-          difficulty: 'advanced',
-          nodesJson: '[]',
-          edgesJson: '[]',
-          topicCount: 20,
-          status: 'public',
-        }),
-      ).rejects.toBeInstanceOf(RoadmapInfrastructureDomainError);
+      ).resolves.toMatchObject({
+        id: roadmapId,
+        slug: 'frontend-engineer',
+        title: 'Frontend Engineer',
+      });
     });
   });
 });

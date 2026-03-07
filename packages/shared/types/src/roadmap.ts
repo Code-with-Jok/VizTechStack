@@ -40,7 +40,7 @@ export const RoadmapGraphEdgeSchema = z.object({
 }).passthrough();
 
 export const RoadmapSummarySchema = z.object({
-  _id: z.string(),
+  id: z.string(),
   slug: z.string(),
   title: z.string(),
   description: z.string(),
@@ -58,7 +58,7 @@ export const RoadmapDetailSchema = RoadmapSummarySchema.extend({
 export const RoadmapPageSchema = z.object({
   items: z.array(RoadmapSummarySchema),
   nextCursor: z.string().nullable(),
-  hasMore: z.boolean(),
+  isDone: z.boolean(),
 });
 
 export const RoadmapPageInputSchema = z.object({

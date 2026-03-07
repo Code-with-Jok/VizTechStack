@@ -1,7 +1,10 @@
 export type RoadmapErrorCode =
   | 'ROADMAP_VALIDATION_ERROR'
   | 'ROADMAP_AUTHORIZATION_ERROR'
-  | 'ROADMAP_INFRASTRUCTURE_ERROR';
+  | 'ROADMAP_INFRASTRUCTURE_ERROR'
+  | 'ROADMAP_NOT_FOUND_ERROR'
+  | 'ROADMAP_DUPLICATE_ERROR'
+  | 'ROADMAP_PARSING_ERROR';
 
 export type RoadmapErrorSeverity = 'low' | 'medium' | 'high';
 
@@ -60,5 +63,41 @@ export class RoadmapInfrastructureDomainError extends RoadmapDomainError {
       severity: 'high',
     });
     this.name = 'RoadmapInfrastructureDomainError';
+  }
+}
+
+export class RoadmapNotFoundDomainError extends RoadmapDomainError {
+  constructor(message: string, operation: string) {
+    super({
+      code: 'ROADMAP_NOT_FOUND_ERROR',
+      message,
+      operation,
+      severity: 'low',
+    });
+    this.name = 'RoadmapNotFoundDomainError';
+  }
+}
+
+export class RoadmapDuplicateDomainError extends RoadmapDomainError {
+  constructor(message: string, operation: string) {
+    super({
+      code: 'ROADMAP_DUPLICATE_ERROR',
+      message,
+      operation,
+      severity: 'medium',
+    });
+    this.name = 'RoadmapDuplicateDomainError';
+  }
+}
+
+export class RoadmapParsingDomainError extends RoadmapDomainError {
+  constructor(message: string, operation: string) {
+    super({
+      code: 'ROADMAP_PARSING_ERROR',
+      message,
+      operation,
+      severity: 'medium',
+    });
+    this.name = 'RoadmapParsingDomainError';
   }
 }

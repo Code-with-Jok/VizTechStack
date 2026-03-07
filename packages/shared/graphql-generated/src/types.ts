@@ -27,54 +27,204 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
+export type Bookmark = {
+  __typename?: "Bookmark";
+  id: Scalars["ID"]["output"];
+  roadmapId: Scalars["ID"]["output"];
+  userId: Scalars["ID"]["output"];
+};
+
 export type CreateRoadmapInput = {
   category: RoadmapCategory;
   description: Scalars["String"]["input"];
   difficulty: RoadmapDifficulty;
-  edgesJson?: InputMaybe<Scalars["String"]["input"]>;
-  nodesJson?: InputMaybe<Scalars["String"]["input"]>;
+  edges: Array<EdgeInput>;
+  nodes: Array<NodeInput>;
   slug: Scalars["String"]["input"];
-  status?: InputMaybe<RoadmapStatus>;
+  status: RoadmapStatus;
   title: Scalars["String"]["input"];
   topicCount: Scalars["Int"]["input"];
 };
 
+export type CreateTopicInput = {
+  content: Scalars["String"]["input"];
+  nodeId: Scalars["String"]["input"];
+  resources: Array<ResourceInput>;
+  roadmapId: Scalars["ID"]["input"];
+  title: Scalars["String"]["input"];
+};
+
+export type Edge = {
+  __typename?: "Edge";
+  id: Scalars["ID"]["output"];
+  source: Scalars["String"]["output"];
+  target: Scalars["String"]["output"];
+  type?: Maybe<Scalars["String"]["output"]>;
+};
+
+export type EdgeInput = {
+  id: Scalars["ID"]["input"];
+  source: Scalars["String"]["input"];
+  target: Scalars["String"]["input"];
+  type?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 export type Mutation = {
   __typename?: "Mutation";
-  createRoadmap: Scalars["ID"]["output"];
+  addBookmark: Bookmark;
+  createRoadmap: Roadmap;
+  createTopic: Topic;
+  deleteRoadmap: Scalars["Boolean"]["output"];
+  removeBookmark: Scalars["Boolean"]["output"];
+  updateProgress: Progress;
+  updateRoadmap: Roadmap;
+};
+
+export type MutationAddBookmarkArgs = {
+  roadmapId: Scalars["ID"]["input"];
 };
 
 export type MutationCreateRoadmapArgs = {
   input: CreateRoadmapInput;
 };
 
+export type MutationCreateTopicArgs = {
+  input: CreateTopicInput;
+};
+
+export type MutationDeleteRoadmapArgs = {
+  id: Scalars["ID"]["input"];
+};
+
+export type MutationRemoveBookmarkArgs = {
+  roadmapId: Scalars["ID"]["input"];
+};
+
+export type MutationUpdateProgressArgs = {
+  input: UpdateProgressInput;
+};
+
+export type MutationUpdateRoadmapArgs = {
+  id: Scalars["ID"]["input"];
+  input: UpdateRoadmapInput;
+};
+
+export type Node = {
+  __typename?: "Node";
+  data: NodeData;
+  id: Scalars["ID"]["output"];
+  position: Position;
+  type: Scalars["String"]["output"];
+};
+
+export type NodeData = {
+  __typename?: "NodeData";
+  isReusedSkillNode?: Maybe<Scalars["Boolean"]["output"]>;
+  label: Scalars["String"]["output"];
+  originalRoadmapId?: Maybe<Scalars["String"]["output"]>;
+  topicId?: Maybe<Scalars["String"]["output"]>;
+};
+
+export type NodeDataInput = {
+  isReusedSkillNode?: InputMaybe<Scalars["Boolean"]["input"]>;
+  label: Scalars["String"]["input"];
+  originalRoadmapId?: InputMaybe<Scalars["String"]["input"]>;
+  topicId?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type NodeInput = {
+  data: NodeDataInput;
+  id: Scalars["ID"]["input"];
+  position: PositionInput;
+  type: Scalars["String"]["input"];
+};
+
+export type PaginationInput = {
+  cursor?: InputMaybe<Scalars["String"]["input"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+};
+
+export type Position = {
+  __typename?: "Position";
+  x: Scalars["Float"]["output"];
+  y: Scalars["Float"]["output"];
+};
+
+export type PositionInput = {
+  x: Scalars["Float"]["input"];
+  y: Scalars["Float"]["input"];
+};
+
+export type Progress = {
+  __typename?: "Progress";
+  id: Scalars["ID"]["output"];
+  nodeId: Scalars["String"]["output"];
+  roadmapId: Scalars["ID"]["output"];
+  status: ProgressStatus;
+  userId: Scalars["ID"]["output"];
+};
+
+export type ProgressStatus =
+  | "DONE"
+  | "IN_PROGRESS"
+  | "SKIPPED"
+  | "%future added value";
+
 export type Query = {
   __typename?: "Query";
+  getProgressForRoadmap: Array<Progress>;
   getRoadmapBySlug?: Maybe<Roadmap>;
-  getRoadmaps: Array<Roadmap>;
-  getRoadmapsPage: RoadmapPage;
+  getSkillNodesForRoleRoadmap: Array<Node>;
+  getTopicByNodeId?: Maybe<Topic>;
+  getUserBookmarks: Array<Bookmark>;
+  listRoadmaps: RoadmapPage;
+};
+
+export type QueryGetProgressForRoadmapArgs = {
+  roadmapId: Scalars["ID"]["input"];
 };
 
 export type QueryGetRoadmapBySlugArgs = {
   slug: Scalars["String"]["input"];
 };
 
-export type QueryGetRoadmapsArgs = {
-  category?: InputMaybe<RoadmapCategory>;
+export type QueryGetTopicByNodeIdArgs = {
+  nodeId: Scalars["String"]["input"];
+  roadmapId: Scalars["ID"]["input"];
 };
 
-export type QueryGetRoadmapsPageArgs = {
+export type QueryListRoadmapsArgs = {
   input?: InputMaybe<RoadmapPageInput>;
 };
 
+export type Resource = {
+  __typename?: "Resource";
+  title: Scalars["String"]["output"];
+  type: ResourceType;
+  url: Scalars["String"]["output"];
+};
+
+export type ResourceInput = {
+  title: Scalars["String"]["input"];
+  type: ResourceType;
+  url: Scalars["String"]["input"];
+};
+
+export type ResourceType =
+  | "ARTICLE"
+  | "COURSE"
+  | "VIDEO"
+  | "%future added value";
+
 export type Roadmap = {
   __typename?: "Roadmap";
-  _id: Scalars["ID"]["output"];
   category: RoadmapCategory;
+  createdAt: Scalars["Float"]["output"];
   description: Scalars["String"]["output"];
   difficulty: RoadmapDifficulty;
-  edgesJson?: Maybe<Scalars["String"]["output"]>;
-  nodesJson?: Maybe<Scalars["String"]["output"]>;
+  edges: Array<Edge>;
+  id: Scalars["ID"]["output"];
+  nodes: Array<Node>;
   slug: Scalars["String"]["output"];
   status: RoadmapStatus;
   title: Scalars["String"]["output"];
@@ -93,9 +243,14 @@ export type RoadmapDifficulty =
   | "INTERMEDIATE"
   | "%future added value";
 
+export type RoadmapFilters = {
+  category?: InputMaybe<RoadmapCategory>;
+  status?: InputMaybe<RoadmapStatus>;
+};
+
 export type RoadmapPage = {
   __typename?: "RoadmapPage";
-  hasMore: Scalars["Boolean"]["output"];
+  isDone: Scalars["Boolean"]["output"];
   items: Array<Roadmap>;
   nextCursor?: Maybe<Scalars["String"]["output"]>;
 };
@@ -111,3 +266,31 @@ export type RoadmapStatus =
   | "PRIVATE"
   | "PUBLIC"
   | "%future added value";
+
+export type Topic = {
+  __typename?: "Topic";
+  content: Scalars["String"]["output"];
+  id: Scalars["ID"]["output"];
+  nodeId: Scalars["String"]["output"];
+  resources: Array<Resource>;
+  roadmapId: Scalars["ID"]["output"];
+  title: Scalars["String"]["output"];
+};
+
+export type UpdateProgressInput = {
+  nodeId: Scalars["String"]["input"];
+  roadmapId: Scalars["ID"]["input"];
+  status: ProgressStatus;
+};
+
+export type UpdateRoadmapInput = {
+  category?: InputMaybe<RoadmapCategory>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  difficulty?: InputMaybe<RoadmapDifficulty>;
+  edges?: InputMaybe<Array<EdgeInput>>;
+  nodes?: InputMaybe<Array<NodeInput>>;
+  slug?: InputMaybe<Scalars["String"]["input"]>;
+  status?: InputMaybe<RoadmapStatus>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  topicCount?: InputMaybe<Scalars["Int"]["input"]>;
+};

@@ -5,12 +5,25 @@
 export * from './types';
 
 // Zod validation schemas for runtime validation
-// Note: Only exporting schemas that exist in zod-schemas.ts
 export {
-  RoadmapCategorySchema,
-  RoadmapDifficultySchema,
+  // Enum schemas
+  ResourceTypeSchema,
+  ProgressStatusSchema,
   RoadmapStatusSchema,
-  RoadmapPageInputSchema,
+  RoadmapDifficultySchema,
+  RoadmapCategorySchema,
+
+  // Input schemas
+  UpdateProgressInputSchema,
+  PaginationInputSchema,
+  PositionInputSchema,
+  NodeDataInputSchema,
+  ResourceInputSchema,
+  CreateTopicInputSchema,
+  NodeInputSchema,
+  EdgeInputSchema,
+  UpdateRoadmapInputSchema,
+  RoadmapFiltersSchema,
   CreateRoadmapInputSchema,
 } from './zod-schemas';
 

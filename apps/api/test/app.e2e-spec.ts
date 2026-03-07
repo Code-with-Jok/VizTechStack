@@ -52,13 +52,9 @@ class TestClerkAuthGuard {
 describe('Roadmap GraphQL (e2e)', () => {
   let app: INestApplication<App>;
   let repository: jest.Mocked<RoadmapRepository>;
-  let listRoadmapsMock: jest.MockedFunction<RoadmapRepository['listRoadmaps']>;
-  let getRoadmapBySlugMock: jest.MockedFunction<
-    RoadmapRepository['getRoadmapBySlug']
-  >;
-  let createRoadmapMock: jest.MockedFunction<
-    RoadmapRepository['createRoadmap']
-  >;
+  let listMock: jest.MockedFunction<RoadmapRepository['list']>;
+  let findBySlugMock: jest.MockedFunction<RoadmapRepository['findBySlug']>;
+  let createMock: jest.MockedFunction<RoadmapRepository['create']>;
 
   const roadmapEntity = {
     id: 'roadmap_1',
@@ -71,6 +67,7 @@ describe('Roadmap GraphQL (e2e)', () => {
     edgesJson: '[]',
     topicCount: 12,
     status: 'public' as const,
+    createdAt: Date.now(),
   };
 
   beforeAll(() => {
@@ -82,15 +79,19 @@ describe('Roadmap GraphQL (e2e)', () => {
   });
 
   beforeEach(async () => {
-    listRoadmapsMock = jest.fn();
-    getRoadmapBySlugMock = jest.fn();
-    createRoadmapMock = jest.fn();
+    listMock = jest.fn();
+    findBySlugMock = jest.fn();
+    createMock = jest.fn();
 
     repository = {
-      listRoadmaps: listRoadmapsMock,
-      getRoadmapBySlug: getRoadmapBySlugMock,
-      createRoadmap: createRoadmapMock,
-    };
+      list: listMock,
+      findBySlug: findBySlugMock,
+      create: createMock,
+      update: jest.fn(),
+      delete: jest.fn(),
+      findById: jest.fn(),
+      findSkillRoadmaps: jest.fn(),
+    } as jest.Mocked<RoadmapRepository>;
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -110,7 +111,7 @@ describe('Roadmap GraphQL (e2e)', () => {
   });
 
   it('lists roadmaps through GraphQL page query', async () => {
-    listRoadmapsMock.mockResolvedValue({
+    listMock.mockResolvedValue({
       items: [roadmapEntity],
       nextCursor: null,
       isDone: true,
@@ -163,7 +164,7 @@ describe('Roadmap GraphQL (e2e)', () => {
   });
 
   it('gets roadmap detail by slug', async () => {
-    getRoadmapBySlugMock.mockResolvedValue(roadmapEntity);
+    findBySlugMock.mockResolvedValue(roadmapEntity);
 
     const response = await request(app.getHttpServer())
       .post('/graphql')
@@ -196,7 +197,7 @@ describe('Roadmap GraphQL (e2e)', () => {
   });
 
   it('creates roadmap when requester has admin role', async () => {
-    createRoadmapMock.mockResolvedValue('roadmap_1');
+    createMock.mockResolvedValue(roadmapEntity);
 
     const response = await request(app.getHttpServer())
       .post('/graphql')
@@ -227,7 +228,7 @@ describe('Roadmap GraphQL (e2e)', () => {
     expect(response.status).toBe(200);
     expect(body.errors).toBeUndefined();
     expect(body.data?.createRoadmap).toBe('roadmap_1');
-    expect(createRoadmapMock).toHaveBeenCalledTimes(1);
+    expect(createMock).toHaveBeenCalledTimes(1);
   });
 
   it('rejects create roadmap when requester is not admin', async () => {
@@ -261,6 +262,6 @@ describe('Roadmap GraphQL (e2e)', () => {
     expect(body.data).toBeNull();
     expect(body.errors).toBeDefined();
     expect(body.errors?.[0]?.message).toContain('Insufficient permissions');
-    expect(createRoadmapMock).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
   });
 });
