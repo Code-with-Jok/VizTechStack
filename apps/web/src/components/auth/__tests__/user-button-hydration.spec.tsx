@@ -25,7 +25,8 @@ import UserButtonWrapper from "../user-button-wrapper";
 
 // Mock @clerk/nextjs to avoid "app router to be mounted" error in Node environment
 jest.mock("@clerk/nextjs", () => {
-  const ReactMock = require("react");
+  const ReactMock = require("react"); // eslint-disable-line @typescript-eslint/no-require-imports
+
   const ActualClerk = jest.requireActual("@clerk/nextjs");
   return {
     ...ActualClerk,
