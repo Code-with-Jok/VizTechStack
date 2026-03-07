@@ -15,12 +15,9 @@ export class ConvexBookmarkRepository implements BookmarkRepository {
 
   async create(bookmark: Omit<BookmarkEntity, 'id'>): Promise<BookmarkEntity> {
     // The Convex addBookmark mutation already handles uniqueness (idempotent)
-    const bookmarkId = await this.convexService.client.mutation(
-      api.bookmarks.addBookmark,
-      {
-        roadmapId: bookmark.roadmapId as Id<'roadmaps'>,
-      },
-    );
+    await this.convexService.client.mutation(api.bookmarks.addBookmark, {
+      roadmapId: bookmark.roadmapId as Id<'roadmaps'>,
+    });
 
     // Fetch all bookmarks to find the created one
     const allBookmarks = await this.convexService.client.query(
@@ -48,7 +45,8 @@ export class ConvexBookmarkRepository implements BookmarkRepository {
     });
   }
 
-  async findByUserId(userId: string): Promise<BookmarkEntity[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async findByUserId(_userId: string): Promise<BookmarkEntity[]> {
     // Note: The Convex query uses authenticated user from context
     // The userId parameter is not directly used in the Convex query
     const bookmarks = await this.convexService.client.query(

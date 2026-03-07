@@ -14,8 +14,6 @@ import type {
   UpdateProgressInput,
   ProgressStatus,
 } from '../schemas/progress.schema';
-import type { NodeInput } from '../schemas/node.schema';
-import type { EdgeInput } from '../schemas/edge.schema';
 
 /**
  * Maps CreateRoadmapInput to CreateRoadmapCommand

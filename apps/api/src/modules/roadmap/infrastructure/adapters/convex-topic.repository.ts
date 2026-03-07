@@ -14,16 +14,13 @@ export class ConvexTopicRepository implements TopicRepository {
   constructor(private readonly convexService: ConvexService) {}
 
   async create(topic: Omit<TopicEntity, 'id'>): Promise<TopicEntity> {
-    const topicId = await this.convexService.client.mutation(
-      api.topics.createTopic,
-      {
-        roadmapId: topic.roadmapId as Id<'roadmaps'>,
-        nodeId: topic.nodeId,
-        title: topic.title,
-        content: topic.content,
-        resources: topic.resources,
-      },
-    );
+    await this.convexService.client.mutation(api.topics.createTopic, {
+      roadmapId: topic.roadmapId as Id<'roadmaps'>,
+      nodeId: topic.nodeId,
+      title: topic.title,
+      content: topic.content,
+      resources: topic.resources,
+    });
 
     // Fetch the created topic to return complete entity
     const created = await this.convexService.client.query(

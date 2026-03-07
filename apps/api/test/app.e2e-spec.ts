@@ -122,14 +122,14 @@ describe('Roadmap GraphQL (e2e)', () => {
       .send({
         query: `
         query ListRoadmaps($input: RoadmapPageInput) {
-          getRoadmapsPage(input: $input) {
+          listRoadmaps(input: $input) {
             items {
-              _id
+              id
               slug
               title
             }
             nextCursor
-            hasMore
+            isDone
           }
         }
       `,
@@ -141,25 +141,25 @@ describe('Roadmap GraphQL (e2e)', () => {
       });
 
     const body = toGraphQLResponse<{
-      getRoadmapsPage: {
-        items: Array<{ _id: string; slug: string; title: string }>;
+      listRoadmaps: {
+        items: Array<{ id: string; slug: string; title: string }>;
         nextCursor: string | null;
-        hasMore: boolean;
+        isDone: boolean;
       };
     }>(response.body as unknown);
 
     expect(response.status).toBe(200);
     expect(body.errors).toBeUndefined();
-    expect(body.data?.getRoadmapsPage).toEqual({
+    expect(body.data?.listRoadmaps).toEqual({
       items: [
         {
-          _id: 'roadmap_1',
+          id: 'roadmap_1',
           slug: 'frontend-engineer',
           title: 'Frontend Engineer',
         },
       ],
       nextCursor: null,
-      hasMore: false,
+      isDone: true,
     });
   });
 
@@ -172,7 +172,7 @@ describe('Roadmap GraphQL (e2e)', () => {
         query: `
         query GetRoadmapBySlug($slug: String!) {
           getRoadmapBySlug(slug: $slug) {
-            _id
+            id
             slug
             title
           }
@@ -184,13 +184,13 @@ describe('Roadmap GraphQL (e2e)', () => {
       });
 
     const body = toGraphQLResponse<{
-      getRoadmapBySlug: { _id: string; slug: string; title: string } | null;
+      getRoadmapBySlug: { id: string; slug: string; title: string } | null;
     }>(response.body as unknown);
 
     expect(response.status).toBe(200);
     expect(body.errors).toBeUndefined();
     expect(body.data?.getRoadmapBySlug).toEqual({
-      _id: 'roadmap_1',
+      id: 'roadmap_1',
       slug: 'frontend-engineer',
       title: 'Frontend Engineer',
     });
@@ -205,7 +205,17 @@ describe('Roadmap GraphQL (e2e)', () => {
       .send({
         query: `
           mutation CreateRoadmap($input: CreateRoadmapInput!) {
-            createRoadmap(input: $input)
+            createRoadmap(input: $input) {
+              id
+              slug
+              title
+              description
+              category
+              difficulty
+              topicCount
+              status
+              createdAt
+            }
           }
         `,
         variables: {
@@ -214,20 +224,32 @@ describe('Roadmap GraphQL (e2e)', () => {
             title: 'Frontend Engineer',
             description: 'Frontend roadmap',
             category: 'ROLE',
-            difficulty: 'INTERMEDIATE',
+            difficulty: 'BEGINNER',
             topicCount: 12,
             status: 'PUBLIC',
+            nodes: [],
+            edges: [],
           },
         },
       });
 
-    const body = toGraphQLResponse<{ createRoadmap: string }>(
-      response.body as unknown,
-    );
+    const body = toGraphQLResponse<{
+      createRoadmap: {
+        id: string;
+        slug: string;
+        title: string;
+        description: string;
+        category: string;
+        difficulty: string;
+        topicCount: number;
+        status: string;
+        createdAt: number;
+      };
+    }>(response.body as unknown);
 
     expect(response.status).toBe(200);
     expect(body.errors).toBeUndefined();
-    expect(body.data?.createRoadmap).toBe('roadmap_1');
+    expect(body.data?.createRoadmap.id).toBe('roadmap_1');
     expect(createMock).toHaveBeenCalledTimes(1);
   });
 
@@ -238,7 +260,11 @@ describe('Roadmap GraphQL (e2e)', () => {
       .send({
         query: `
           mutation CreateRoadmap($input: CreateRoadmapInput!) {
-            createRoadmap(input: $input)
+            createRoadmap(input: $input) {
+              id
+              slug
+              title
+            }
           }
         `,
         variables: {
@@ -247,16 +273,22 @@ describe('Roadmap GraphQL (e2e)', () => {
             title: 'Frontend Engineer',
             description: 'Frontend roadmap',
             category: 'ROLE',
-            difficulty: 'INTERMEDIATE',
+            difficulty: 'BEGINNER',
             topicCount: 12,
             status: 'PUBLIC',
+            nodes: [],
+            edges: [],
           },
         },
       });
 
-    const body = toGraphQLResponse<{ createRoadmap: string }>(
-      response.body as unknown,
-    );
+    const body = toGraphQLResponse<{
+      createRoadmap: {
+        id: string;
+        slug: string;
+        title: string;
+      } | null;
+    }>(response.body as unknown);
 
     expect(response.status).toBe(200);
     expect(body.data).toBeNull();

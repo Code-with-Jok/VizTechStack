@@ -15,14 +15,11 @@ export class ConvexProgressRepository implements ProgressRepository {
 
   async upsert(progress: Omit<ProgressEntity, 'id'>): Promise<ProgressEntity> {
     // The Convex updateProgress mutation already handles upsert logic
-    const progressId = await this.convexService.client.mutation(
-      api.progress.updateProgress,
-      {
-        roadmapId: progress.roadmapId as Id<'roadmaps'>,
-        nodeId: progress.nodeId,
-        status: progress.status,
-      },
-    );
+    await this.convexService.client.mutation(api.progress.updateProgress, {
+      roadmapId: progress.roadmapId as Id<'roadmaps'>,
+      nodeId: progress.nodeId,
+      status: progress.status,
+    });
 
     // Fetch all progress for the user and roadmap to find the updated record
     const allProgress = await this.convexService.client.query(

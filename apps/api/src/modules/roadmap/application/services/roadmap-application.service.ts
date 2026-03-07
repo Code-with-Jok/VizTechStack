@@ -86,7 +86,7 @@ export class RoadmapApplicationService {
       );
     }
 
-    validateRoadmapSlug(normalizedSlug, 'getRoadmapBySlug');
+    validateRoadmapSlug(normalizedSlug);
     return this.roadmapRepository.findBySlug(normalizedSlug);
   }
 

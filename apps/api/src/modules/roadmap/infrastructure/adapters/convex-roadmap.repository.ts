@@ -123,7 +123,8 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
   async list(
     filters: RoadmapFilters,
     pagination: PaginationInput,
-    isAdmin: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _isAdmin: boolean,
   ): Promise<RoadmapPageEntity> {
     const result = await this.convexService.client.query(api.roadmaps.list, {
       category: filters.category,
@@ -168,7 +169,8 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
     };
   }
 
-  async findSkillRoadmaps(isAdmin: boolean): Promise<RoadmapEntity[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async findSkillRoadmaps(_isAdmin: boolean): Promise<RoadmapEntity[]> {
     const roadmaps = await this.convexService.client.query(
       api.roadmaps.listSkillRoadmaps,
       {},

@@ -2,7 +2,7 @@ import type {
   TopicEntity,
   ResourceEntity,
 } from '../../../domain/entities/topic.entity';
-import type { Topic, Resource } from '../schemas/topic.schema';
+import type { Topic, Resource, ResourceType } from '../schemas/topic.schema';
 
 /**
  * Maps a TopicEntity to GraphQL Topic type
@@ -32,6 +32,6 @@ function mapResourceEntityToGraphQL(entity: ResourceEntity): Resource {
   return {
     title: entity.title,
     url: entity.url,
-    type: entity.type as any,
+    type: entity.type as ResourceType,
   };
 }

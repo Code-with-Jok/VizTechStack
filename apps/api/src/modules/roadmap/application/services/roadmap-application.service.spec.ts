@@ -54,6 +54,7 @@ describe('RoadmapApplicationService', () => {
         page,
       );
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.list).toHaveBeenCalledWith(
         { category: 'role' },
         { limit: 24, cursor: null },
@@ -71,6 +72,7 @@ describe('RoadmapApplicationService', () => {
 
       await service.listRoadmaps({ category: 'role', isAdmin: true });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.list).toHaveBeenCalledWith(
         { category: 'role' },
         { limit: 24, cursor: null },
@@ -99,6 +101,7 @@ describe('RoadmapApplicationService', () => {
         service.getRoadmapBySlug({ slug: ' frontend-engineer ' }),
       ).resolves.toEqual(roadmapEntity);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.findBySlug).toHaveBeenCalledWith('frontend-engineer');
     });
 
@@ -134,6 +137,7 @@ describe('RoadmapApplicationService', () => {
       });
 
       expect(result).toEqual(roadmapEntity);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           slug: 'frontend-engineer',
@@ -180,6 +184,7 @@ describe('RoadmapApplicationService', () => {
       });
 
       expect(result.title).toBe('Updated Title');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.update).toHaveBeenCalledWith('roadmap_1', {
         title: 'Updated Title',
       });
@@ -202,7 +207,7 @@ describe('RoadmapApplicationService', () => {
       await expect(
         service.updateRoadmap({
           id: 'roadmap_1',
-          category: 'invalid' as any,
+          category: 'invalid' as 'role' | 'skill' | 'best-practice',
         }),
       ).rejects.toThrow(RoadmapValidationDomainError);
     });
@@ -215,6 +220,7 @@ describe('RoadmapApplicationService', () => {
 
       await service.deleteRoadmap({ id: 'roadmap_1' });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.delete).toHaveBeenCalledWith('roadmap_1');
     });
 

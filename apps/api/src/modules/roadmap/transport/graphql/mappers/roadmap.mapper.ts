@@ -9,8 +9,13 @@ import {
 import { RoadmapParsingDomainError } from '../../../domain/errors/roadmap-domain-error';
 import { mapNodeEntitiesToGraphQL } from './node.mapper';
 import { mapEdgeEntitiesToGraphQL } from './edge.mapper';
-import type { Roadmap } from '../schemas/roadmap.schema';
-import type { RoadmapPage } from '../schemas/roadmap.schema';
+import type {
+  Roadmap,
+  RoadmapPage,
+  RoadmapCategory,
+  RoadmapDifficulty,
+  RoadmapStatus,
+} from '../schemas/roadmap.schema';
 
 /**
  * Maps a RoadmapEntity to GraphQL Roadmap type
@@ -28,12 +33,12 @@ export function mapRoadmapEntityToGraphQL(entity: RoadmapEntity): Roadmap {
       slug: entity.slug,
       title: entity.title,
       description: entity.description,
-      category: entity.category as any,
-      difficulty: entity.difficulty as any,
+      category: entity.category as RoadmapCategory,
+      difficulty: entity.difficulty as RoadmapDifficulty,
       nodes: mapNodeEntitiesToGraphQL(nodes),
       edges: mapEdgeEntitiesToGraphQL(edges),
       topicCount: entity.topicCount,
-      status: entity.status as any,
+      status: entity.status as RoadmapStatus,
       createdAt: entity.createdAt,
     };
   } catch (error) {

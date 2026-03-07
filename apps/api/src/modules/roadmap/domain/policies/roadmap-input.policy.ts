@@ -132,10 +132,9 @@ export class RoadmapInputPolicy {
 /**
  * Standalone validation function for roadmap slug
  * @param slug - The slug to validate
- * @param operation - The operation context for error reporting
  * @throws RoadmapValidationDomainError if slug is invalid
  */
-export function validateRoadmapSlug(slug: string, operation: string): void {
+export function validateRoadmapSlug(slug: string): void {
   const policy = new RoadmapInputPolicy();
   policy.validateSlug(slug);
 }

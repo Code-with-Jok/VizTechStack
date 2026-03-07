@@ -1,5 +1,5 @@
 import type { ProgressEntity } from '../../../domain/entities/progress.entity';
-import type { Progress } from '../schemas/progress.schema';
+import type { Progress, ProgressStatus } from '../schemas/progress.schema';
 
 /**
  * Maps a ProgressEntity to GraphQL Progress type
@@ -10,7 +10,7 @@ export function mapProgressEntityToGraphQL(entity: ProgressEntity): Progress {
     userId: entity.userId,
     roadmapId: entity.roadmapId,
     nodeId: entity.nodeId,
-    status: entity.status as any,
+    status: entity.status as ProgressStatus,
   };
 }
 

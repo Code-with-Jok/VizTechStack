@@ -1,11 +1,6 @@
 import { api } from '@viztechstack/convex';
 import { ConvexRoadmapRepository } from './convex-roadmap.repository';
 import type { ConvexService } from '../../../../common/convex/convex.service';
-import {
-  RoadmapAuthorizationDomainError,
-  RoadmapInfrastructureDomainError,
-  RoadmapValidationDomainError,
-} from '../../domain/errors/roadmap-domain-error';
 
 interface MockConvexClient {
   query: jest.Mock<Promise<unknown>, [unknown, Record<string, unknown>]>;
