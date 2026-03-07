@@ -37,18 +37,15 @@ const GET_ROADMAPS_PAGE_QUERY = `
 
 const GET_ROADMAPS_LEGACY_QUERY = `
   query GetRoadmapsLegacy {
-    listRoadmaps(input: {limit: 100}) {
-      items {
-        id
-        slug
-        title
-        description
-        category
-        difficulty
-        topicCount
-        status
-      }
-      isDone
+    getRoadmaps(limit: 100) {
+      id
+      slug
+      title
+      description
+      category
+      difficulty
+      topicCount
+      status
     }
   }
 `;
@@ -114,7 +111,7 @@ interface GetRoadmapsPageResponse {
 }
 
 interface GetRoadmapsLegacyResponse {
-  listRoadmaps: unknown;
+  getRoadmaps: unknown[];
 }
 
 interface GetRoadmapBySlugResponse {
@@ -240,9 +237,17 @@ export async function getRoadmapsPageServer(
       });
 
       console.log('[getRoadmapsPageServer] Legacy query succeeded');
-      return RoadmapPageSchema.parse(
-        normalizeRoadmapPageResponse(legacyResponse.listRoadmaps),
-      );
+
+      // Legacy query returns array directly, not wrapped in pagination
+      const items = Array.isArray(legacyResponse.getRoadmaps)
+        ? legacyResponse.getRoadmaps
+        : [];
+
+      return RoadmapPageSchema.parse({
+        items: items.map((item) => normalizeRoadmapRecord(item)),
+        nextCursor: null,
+        isDone: true,
+      });
     } catch (legacyError) {
       // If both queries fail (e.g., API not accessible during build),
       // return empty result to allow build to continue
