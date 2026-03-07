@@ -105,8 +105,17 @@ async function executeGraphql<TData, TVariables>(
   }
 
   if (!response.ok) {
+    // Try to get response body for better error messages
+    let errorDetails = '';
+    try {
+      const text = await response.text();
+      errorDetails = text ? ` - Response: ${text.substring(0, 500)}` : '';
+    } catch {
+      // Ignore if we can't read the body
+    }
+
     throw new GraphqlRequestError(
-      `GraphQL request failed: ${response.status} ${response.statusText}`,
+      `GraphQL request failed: ${response.status} ${response.statusText}${errorDetails}`,
       response.status,
     );
   }

@@ -26,12 +26,18 @@ export default async function Home() {
       revalidate: 120,
       tags: ["roadmaps-public"],
     });
-    console.log({ roadmapsPage });
+    console.log('[Homepage] Successfully fetched roadmaps:', {
+      count: roadmapsPage.items.length,
+      isDone: roadmapsPage.isDone,
+    });
 
     roadmaps = roadmapsPage.items;
   } catch (error) {
     // Keep homepage available even when API is unreachable at build/runtime.
-    console.error("Failed to fetch roadmaps for homepage.", error);
+    console.error('[Homepage] Failed to fetch roadmaps for homepage.', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 
   // Keep auth check for future use

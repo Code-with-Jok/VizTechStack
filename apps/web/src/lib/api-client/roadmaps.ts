@@ -216,6 +216,11 @@ export async function getRoadmapsPageServer(
       throw error;
     }
 
+    console.warn('[getRoadmapsPageServer] Primary query failed, trying legacy query...', {
+      error: error.message,
+      status: error.status,
+    });
+
     // Try legacy query as fallback
     try {
       const legacyResponse = await executeServerGraphql<
@@ -234,13 +239,20 @@ export async function getRoadmapsPageServer(
             : undefined,
       });
 
+      console.log('[getRoadmapsPageServer] Legacy query succeeded');
       return RoadmapPageSchema.parse(
         normalizeRoadmapPageResponse(legacyResponse.listRoadmaps),
       );
     } catch (legacyError) {
       // If both queries fail (e.g., API not accessible during build),
       // return empty result to allow build to continue
-      console.warn('Failed to fetch roadmaps (both primary and legacy queries failed):', legacyError);
+      // Only log in development or when not in build phase
+      if (process.env.NODE_ENV === 'development' || !process.env.VERCEL) {
+        console.warn('[getRoadmapsPageServer] Both primary and legacy queries failed:', {
+          primaryError: error.message,
+          legacyError: legacyError instanceof Error ? legacyError.message : String(legacyError),
+        });
+      }
       return {
         items: [],
         nextCursor: null,
