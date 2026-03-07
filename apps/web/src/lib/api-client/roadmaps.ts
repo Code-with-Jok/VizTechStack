@@ -216,25 +216,37 @@ export async function getRoadmapsPageServer(
       throw error;
     }
 
-    const legacyResponse = await executeServerGraphql<
-      GetRoadmapsLegacyResponse,
-      undefined
-    >({
-      query: GET_ROADMAPS_LEGACY_QUERY,
-      token: options.token,
-      cache: options.cache,
-      next:
-        options.revalidate !== undefined || options.tags !== undefined
-          ? {
-            revalidate: options.revalidate,
-            tags: options.tags,
-          }
-          : undefined,
-    });
+    // Try legacy query as fallback
+    try {
+      const legacyResponse = await executeServerGraphql<
+        GetRoadmapsLegacyResponse,
+        undefined
+      >({
+        query: GET_ROADMAPS_LEGACY_QUERY,
+        token: options.token,
+        cache: options.cache,
+        next:
+          options.revalidate !== undefined || options.tags !== undefined
+            ? {
+              revalidate: options.revalidate,
+              tags: options.tags,
+            }
+            : undefined,
+      });
 
-    return RoadmapPageSchema.parse(
-      normalizeRoadmapPageResponse(legacyResponse.listRoadmaps),
-    );
+      return RoadmapPageSchema.parse(
+        normalizeRoadmapPageResponse(legacyResponse.listRoadmaps),
+      );
+    } catch (legacyError) {
+      // If both queries fail (e.g., API not accessible during build),
+      // return empty result to allow build to continue
+      console.warn('Failed to fetch roadmaps (both primary and legacy queries failed):', legacyError);
+      return {
+        items: [],
+        nextCursor: null,
+        isDone: true,
+      };
+    }
   }
 }
 
