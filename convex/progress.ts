@@ -94,3 +94,38 @@ export const updateProgress = mutation({
     });
   },
 });
+
+export const getProgressForRoadmap = query({
+  args: {
+    roadmapId: v.id("roadmaps"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    const email = identity.email;
+    if (!email) {
+      return [];
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (!user) {
+      return [];
+    }
+
+    const userId: Id<"users"> = user._id;
+
+    return await ctx.db
+      .query("progress")
+      .withIndex("by_user_roadmap", (q) =>
+        q.eq("userId", userId).eq("roadmapId", args.roadmapId)
+      )
+      .collect();
+  },
+});

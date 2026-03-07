@@ -6,11 +6,11 @@ const config: CodegenConfig = {
   // ============================================
   // Option 1: Use running GraphQL server (recommended for development)
   // schema: 'http://localhost:4000/graphql',
-  
+
   // Option 2: Use local schema files (recommended for CI/CD)
   // Using local files since API server is not running
   schema: 'packages/shared/graphql-schema/src/**/*.graphql',
-  
+
   // ============================================
   // Client-side Operations (Queries & Mutations)
   // ============================================
@@ -20,7 +20,7 @@ const config: CodegenConfig = {
   //   'apps/web/src/**/*.{ts,tsx}',
   //   'packages/shared/api-client/src/**/*.{ts,tsx}',
   // ],
-  
+
   // ============================================
   // Code Generation Outputs
   // ============================================
@@ -54,8 +54,8 @@ const config: CodegenConfig = {
       config: {
         // Use Zod for validation
         schema: 'zod',
-        // Import types from types.ts
-        importFrom: './types',
+        // Don't import types from types.ts to avoid conflicts
+        // importFrom: './types',
         // Validation schema export type
         validationSchemaExportType: 'const',
         // Use TypeScript type imports
@@ -68,6 +68,12 @@ const config: CodegenConfig = {
         },
         // Enum handling
         enumsAsTypes: true,
+        // Scalar type mappings
+        scalars: {
+          ID: 'string',
+          DateTime: 'string',
+          JSON: 'Record<string, unknown>',
+        },
       },
     },
 
@@ -114,7 +120,7 @@ const config: CodegenConfig = {
   // ============================================
   // Automatically regenerate when schema or operations change
   watch: process.env.NODE_ENV === 'development',
-  
+
   // ============================================
   // Post-generation Hooks
   // ============================================

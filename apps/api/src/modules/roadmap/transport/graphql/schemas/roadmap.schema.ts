@@ -4,7 +4,10 @@ import {
   Int,
   InputType,
   registerEnumType,
+  ID,
 } from '@nestjs/graphql';
+import { Node, NodeInput } from './node.schema';
+import { Edge, EdgeInput } from './edge.schema';
 
 export enum RoadmapCategory {
   ROLE = 'role',
@@ -30,8 +33,8 @@ registerEnumType(RoadmapStatus, { name: 'RoadmapStatus' });
 
 @ObjectType()
 export class Roadmap {
-  @Field()
-  _id!: string;
+  @Field(() => ID)
+  id!: string;
 
   @Field()
   slug!: string;
@@ -48,20 +51,38 @@ export class Roadmap {
   @Field(() => RoadmapDifficulty)
   difficulty!: RoadmapDifficulty;
 
-  @Field(() => String, { nullable: true })
-  nodesJson?: string;
+  @Field(() => [Node])
+  nodes!: Node[];
 
-  @Field(() => String, { nullable: true })
-  edgesJson?: string;
+  @Field(() => [Edge])
+  edges!: Edge[];
 
-  @Field(() => Int, { nullable: true })
-  topicCount?: number;
+  @Field(() => Int)
+  topicCount!: number;
 
-  @Field(() => RoadmapStatus, {
-    nullable: true,
-    defaultValue: RoadmapStatus.PUBLIC,
-  })
+  @Field(() => RoadmapStatus)
   status!: RoadmapStatus;
+
+  @Field(() => Number)
+  createdAt!: number;
+}
+
+@InputType()
+export class RoadmapFilters {
+  @Field(() => RoadmapCategory, { nullable: true })
+  category?: RoadmapCategory;
+
+  @Field(() => RoadmapStatus, { nullable: true })
+  status?: RoadmapStatus;
+}
+
+@InputType()
+export class PaginationInput {
+  @Field(() => Int, { nullable: true, defaultValue: 24 })
+  limit?: number;
+
+  @Field(() => String, { nullable: true })
+  cursor?: string;
 }
 
 @InputType()
@@ -85,7 +106,7 @@ export class RoadmapPage {
   nextCursor!: string | null;
 
   @Field(() => Boolean)
-  hasMore!: boolean;
+  isDone!: boolean;
 }
 
 @InputType()
@@ -105,15 +126,45 @@ export class CreateRoadmapInput {
   @Field(() => RoadmapDifficulty)
   difficulty!: RoadmapDifficulty;
 
-  @Field(() => String, { nullable: true, defaultValue: '[]' })
-  nodesJson?: string;
+  @Field(() => [NodeInput])
+  nodes!: NodeInput[];
 
-  @Field(() => String, { nullable: true, defaultValue: '[]' })
-  edgesJson?: string;
+  @Field(() => [EdgeInput])
+  edges!: EdgeInput[];
 
-  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  @Field(() => Int)
+  topicCount!: number;
+
+  @Field(() => RoadmapStatus)
+  status!: RoadmapStatus;
+}
+
+@InputType()
+export class UpdateRoadmapInput {
+  @Field({ nullable: true })
+  slug?: string;
+
+  @Field({ nullable: true })
+  title?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => RoadmapCategory, { nullable: true })
+  category?: RoadmapCategory;
+
+  @Field(() => RoadmapDifficulty, { nullable: true })
+  difficulty?: RoadmapDifficulty;
+
+  @Field(() => [NodeInput], { nullable: true })
+  nodes?: NodeInput[];
+
+  @Field(() => [EdgeInput], { nullable: true })
+  edges?: EdgeInput[];
+
+  @Field(() => Int, { nullable: true })
   topicCount?: number;
 
-  @Field(() => RoadmapStatus, { defaultValue: RoadmapStatus.PUBLIC })
+  @Field(() => RoadmapStatus, { nullable: true })
   status?: RoadmapStatus;
 }

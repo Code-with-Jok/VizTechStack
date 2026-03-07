@@ -1,344 +1,229 @@
 import { Injectable } from '@nestjs/common';
-import { api } from '@viztechstack/convex';
 import { ConvexService } from '../../../../common/convex/convex.service';
-import { CreateRoadmapCommand } from '../../application/commands/create-roadmap.command';
-import { RoadmapRepository } from '../../application/ports/roadmap.repository';
-import { GetRoadmapBySlugQuery } from '../../application/queries/get-roadmap-by-slug.query';
-import { ListRoadmapsQuery } from '../../application/queries/list-roadmaps.query';
-import {
+import { api } from '@viztechstack/convex';
+import type { Id } from '@viztechstack/convex/dataModel';
+import type {
+  RoadmapRepository,
+  RoadmapFilters,
+  PaginationInput,
+} from '../../application/ports/roadmap.repository';
+import type {
   RoadmapEntity,
   RoadmapPageEntity,
 } from '../../domain/entities/roadmap.entity';
-import {
-  RoadmapAuthorizationDomainError,
-  RoadmapDomainError,
-  RoadmapInfrastructureDomainError,
-  RoadmapValidationDomainError,
-} from '../../domain/errors/roadmap-domain-error';
 
-interface RoadmapSummaryPayload {
-  _id: string;
-  slug: string;
-  title: string;
-  description: string;
-  category: 'role' | 'skill' | 'best-practice';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  topicCount: number;
-  status?: 'public' | 'draft' | 'private';
-}
-
-interface RoadmapRecordPayload extends RoadmapSummaryPayload {
-  nodesJson: string;
-  edgesJson: string;
-}
-
-interface RoadmapPaginatedPayload {
-  page: RoadmapSummaryPayload[];
-  continueCursor: string;
-  isDone: boolean;
-}
-
+/**
+ * Convex implementation of RoadmapRepository
+ * Handles serialization/deserialization of nodesJson and edgesJson
+ * Automatically creates roadmapSummary when creating a roadmap
+ */
 @Injectable()
 export class ConvexRoadmapRepository implements RoadmapRepository {
   constructor(private readonly convexService: ConvexService) {}
 
-  async listRoadmaps(query: ListRoadmapsQuery): Promise<RoadmapPageEntity> {
-    try {
-      const result: unknown = await this.convexService.client.query(
-        api.roadmaps.list,
-        {
-          category: query.category,
-          paginationOpts: {
-            numItems: query.limit ?? 24,
-            cursor: query.cursor ?? null,
-          },
-        },
-      );
-
-      if (!this.isRoadmapPaginatedPayload(result)) {
-        throw new RoadmapInfrastructureDomainError(
-          'Convex listRoadmaps returned an invalid paginated payload.',
-          'listRoadmaps',
-        );
-      }
-
-      return {
-        items: result.page.map((item) =>
-          this.mapRoadmapSummary(item, 'listRoadmaps'),
-        ),
-        nextCursor: result.isDone ? null : result.continueCursor,
-        isDone: result.isDone,
-      };
-    } catch (error) {
-      if (this.shouldFallbackToLegacyList(error)) {
-        return this.listRoadmapsWithLegacyPayload(query);
-      }
-
-      throw this.mapInfrastructureError(error, 'listRoadmaps');
-    }
-  }
-
-  private async listRoadmapsWithLegacyPayload(
-    query: ListRoadmapsQuery,
-  ): Promise<RoadmapPageEntity> {
-    const legacyResult: unknown = await this.convexService.client.query(
-      api.roadmaps.list,
+  async create(roadmap: Omit<RoadmapEntity, 'id'>): Promise<RoadmapEntity> {
+    const roadmapId = await this.convexService.client.mutation(
+      api.roadmaps.createRoadmap,
       {
-        category: query.category,
+        slug: roadmap.slug,
+        title: roadmap.title,
+        description: roadmap.description,
+        category: roadmap.category,
+        difficulty: roadmap.difficulty,
+        topicCount: roadmap.topicCount,
+        nodesJson: roadmap.nodesJson,
+        edgesJson: roadmap.edgesJson,
+        status: roadmap.status,
       },
     );
 
-    if (!this.isLegacyRoadmapListPayload(legacyResult)) {
-      throw new RoadmapInfrastructureDomainError(
-        'Convex listRoadmaps legacy fallback returned an invalid payload.',
-        'listRoadmaps',
-      );
+    // Fetch the created roadmap to return complete entity
+    const created = await this.convexService.client.query(
+      api.roadmaps.getById,
+      {
+        id: roadmapId as Id<'roadmaps'>,
+      },
+    );
+
+    if (!created) {
+      throw new Error('Failed to retrieve created roadmap');
     }
 
-    const limit = query.limit ?? 24;
-    const offset = this.decodeLegacyCursor(query.cursor);
-    const slicedItems = legacyResult.slice(offset, offset + limit);
-    const mappedItems = slicedItems.map((item) =>
-      this.mapRoadmapSummary(item, 'listRoadmaps'),
+    return this.mapToEntity(created);
+  }
+
+  async update(
+    id: string,
+    roadmap: Partial<Omit<RoadmapEntity, 'id'>>,
+  ): Promise<RoadmapEntity> {
+    await this.convexService.client.mutation(api.roadmaps.updateRoadmap, {
+      id: id as Id<'roadmaps'>,
+      slug: roadmap.slug,
+      title: roadmap.title,
+      description: roadmap.description,
+      category: roadmap.category,
+      difficulty: roadmap.difficulty,
+      topicCount: roadmap.topicCount,
+      nodesJson: roadmap.nodesJson,
+      edgesJson: roadmap.edgesJson,
+      status: roadmap.status,
+    });
+
+    // Fetch the updated roadmap
+    const updated = await this.convexService.client.query(
+      api.roadmaps.getById,
+      {
+        id: id as Id<'roadmaps'>,
+      },
     );
-    const nextOffset = offset + limit;
-    const hasMore = nextOffset < legacyResult.length;
+
+    if (!updated) {
+      throw new Error(`Roadmap with id '${id}' not found after update`);
+    }
+
+    return this.mapToEntity(updated);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.convexService.client.mutation(api.roadmaps.deleteRoadmap, {
+      id: id as Id<'roadmaps'>,
+    });
+  }
+
+  async findBySlug(slug: string): Promise<RoadmapEntity | null> {
+    const roadmap = await this.convexService.client.query(
+      api.roadmaps.getBySlug,
+      {
+        slug,
+      },
+    );
+
+    if (!roadmap) {
+      return null;
+    }
+
+    return this.mapToEntity(roadmap);
+  }
+
+  async findById(id: string): Promise<RoadmapEntity | null> {
+    const roadmap = await this.convexService.client.query(
+      api.roadmaps.getById,
+      {
+        id: id as Id<'roadmaps'>,
+      },
+    );
+
+    if (!roadmap) {
+      return null;
+    }
+
+    return this.mapToEntity(roadmap);
+  }
+
+  async list(
+    filters: RoadmapFilters,
+    pagination: PaginationInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _isAdmin: boolean,
+  ): Promise<RoadmapPageEntity> {
+    const result = await this.convexService.client.query(api.roadmaps.list, {
+      category: filters.category,
+      paginationOpts: {
+        numItems: pagination.limit ?? 24,
+        cursor: pagination.cursor ?? null,
+      },
+    });
+
+    // Map roadmap summaries to full roadmap entities
+    // Note: The list query returns summaries, so we need to fetch full data if needed
+    // For now, we'll construct minimal entities from summaries
+    const items: RoadmapEntity[] = result.page.map(
+      (summary: {
+        _id: string;
+        slug: string;
+        title: string;
+        description: string;
+        category: 'role' | 'skill' | 'best-practice';
+        difficulty: 'beginner' | 'intermediate' | 'advanced';
+        topicCount: number;
+        status: 'public' | 'draft' | 'private';
+      }) => ({
+        id: summary._id,
+        slug: summary.slug,
+        title: summary.title,
+        description: summary.description,
+        category: summary.category,
+        difficulty: summary.difficulty,
+        topicCount: summary.topicCount,
+        status: summary.status,
+        nodesJson: '[]', // Not included in summary
+        edgesJson: '[]', // Not included in summary
+        createdAt: 0, // Not included in summary response
+      }),
+    );
 
     return {
-      items: mappedItems,
-      nextCursor: hasMore ? this.encodeLegacyCursor(nextOffset) : null,
-      isDone: !hasMore,
+      items,
+      nextCursor: result.continueCursor ?? null,
+      isDone: result.isDone,
     };
   }
 
-  async getRoadmapBySlug(
-    query: GetRoadmapBySlugQuery,
-  ): Promise<RoadmapEntity | null> {
-    try {
-      const result: unknown = await this.convexService.client.query(
-        api.roadmaps.getBySlug,
-        {
-          slug: query.slug,
-        },
-      );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async findSkillRoadmaps(_isAdmin: boolean): Promise<RoadmapEntity[]> {
+    const roadmaps = await this.convexService.client.query(
+      api.roadmaps.listSkillRoadmaps,
+      {},
+    );
 
-      if (result === null) {
-        return null;
-      }
-
-      return this.mapRoadmapDetail(result, 'getRoadmapBySlug');
-    } catch (error) {
-      throw this.mapInfrastructureError(error, 'getRoadmapBySlug');
-    }
+    return roadmaps.map(
+      (roadmap: {
+        _id: string;
+        slug: string;
+        title: string;
+        description: string;
+        category: 'role' | 'skill' | 'best-practice';
+        difficulty: 'beginner' | 'intermediate' | 'advanced';
+        nodesJson: string;
+        edgesJson: string;
+        topicCount: number;
+        status?: 'public' | 'draft' | 'private';
+        createdAt?: number;
+        _creationTime: number;
+      }) => this.mapToEntity(roadmap),
+    );
   }
 
-  async createRoadmap(command: CreateRoadmapCommand): Promise<string> {
-    try {
-      const result: unknown = await this.convexService.client.mutation(
-        api.roadmaps.createRoadmap,
-        {
-          slug: command.slug,
-          title: command.title,
-          description: command.description,
-          category: command.category,
-          difficulty: command.difficulty,
-          topicCount: command.topicCount,
-          nodesJson: command.nodesJson,
-          edgesJson: command.edgesJson,
-          status: command.status,
-        },
-      );
-
-      if (typeof result !== 'string') {
-        throw new RoadmapInfrastructureDomainError(
-          'Convex createRoadmap returned an invalid identifier.',
-          'createRoadmap',
-        );
-      }
-
-      return result;
-    } catch (error) {
-      throw this.mapInfrastructureError(error, 'createRoadmap');
-    }
-  }
-
-  private mapRoadmapDetail(payload: unknown, operation: string): RoadmapEntity {
-    if (!this.isRoadmapRecord(payload)) {
-      throw new RoadmapInfrastructureDomainError(
-        `Convex ${operation} returned malformed roadmap data.`,
-        operation,
-      );
-    }
-
+  /**
+   * Maps Convex document to RoadmapEntity
+   * Handles the conversion of Convex _id to entity id
+   */
+  private mapToEntity(doc: {
+    _id: string;
+    slug: string;
+    title: string;
+    description: string;
+    category: 'role' | 'skill' | 'best-practice';
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    nodesJson: string;
+    edgesJson: string;
+    topicCount: number;
+    status?: 'public' | 'draft' | 'private';
+    createdAt?: number;
+    _creationTime: number;
+  }): RoadmapEntity {
     return {
-      id: payload._id,
-      slug: payload.slug,
-      title: payload.title,
-      description: payload.description,
-      category: payload.category,
-      difficulty: payload.difficulty,
-      nodesJson: payload.nodesJson,
-      edgesJson: payload.edgesJson,
-      topicCount: payload.topicCount,
-      status: payload.status ?? 'public',
+      id: doc._id,
+      slug: doc.slug,
+      title: doc.title,
+      description: doc.description,
+      category: doc.category,
+      difficulty: doc.difficulty,
+      nodesJson: doc.nodesJson,
+      edgesJson: doc.edgesJson,
+      topicCount: doc.topicCount,
+      status: doc.status ?? 'public',
+      createdAt: doc.createdAt ?? doc._creationTime,
     };
-  }
-
-  private mapRoadmapSummary(
-    payload: unknown,
-    operation: string,
-  ): RoadmapEntity {
-    if (!this.isRoadmapSummary(payload)) {
-      throw new RoadmapInfrastructureDomainError(
-        `Convex ${operation} returned malformed roadmap summary data.`,
-        operation,
-      );
-    }
-
-    return {
-      id: payload._id,
-      slug: payload.slug,
-      title: payload.title,
-      description: payload.description,
-      category: payload.category,
-      difficulty: payload.difficulty,
-      topicCount: payload.topicCount,
-      status: payload.status ?? 'public',
-    };
-  }
-
-  private isRoadmapPaginatedPayload(
-    payload: unknown,
-  ): payload is RoadmapPaginatedPayload {
-    if (typeof payload !== 'object' || payload === null) {
-      return false;
-    }
-
-    const record = payload as Record<string, unknown>;
-    if (
-      !Array.isArray(record.page) ||
-      typeof record.continueCursor !== 'string' ||
-      typeof record.isDone !== 'boolean'
-    ) {
-      return false;
-    }
-
-    return record.page.every((item) => this.isRoadmapSummary(item));
-  }
-
-  private isRoadmapSummary(payload: unknown): payload is RoadmapSummaryPayload {
-    if (typeof payload !== 'object' || payload === null) {
-      return false;
-    }
-
-    const record = payload as Record<string, unknown>;
-
-    return (
-      typeof record._id === 'string' &&
-      typeof record.slug === 'string' &&
-      typeof record.title === 'string' &&
-      typeof record.description === 'string' &&
-      (record.category === 'role' ||
-        record.category === 'skill' ||
-        record.category === 'best-practice') &&
-      (record.difficulty === 'beginner' ||
-        record.difficulty === 'intermediate' ||
-        record.difficulty === 'advanced') &&
-      typeof record.topicCount === 'number' &&
-      Number.isInteger(record.topicCount) &&
-      record.topicCount >= 0 &&
-      (record.status === undefined ||
-        record.status === 'public' ||
-        record.status === 'draft' ||
-        record.status === 'private')
-    );
-  }
-
-  private isLegacyRoadmapListPayload(
-    payload: unknown,
-  ): payload is RoadmapSummaryPayload[] {
-    return (
-      Array.isArray(payload) &&
-      payload.every((item) => this.isRoadmapSummary(item))
-    );
-  }
-
-  private shouldFallbackToLegacyList(error: unknown): boolean {
-    const message = error instanceof Error ? error.message : String(error);
-    return (
-      message.includes('extra field `paginationOpts`') &&
-      message.includes('not in the validator')
-    );
-  }
-
-  private decodeLegacyCursor(cursor: string | null | undefined): number {
-    if (!cursor || !cursor.startsWith('legacy:')) {
-      return 0;
-    }
-
-    const rawOffset = Number.parseInt(cursor.slice('legacy:'.length), 10);
-    if (Number.isNaN(rawOffset) || rawOffset < 0) {
-      return 0;
-    }
-
-    return rawOffset;
-  }
-
-  private encodeLegacyCursor(offset: number): string {
-    return `legacy:${offset}`;
-  }
-
-  private isRoadmapRecord(payload: unknown): payload is RoadmapRecordPayload {
-    if (typeof payload !== 'object' || payload === null) {
-      return false;
-    }
-
-    const record = payload as Record<string, unknown>;
-
-    return (
-      typeof record._id === 'string' &&
-      typeof record.slug === 'string' &&
-      typeof record.title === 'string' &&
-      typeof record.description === 'string' &&
-      (record.category === 'role' ||
-        record.category === 'skill' ||
-        record.category === 'best-practice') &&
-      (record.difficulty === 'beginner' ||
-        record.difficulty === 'intermediate' ||
-        record.difficulty === 'advanced') &&
-      typeof record.nodesJson === 'string' &&
-      typeof record.edgesJson === 'string' &&
-      typeof record.topicCount === 'number' &&
-      Number.isInteger(record.topicCount) &&
-      record.topicCount >= 0 &&
-      (record.status === undefined ||
-        record.status === 'public' ||
-        record.status === 'draft' ||
-        record.status === 'private')
-    );
-  }
-
-  private mapInfrastructureError(
-    error: unknown,
-    operation: string,
-  ): RoadmapDomainError {
-    if (error instanceof RoadmapDomainError) {
-      return error;
-    }
-
-    const message = error instanceof Error ? error.message : String(error);
-
-    if (message.includes('already exists')) {
-      return new RoadmapValidationDomainError(message, operation);
-    }
-
-    if (
-      message.includes('Unauthorized') ||
-      message.includes('Unauthenticated')
-    ) {
-      return new RoadmapAuthorizationDomainError(message, operation);
-    }
-
-    return new RoadmapInfrastructureDomainError(message, operation);
   }
 }

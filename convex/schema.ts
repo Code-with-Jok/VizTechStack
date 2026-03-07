@@ -22,16 +22,18 @@ export default defineSchema({
     topicCount: v.number(),
     userId: v.optional(v.string()), // Optional for seeded data
     createdAt: v.optional(v.number()),
-    status: v.union(
+    status: v.optional(v.union(
       v.literal("public"),
       v.literal("draft"),
       v.literal("private")
-    ),
+    )),
   })
     .index("by_slug", ["slug"])
     .index("by_category", ["category"])
     .index("by_status", ["status"])
-    .index("by_category_status", ["category", "status"]),
+    .index("by_category_status", ["category", "status"])
+    .index("by_category_created_at", ["category", "createdAt"])
+    .index("by_category_status_created_at", ["category", "status", "createdAt"]),
 
   roadmapSummaries: defineTable({
     roadmapId: v.id("roadmaps"),

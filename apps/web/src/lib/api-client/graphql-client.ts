@@ -79,11 +79,43 @@ async function executeGraphql<TData, TVariables>(
     next: options.next,
   };
 
-  const response = await fetch(endpoint, requestInit);
+  let response: Response;
+
+  try {
+    response = await fetch(endpoint, requestInit);
+  } catch (error) {
+    // Handle network failures (ECONNREFUSED, fetch failed, etc.)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isNetworkError =
+      errorMessage.includes('ECONNREFUSED') ||
+      errorMessage.includes('fetch failed') ||
+      errorMessage.includes('ENOTFOUND') ||
+      errorMessage.includes('network');
+
+    if (isNetworkError && process.env.NODE_ENV === 'development') {
+      throw new GraphqlRequestError(
+        `Failed to connect to GraphQL API at ${endpoint}. ` +
+        `API server not running. Start it with: pnpm dev --filter @viztechstack/api`,
+      );
+    }
+
+    throw new GraphqlRequestError(
+      `Network error connecting to GraphQL API at ${endpoint}: ${errorMessage}`,
+    );
+  }
 
   if (!response.ok) {
+    // Try to get response body for better error messages
+    let errorDetails = '';
+    try {
+      const text = await response.text();
+      errorDetails = text ? ` - Response: ${text.substring(0, 500)}` : '';
+    } catch {
+      // Ignore if we can't read the body
+    }
+
     throw new GraphqlRequestError(
-      `GraphQL request failed: ${response.status} ${response.statusText}`,
+      `GraphQL request failed: ${response.status} ${response.statusText}${errorDetails}`,
       response.status,
     );
   }

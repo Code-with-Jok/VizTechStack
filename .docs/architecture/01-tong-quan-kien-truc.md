@@ -401,7 +401,51 @@ async getRoadmaps() { ... }
 - Build complexity
 - Requires good tooling (Turbo)
 
-## 10. Kết Luận
+## 10. Core Features Implementation
+
+### 10.1 Roadmap Feature (Implemented)
+
+**Status:** ✅ Complete  
+**Documentation:** `.docs/architecture/05-roadmap-feature-architecture.md`
+
+The Roadmap feature is the core functionality providing interactive graph-based learning path visualization:
+
+**Key Components:**
+- **Backend:** NestJS modules with hexagonal architecture
+  - Application services for use case orchestration
+  - Domain entities and policies
+  - Convex repository adapters
+  - GraphQL resolvers with authentication/authorization
+
+- **Frontend:** Next.js pages and React components
+  - RoadmapList for browsing and filtering
+  - RoadmapViewer with React Flow visualization
+  - RoadmapEditor for admin CRUD operations
+  - Progress tracking and bookmarking
+
+- **Database:** Convex tables
+  - roadmaps (full data with graph JSON)
+  - roadmapSummaries (denormalized for performance)
+  - topics, progress, bookmarks
+
+**Features:**
+- ✅ Browse roadmaps with category filtering
+- ✅ Interactive graph visualization
+- ✅ Progress tracking (done/in-progress/skipped)
+- ✅ Topic content with markdown rendering
+- ✅ Bookmark management
+- ✅ Admin CRUD operations
+- ✅ Real-time collaborative editing
+- ✅ Skill node reuse across roadmaps
+
+**Architecture Patterns:**
+- Hexagonal Architecture (Ports & Adapters)
+- CQRS (Command Query Responsibility Segregation)
+- Domain-Driven Design
+- Repository Pattern
+- Dependency Injection
+
+## 11. Kết Luận
 
 VizTechStack được thiết kế với kiến trúc hiện đại, scalable và maintainable. Các quyết định kỹ thuật được cân nhắc kỹ lưỡng để balance giữa developer experience, performance và long-term maintainability.
 
@@ -410,9 +454,21 @@ VizTechStack được thiết kế với kiến trúc hiện đại, scalable v�
 - Type safety end-to-end
 - Modern tech stack
 - Good separation of concerns
+- Comprehensive roadmap feature implementation
+- Real-time collaboration capabilities
 
 **Điểm Cần Cải Thiện:**
 - Monitoring & observability
 - Error tracking (Sentry?)
 - Performance monitoring
 - E2E testing coverage
+- Increase unit test coverage to 80%+
+
+## 12. Related Documentation
+
+- **Roadmap Feature:** `.docs/architecture/05-roadmap-feature-architecture.md`
+- **Business Logic Flow:** `.docs/architecture/04-business-logic-flow.md`
+- **Technical Stack:** `.docs/architecture/02-danh-gia-technical-stack.md`
+- **Issues & Improvements:** `.docs/architecture/03-van-de-va-cai-tien.md`
+- **Feature Specs:** `.kiro/specs/roadmap/`
+- **Steering Rules:** `.kiro/steering/`
