@@ -15,7 +15,11 @@
     "prepare": "husky",
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:watch": "graphql-codegen --config codegen.ts --watch",
-    "codegen:check": "graphql-codegen --config codegen.ts --check"
+    "codegen:check": "graphql-codegen --config codegen.ts --check",
+    "generate:module": "tsx tooling/scripts/generate-module.ts",
+    "generate:feature": "tsx tooling/scripts/generate-feature.ts",
+    "validate:deps": "tsx tooling/scripts/validate-deps.ts",
+    "analyze:bundle": "tsx tooling/scripts/analyze-bundle.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.3",
@@ -24,12 +28,15 @@
     "@graphql-codegen/typescript": "^5.0.9",
     "@graphql-codegen/typescript-operations": "^5.0.9",
     "@graphql-codegen/typescript-react-apollo": "^4.4.0",
+    "@types/glob": "^9.0.0",
     "@types/node": "^22.10.7",
     "@viztechstack/env": "workspace:*",
     "convex": "^1.32.0",
+    "glob": "^13.0.6",
     "graphql-codegen-typescript-validation-schema": "^0.18.1",
     "husky": "^9.1.7",
     "prettier": "^3.5.0",
+    "tsx": "^4.21.0",
     "turbo": "^2.4.0",
     "typescript": "^5.7.0"
   },

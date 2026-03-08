@@ -1,6 +1,6 @@
 packages:
   - "apps/*"
   - "packages/shared/*"
-  - "configs/*"
   - "tooling/*"
+  - "tooling/configs/*"
   - "convex"

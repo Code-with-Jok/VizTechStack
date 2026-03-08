@@ -9,7 +9,7 @@ import {
 
 @Injectable()
 export class HealthCheckService {
-  constructor(private readonly convexService: ConvexService) {}
+  constructor(private readonly convexService: ConvexService) { }
 
   async checkHealth(): Promise<HealthStatus> {
     const services: ServiceHealth[] = [];
@@ -36,8 +36,7 @@ export class HealthCheckService {
     try {
       // Attempt a simple query to verify Convex connectivity
       // Using a lightweight query that should always work
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await this.convexService.client.query('ping:ping' as any);
+      await this.convexService.client.query('ping:ping' as never);
 
       const responseTime = Date.now() - startTime;
 
