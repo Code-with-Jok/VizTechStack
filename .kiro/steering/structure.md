@@ -12,18 +12,22 @@ viztechstack/
 │   ├── web/               # Next.js frontend
 │   └── api/               # NestJS backend
 ├── packages/              # Shared packages
-│   ├── shared/           # Shared utilities and types
-│   ├── core/             # Business logic packages
-│   └── ui/               # UI component library
+│   └── shared/           # Shared utilities and types
+│       ├── api-client/   # GraphQL client with hooks
+│       ├── graphql-generated/  # Auto-generated types
+│       ├── graphql-schema/     # GraphQL schema definitions
+│       ├── types/        # Zod schemas and types
+│       └── validation/   # Validation utilities
 ├── tooling/              # Development tools
+│   ├── configs/         # Shared configurations (ESLint, TypeScript, Tailwind)
 │   ├── env/             # Environment validation
-│   └── scripts/         # Build scripts
+│   └── scripts/         # Build and utility scripts
 ├── convex/               # Convex database functions
 ├── .docs/                # Architecture documentation
 ├── .kiro/                # Kiro configuration
 │   ├── specs/           # Feature specs
 │   └── steering/        # Steering rules
-└── configs/              # Shared configurations
+└── content/              # Content files
 ```
 
 ## Backend Module Structure (Domain-Driven Design)
@@ -59,8 +63,7 @@ packages/shared/
 ├── graphql-generated/     # Auto-generated types and Zod schemas
 ├── api-client/           # Type-safe GraphQL client with React hooks
 ├── validation/           # Validation utilities and error handling
-├── types/                # Shared Zod schemas and TypeScript types
-└── utils/                # Common utilities
+└── types/                # Shared Zod schemas and TypeScript types
 ```
 
 ## Frontend Structure
@@ -70,10 +73,19 @@ apps/web/src/
 ├── app/                  # Next.js App Router
 │   ├── layout.tsx       # Root layout with providers
 │   ├── page.tsx         # Homepage
-│   └── roadmaps/        # Roadmap pages
-├── components/          # React components
+│   ├── roadmaps/        # Roadmap pages
+│   ├── admin/           # Admin pages
+│   └── my/              # User pages (bookmarks, etc.)
+├── components/          # Shared React components
 │   ├── ui/             # shadcn/ui components
-│   └── roadmap/        # Domain-specific components
+│   ├── layout/         # Layout components (Header, Footer)
+│   └── auth/           # Authentication components
+├── features/            # Feature-based organization
+│   ├── roadmap/        # Roadmap feature
+│   ├── topic/          # Topic feature
+│   ├── progress/       # Progress tracking feature
+│   ├── bookmark/       # Bookmark feature
+│   └── editor/         # Admin editor feature
 └── lib/                # Utilities and configurations
 ```
 

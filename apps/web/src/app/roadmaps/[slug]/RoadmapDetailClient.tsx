@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { RoadmapViewer } from '@/components/roadmap/RoadmapViewer';
+import { RoadmapViewer } from '@/features/roadmap/components';
 import { Button } from '@/components/ui/button';
 
 interface RoadmapDetailClientProps {

@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { auth } from '@clerk/nextjs/server';
-import { CreateRoadmapForm } from '@/components/roadmap/CreateRoadmapForm';
+import { CreateRoadmapForm } from '@/features/editor/components/CreateRoadmapForm';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {

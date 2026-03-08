@@ -11,7 +11,4 @@
 export * from './roadmap.mapper';
 export * from './node.mapper';
 export * from './edge.mapper';
-export * from './topic.mapper';
-export * from './progress.mapper';
-export * from './bookmark.mapper';
 export * from './input.mapper';
