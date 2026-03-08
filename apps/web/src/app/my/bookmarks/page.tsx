@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { BookmarkedRoadmapsList } from '@/components/roadmap/BookmarkedRoadmapsList';
+import { BookmarkedRoadmapsList } from '@/features/bookmark/components/BookmarkedRoadmapsList';
 
 export const metadata: Metadata = {
     title: 'My Bookmarks | VizTechStack',

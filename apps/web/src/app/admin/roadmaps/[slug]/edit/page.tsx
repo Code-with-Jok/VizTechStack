@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { RoadmapEditor } from '@/components/roadmap/RoadmapEditor';
-import { NodeSidebar } from '@/components/roadmap/NodeSidebar';
+import { RoadmapEditor } from '@/features/editor/components/RoadmapEditorCanvas';
+import { NodeSidebar } from '@/features/editor/components/NodeSidebar';
 
 interface EditRoadmapPageProps {
     params: Promise<{

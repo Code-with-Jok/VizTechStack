@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Settings, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getRoadmapsPageServer } from "@/lib/api-client/roadmaps";
-import { DeleteRoadmapButton } from "@/components/admin/delete-roadmap-button";
+import { DeleteRoadmapButton } from "@/features/editor/components/DeleteRoadmapButton";
 
 export default async function AdminRoadmapsPage() {
     const { getToken } = await auth();

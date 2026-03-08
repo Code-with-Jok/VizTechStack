@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { RoadmapList } from '@/components/roadmap/RoadmapList';
+import { RoadmapList } from '@/features/roadmap/components/RoadmapList';
 
 export const metadata: Metadata = {
     title: 'Explore Roadmaps | VizTechStack',
