@@ -1,8 +1,6 @@
 packages:
   - "apps/*"
   - "packages/shared/*"
-  - "packages/core/*"
-  - "packages/ui/*"
   - "configs/*"
   - "tooling/*"
   - "convex"
