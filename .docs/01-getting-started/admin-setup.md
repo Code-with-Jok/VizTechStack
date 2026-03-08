@@ -1,24 +1,24 @@
-# Admin Setup Guide
+# Hướng Dẫn Thiết Lập Admin
 
-## Setting Up Admin Access
+## Thiết Lập Quyền Admin
 
-To create and manage roadmaps, you need admin privileges. Follow these steps:
+Để tạo và quản lý roadmap, bạn cần quyền admin. Làm theo các bước sau:
 
-### Step 1: Sign In to the Application
+### Bước 1: Đăng Nhập Vào Ứng Dụng
 
-1. Go to http://localhost:3000
-2. Click "Đăng nhập" (Sign In) in the top right
-3. Create an account or sign in with an existing account
+1. Truy cập http://localhost:3000
+2. Click "Đăng nhập" (Sign In) ở góc trên bên phải
+3. Tạo tài khoản mới hoặc đăng nhập bằng tài khoản hiện có
 
-### Step 2: Set Admin Role in Clerk Dashboard
+### Bước 2: Thiết Lập Vai Trò Admin Trong Clerk Dashboard
 
-1. Go to [Clerk Dashboard](https://dashboard.clerk.com/)
-2. Select your application: "summary-wren-91"
-3. Navigate to **Users** in the left sidebar
-4. Find and click on your user account
-5. Scroll down to **Public metadata** section
+1. Truy cập [Clerk Dashboard](https://dashboard.clerk.com/)
+2. Chọn ứng dụng của bạn: "summary-wren-91"
+3. Điều hướng đến **Users** trong sidebar bên trái
+4. Tìm và click vào tài khoản người dùng của bạn
+5. Cuộn xuống phần **Public metadata**
 6. Click **Edit**
-7. Add the following JSON:
+7. Thêm JSON sau:
    ```json
    {
      "role": "admin"
@@ -26,80 +26,80 @@ To create and manage roadmaps, you need admin privileges. Follow these steps:
    ```
 8. Click **Save**
 
-### Step 3: Refresh Your Session
+### Bước 3: Làm Mới Session
 
-1. Go back to http://localhost:3000
-2. Sign out and sign in again (to refresh the JWT token with new metadata)
-3. You should now see "Admin Dashboard" button in the header
+1. Quay lại http://localhost:3000
+2. Đăng xuất và đăng nhập lại (để làm mới JWT token với metadata mới)
+3. Bây giờ bạn sẽ thấy nút "Admin Dashboard" trong header
 
-### Step 4: Seed the Database
+### Bước 4: Seed Database
 
-You have two options:
+Bạn có hai lựa chọn:
 
-#### Option A: Use Convex Dashboard (Recommended)
+#### Lựa Chọn A: Sử Dụng Convex Dashboard (Khuyến Nghị)
 
-1. Go to [Convex Dashboard](https://dashboard.convex.dev/)
-2. Select your deployment: "joyous-hedgehog-239"
-3. Go to **Functions** tab
-4. Find and run the `seed` function
-5. This will create 3 sample roadmaps:
+1. Truy cập [Convex Dashboard](https://dashboard.convex.dev/)
+2. Chọn deployment của bạn: "joyous-hedgehog-239"
+3. Vào tab **Functions**
+4. Tìm và chạy function `seed`
+5. Lệnh này sẽ tạo 3 roadmap mẫu:
    - Frontend Developer (beginner)
    - Backend Developer (intermediate)
    - React (intermediate, skill)
 
-#### Option B: Use the Admin Interface
+#### Lựa Chọn B: Sử Dụng Giao Diện Admin
 
-1. Go to http://localhost:3000
-2. Click "Admin Dashboard" button
-3. Navigate to the roadmap creation page
-4. Fill in the form to create a new roadmap:
-   - Slug: unique identifier (e.g., "nodejs")
-   - Title: Display name (e.g., "Node.js Developer")
-   - Description: Brief description
-   - Category: role, skill, or best-practice
-   - Difficulty: beginner, intermediate, or advanced
-   - Status: public, draft, or private
+1. Truy cập http://localhost:3000
+2. Click nút "Admin Dashboard"
+3. Điều hướng đến trang tạo roadmap
+4. Điền form để tạo roadmap mới:
+   - Slug: định danh duy nhất (ví dụ: "nodejs")
+   - Title: Tên hiển thị (ví dụ: "Node.js Developer")
+   - Description: Mô tả ngắn gọn
+   - Category: role, skill, hoặc best-practice
+   - Difficulty: beginner, intermediate, hoặc advanced
+   - Status: public, draft, hoặc private
 
-## Verifying Admin Access
+## Xác Minh Quyền Admin
 
-Once you have admin access, you should see:
+Sau khi có quyền admin, bạn sẽ thấy:
 
-1. **Admin Dashboard** button in the header
-2. Ability to create/edit/delete roadmaps
-3. Access to admin-only GraphQL mutations
+1. Nút **Admin Dashboard** trong header
+2. Khả năng tạo/sửa/xóa roadmap
+3. Truy cập vào các GraphQL mutation dành cho admin
 
-## Troubleshooting
+## Xử Lý Sự Cố
 
-### "Unauthorized" Error When Seeding
+### Lỗi "Unauthorized" Khi Seed
 
-- Make sure you've added the `role: "admin"` to your user's public metadata in Clerk
-- Sign out and sign in again to refresh your JWT token
-- Check the browser console for any authentication errors
+- Đảm bảo bạn đã thêm `role: "admin"` vào public metadata của user trong Clerk
+- Đăng xuất và đăng nhập lại để làm mới JWT token
+- Kiểm tra browser console để tìm lỗi authentication
 
-### Admin Dashboard Not Showing
+### Admin Dashboard Không Hiển Thị
 
-- Verify the role is set correctly in Clerk dashboard
-- Clear browser cache and cookies
-- Check that the JWT token includes the role in metadata:
+- Xác minh role đã được thiết lập đúng trong Clerk dashboard
+- Xóa browser cache và cookies
+- Kiểm tra JWT token có chứa role trong metadata:
   ```javascript
-  // In browser console
+  // Trong browser console
   console.log(await clerk.session.getToken())
   ```
 
-### Seed Function Fails
+### Seed Function Thất Bại
 
-- Make sure you're authenticated (signed in)
-- Verify your role is "admin"
-- Check Convex dashboard logs for detailed error messages
+- Đảm bảo bạn đã đăng nhập (signed in)
+- Xác minh role của bạn là "admin"
+- Kiểm tra Convex dashboard logs để xem thông báo lỗi chi tiết
 
-## Quick Test
+## Kiểm Tra Nhanh
 
-To verify everything is working:
+Để xác minh mọi thứ hoạt động:
 
-1. Sign in as admin
-2. Go to http://localhost:3000/admin/roadmap (if this route exists)
-3. Or use GraphQL Playground at http://localhost:4000/graphql
-4. Try this mutation:
+1. Đăng nhập với tư cách admin
+2. Truy cập http://localhost:3000/admin/roadmap (nếu route này tồn tại)
+3. Hoặc sử dụng GraphQL Playground tại http://localhost:4000/graphql
+4. Thử mutation này:
    ```graphql
    mutation {
      createRoadmap(input: {
@@ -120,18 +120,18 @@ To verify everything is working:
    }
    ```
 
-## Next Steps
+## Bước Tiếp Theo
 
-After setting up admin access and seeding data:
+Sau khi thiết lập quyền admin và seed data:
 
-1. Visit http://localhost:3000 to see the roadmaps on the homepage
-2. Visit http://localhost:3000/roadmaps to see the roadmaps listing page
-3. Click on a roadmap to view its details
-4. Use the admin interface to create more roadmaps
+1. Truy cập http://localhost:3000 để xem roadmap trên trang chủ
+2. Truy cập http://localhost:3000/roadmaps để xem danh sách roadmap
+3. Click vào roadmap để xem chi tiết
+4. Sử dụng giao diện admin để tạo thêm roadmap
 
-## Environment Variables
+## Biến Môi Trường
 
-Make sure these are set in your `.env.local`:
+Đảm bảo các biến này được thiết lập trong `.env.local`:
 
 ```env
 # Clerk

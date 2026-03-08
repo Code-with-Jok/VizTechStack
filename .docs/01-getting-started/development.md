@@ -1,49 +1,49 @@
-# Development Workflow
+# Quy Trình Development
 
-This guide covers development best practices, workflows, and conventions for contributing to VizTechStack.
+Tài liệu này bao gồm các best practices, workflows, và conventions để đóng góp vào VizTechStack.
 
-## Development Commands
+## Commands Development
 
-### Common Commands
+### Commands Thường Dùng
 
 ```bash
 # Development
-pnpm dev                    # Start all apps in dev mode
-pnpm dev --filter @viztechstack/web    # Start web app only
-pnpm dev --filter @viztechstack/api    # Start API only
+pnpm dev                    # Start tất cả apps ở dev mode
+pnpm dev --filter @viztechstack/web    # Start chỉ web app
+pnpm dev --filter @viztechstack/api    # Start chỉ API
 
 # Building
-pnpm build                  # Build all packages and apps
-pnpm build --filter @viztechstack/web  # Build web app only
+pnpm build                  # Build tất cả packages và apps
+pnpm build --filter @viztechstack/web  # Build chỉ web app
 
 # Code Quality
-pnpm lint                   # Lint all packages
-pnpm typecheck              # Type check all packages
-pnpm format                 # Format code with Prettier
-pnpm check:no-any           # Check for 'any' types
+pnpm lint                   # Lint tất cả packages
+pnpm typecheck              # Type check tất cả packages
+pnpm format                 # Format code với Prettier
+pnpm check:no-any           # Kiểm tra 'any' types
 
 # GraphQL Code Generation
-pnpm codegen                # Generate types and schemas
-pnpm codegen:watch          # Watch mode for development
-pnpm codegen:check          # Verify generated files are up to date
+pnpm codegen                # Generate types và schemas
+pnpm codegen:watch          # Watch mode cho development
+pnpm codegen:check          # Verify generated files up to date
 
 # Testing
-pnpm test                   # Run all tests
-pnpm test --filter @viztechstack/api   # Run API tests only
+pnpm test                   # Chạy tất cả tests
+pnpm test --filter @viztechstack/api   # Chạy chỉ API tests
 
 # Utility Scripts
-pnpm generate:module <name>    # Generate new backend module
-pnpm generate:feature <name>   # Generate new frontend feature
-pnpm validate:deps             # Check for circular dependencies
-pnpm analyze:bundle            # Analyze bundle size
+pnpm generate:module <name>    # Generate backend module mới
+pnpm generate:feature <name>   # Generate frontend feature mới
+pnpm validate:deps             # Kiểm tra circular dependencies
+pnpm analyze:bundle            # Phân tích bundle size
 
 # Cleanup
-pnpm clean                  # Clean build artifacts
+pnpm clean                  # Xóa build artifacts
 ```
 
-## Project Structure
+## Cấu Trúc Project
 
-### Monorepo Organization
+### Tổ Chức Monorepo
 
 ```
 viztechstack/
@@ -53,7 +53,7 @@ viztechstack/
 ├── packages/shared/       # Shared packages
 │   ├── graphql-schema/   # GraphQL schema definitions
 │   ├── graphql-generated/# Auto-generated types
-│   ├── api-client/       # GraphQL client with hooks
+│   ├── api-client/       # GraphQL client với hooks
 │   ├── validation/       # Validation utilities
 │   └── types/            # Shared types
 ├── tooling/
@@ -63,9 +63,9 @@ viztechstack/
 └── convex/               # Convex database functions
 ```
 
-### Backend Module Structure
+### Cấu Trúc Backend Module
 
-Each backend module follows hexagonal architecture:
+Mỗi backend module tuân theo hexagonal architecture:
 
 ```
 apps/api/src/modules/{module-name}/
@@ -87,9 +87,9 @@ apps/api/src/modules/{module-name}/
         └── mappers/     # DTO transformations
 ```
 
-### Frontend Feature Structure
+### Cấu Trúc Frontend Feature
 
-Frontend code is organized by feature:
+Frontend code được tổ chức theo feature:
 
 ```
 apps/web/src/features/{feature-name}/
@@ -98,7 +98,7 @@ apps/web/src/features/{feature-name}/
 └── types/               # Feature-specific types
 ```
 
-## Coding Conventions
+## Conventions Coding
 
 ### Naming Conventions
 
@@ -106,20 +106,20 @@ apps/web/src/features/{feature-name}/
 - **Classes**: PascalCase (`RoadmapApplicationService`)
 - **Functions/Variables**: camelCase (`getRoadmapBySlug`)
 - **Constants**: UPPER_SNAKE_CASE (`MAX_RETRY_COUNT`)
-- **Interfaces**: PascalCase with descriptive names (`RoadmapRepository`)
+- **Interfaces**: PascalCase với tên mô tả (`RoadmapRepository`)
 - **Types**: PascalCase (`RoadmapEntity`)
 
 ### Backend Patterns
 
-- **Commands**: `{Verb}{Entity}Command` (e.g., `CreateRoadmapCommand`)
-- **Queries**: `Get{Entity}By{Criteria}Query` (e.g., `GetRoadmapBySlugQuery`)
-- **Entities**: `{Entity}Entity` (e.g., `RoadmapEntity`)
-- **Errors**: `{Entity}{Type}DomainError` (e.g., `RoadmapNotFoundDomainError`)
+- **Commands**: `{Verb}{Entity}Command` (ví dụ: `CreateRoadmapCommand`)
+- **Queries**: `Get{Entity}By{Criteria}Query` (ví dụ: `GetRoadmapBySlugQuery`)
+- **Entities**: `{Entity}Entity` (ví dụ: `RoadmapEntity`)
+- **Errors**: `{Entity}{Type}DomainError` (ví dụ: `RoadmapNotFoundDomainError`)
 - **Repositories**: `{Entity}Repository` interface, `Convex{Entity}Repository` implementation
 
-### Import Organization
+### Tổ Chức Import
 
-Group imports in this order:
+Nhóm imports theo thứ tự này:
 
 1. External dependencies
 2. Internal workspace packages
@@ -139,7 +139,7 @@ import { RoadmapRepository } from '../ports/roadmap.repository'
 
 ## Git Workflow
 
-### Branch Naming
+### Đặt Tên Branch
 
 - **Feature**: `feature/feature-name`
 - **Bugfix**: `bugfix/issue-description`
@@ -148,7 +148,7 @@ import { RoadmapRepository } from '../ports/roadmap.repository'
 
 ### Commit Messages
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+Tuân theo [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 <type>(<scope>): <description>
@@ -159,15 +159,15 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 Types:
-- `feat`: New feature
+- `feat`: Feature mới
 - `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
+- `docs`: Thay đổi documentation
+- `style`: Thay đổi code style (formatting, etc.)
 - `refactor`: Code refactoring
-- `test`: Adding or updating tests
+- `test`: Thêm hoặc update tests
 - `chore`: Maintenance tasks
 
-Examples:
+Ví dụ:
 ```bash
 feat(roadmap): add bookmark functionality
 fix(api): resolve circular dependency in modules
@@ -177,39 +177,39 @@ refactor(web): extract hooks from components
 
 ### Git Hooks
 
-Pre-commit hooks automatically run:
+Pre-commit hooks tự động chạy:
 - ESLint
 - TypeScript type checking
 - Prettier formatting
 
-Commit message validation ensures conventional commit format.
+Commit message validation đảm bảo conventional commit format.
 
 ## Testing
 
-### Running Tests
+### Chạy Tests
 
 ```bash
-# Run all tests
+# Chạy tất cả tests
 pnpm test
 
-# Run tests for specific package
+# Chạy tests cho package cụ thể
 pnpm test --filter @viztechstack/api
 
-# Run tests in watch mode
+# Chạy tests ở watch mode
 pnpm test --watch
 
-# Run tests with coverage
+# Chạy tests với coverage
 pnpm test --coverage
 ```
 
-### Writing Tests
+### Viết Tests
 
-- Co-locate unit tests with source files (`.spec.ts`)
-- Place integration tests in `test/` directory (`.e2e-spec.ts`)
-- Maintain test coverage ≥ 25%
-- Use descriptive test names
+- Co-locate unit tests với source files (`.spec.ts`)
+- Đặt integration tests trong thư mục `test/` (`.e2e-spec.ts`)
+- Duy trì test coverage ≥ 25%
+- Sử dụng tên test mô tả rõ ràng
 
-Example:
+Ví dụ:
 ```typescript
 describe('RoadmapApplicationService', () => {
   describe('createRoadmap', () => {
@@ -232,24 +232,24 @@ describe('RoadmapApplicationService', () => {
 
 ### Schema-First Approach
 
-1. Define GraphQL schema in `packages/shared/graphql-schema/src/**/*.graphql`
-2. Run code generation: `pnpm codegen`
-3. Implement resolvers using generated types
+1. Định nghĩa GraphQL schema trong `packages/shared/graphql-schema/src/**/*.graphql`
+2. Chạy code generation: `pnpm codegen`
+3. Implement resolvers sử dụng generated types
 
 ### Code Generation
 
-GraphQL Codegen automatically generates:
+GraphQL Codegen tự động generates:
 - TypeScript types
 - Zod validation schemas
-- React hooks for queries/mutations
+- React hooks cho queries/mutations
 
-Run `pnpm codegen:watch` during development for automatic regeneration.
+Chạy `pnpm codegen:watch` trong quá trình development để tự động regeneration.
 
 ## Debugging
 
 ### VS Code Debug Configuration
 
-Create `.vscode/launch.json`:
+Tạo `.vscode/launch.json`:
 
 ```json
 {
@@ -277,7 +277,7 @@ Create `.vscode/launch.json`:
 
 ### Logging
 
-Use structured logging:
+Sử dụng structured logging:
 
 ```typescript
 // Backend (NestJS)
@@ -293,21 +293,21 @@ console.error('[Roadmap]', 'Failed to load', error)
 
 ### Build Performance
 
-- Turbo caching speeds up builds
-- Incremental builds only rebuild changed packages
-- Use `--filter` to build specific packages
+- Turbo caching tăng tốc builds
+- Incremental builds chỉ rebuild các packages đã thay đổi
+- Sử dụng `--filter` để build các packages cụ thể
 
 ### Development Performance
 
-- Hot Module Replacement (HMR) for fast refresh
-- Feature-based structure improves HMR performance
-- Use `pnpm dev --filter` to run only needed services
+- Hot Module Replacement (HMR) cho fast refresh
+- Feature-based structure cải thiện HMR performance
+- Sử dụng `pnpm dev --filter` để chỉ chạy services cần thiết
 
 ## Troubleshooting
 
-### Common Issues
+### Issues Thường Gặp
 
-1. **TypeScript errors after pulling changes**
+1. **TypeScript errors sau khi pull changes**
    ```bash
    pnpm clean
    pnpm install
@@ -325,11 +325,11 @@ console.error('[Roadmap]', 'Failed to load', error)
    ```
 
 4. **Port conflicts**
-   - Frontend: Change port in `apps/web/package.json`
-   - Backend: Change port in `apps/api/src/main.ts`
+   - Frontend: Thay đổi port trong `apps/web/package.json`
+   - Backend: Thay đổi port trong `apps/api/src/main.ts`
 
-## Next Steps
+## Các Bước Tiếp Theo
 
-- [Architecture Overview](../02-architecture/README.md) - Understand system architecture
-- [Features Documentation](../03-features/README.md) - Learn about features
-- [Implementation Guides](../04-implementation/README.md) - Deep dive into implementation
+- [Tổng Quan Architecture](../02-architecture/README.md) - Hiểu system architecture
+- [Documentation Features](../03-features/README.md) - Tìm hiểu về features
+- [Hướng Dẫn Implementation](../04-implementation/README.md) - Deep dive vào implementation

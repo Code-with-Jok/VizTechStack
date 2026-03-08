@@ -1,29 +1,29 @@
-# Hexagonal Architecture Guide
+# Hướng Dẫn Hexagonal Architecture
 
-## Overview
+## Tổng Quan
 
-VizTechStack backend modules follow hexagonal architecture (also known as ports and adapters) to achieve clean separation of concerns and testable business logic.
+Backend modules của VizTechStack tuân theo hexagonal architecture (còn gọi là ports and adapters) để đạt được sự phân tách concerns rõ ràng và business logic có thể test được.
 
-## Architecture Layers
+## Các Layer Kiến Trúc
 
 ```
 Transport Layer (GraphQL Resolvers)
-    ↓ depends on
+    ↓ phụ thuộc vào
 Application Layer (Services, Commands, Queries)
-    ↓ depends on
+    ↓ phụ thuộc vào
 Domain Layer (Entities, Policies, Errors)
     ↑ implements
 Infrastructure Layer (Repository Adapters)
 ```
 
-## Module Structure
+## Cấu Trúc Module
 
 ```
 apps/api/src/modules/{module-name}/
 ├── application/           # Application Layer
-│   ├── commands/         # Write operations
-│   ├── queries/          # Read operations
-│   ├── services/         # Use case orchestration
+│   ├── commands/         # Thao tác ghi
+│   ├── queries/          # Thao tác đọc
+│   ├── services/         # Orchestration use case
 │   └── ports/            # Repository interfaces
 ├── domain/               # Domain Layer
 │   ├── entities/         # Business objects
@@ -38,19 +38,19 @@ apps/api/src/modules/{module-name}/
         └── mappers/      # DTO transformations
 ```
 
-## Layer Responsibilities
+## Trách Nhiệm Các Layer
 
 ### Transport Layer
 
-**Purpose**: Handle external communication (GraphQL, REST, etc.)
+**Mục Đích**: Xử lý giao tiếp bên ngoài (GraphQL, REST, etc.)
 
-**Contains**:
+**Chứa**:
 - GraphQL resolvers
 - GraphQL type definitions
 - DTO mappers
 - Exception filters
 
-**Example**:
+**Ví Dụ**:
 ```typescript
 @Resolver(() => Roadmap)
 export class RoadmapResolver {
@@ -66,15 +66,15 @@ export class RoadmapResolver {
 
 ### Application Layer
 
-**Purpose**: Orchestrate use cases and business workflows
+**Mục Đích**: Orchestrate use cases và business workflows
 
-**Contains**:
-- Commands (write operations)
-- Queries (read operations)
+**Chứa**:
+- Commands (thao tác ghi)
+- Queries (thao tác đọc)
 - Application services
 - Repository interfaces (ports)
 
-**Example**:
+**Ví Dụ**:
 ```typescript
 @Injectable()
 export class RoadmapApplicationService {
@@ -92,15 +92,15 @@ export class RoadmapApplicationService {
 
 ### Domain Layer
 
-**Purpose**: Contain business logic and rules
+**Mục Đích**: Chứa business logic và rules
 
-**Contains**:
+**Chứa**:
 - Domain entities
 - Business policies
 - Domain errors
 - Value objects
 
-**Example**:
+**Ví Dụ**:
 ```typescript
 export class RoadmapEntity {
   constructor(
@@ -121,14 +121,14 @@ export class RoadmapEntity {
 
 ### Infrastructure Layer
 
-**Purpose**: Implement technical concerns (database, external services)
+**Mục Đích**: Triển khai technical concerns (database, external services)
 
-**Contains**:
+**Chứa**:
 - Repository implementations
 - Database adapters
 - External service clients
 
-**Example**:
+**Ví Dụ**:
 ```typescript
 @Injectable()
 export class ConvexRoadmapRepository implements RoadmapRepository {
@@ -143,13 +143,13 @@ export class ConvexRoadmapRepository implements RoadmapRepository {
 
 ## Dependency Injection
 
-Use NestJS DI with symbol tokens:
+Sử dụng NestJS DI với symbol tokens:
 
 ```typescript
-// Define token
+// Định nghĩa token
 export const ROADMAP_REPOSITORY = Symbol('ROADMAP_REPOSITORY')
 
-// Module configuration
+// Cấu hình module
 @Module({
   providers: [
     {
@@ -162,24 +162,24 @@ export const ROADMAP_REPOSITORY = Symbol('ROADMAP_REPOSITORY')
 export class RoadmapModule {}
 ```
 
-## Benefits
+## Lợi Ích
 
-- **Testability**: Easy to mock dependencies
-- **Flexibility**: Swap implementations without changing business logic
-- **Maintainability**: Clear separation of concerns
-- **Independence**: Business logic independent of frameworks
+- **Testability**: Dễ dàng mock dependencies
+- **Flexibility**: Thay đổi implementations mà không thay đổi business logic
+- **Maintainability**: Phân tách concerns rõ ràng
+- **Independence**: Business logic độc lập với frameworks
 
-## Generating New Modules
+## Tạo Module Mới
 
-Use the utility script:
+Sử dụng utility script:
 
 ```bash
 pnpm generate:module user-profile
 ```
 
-This creates the complete hexagonal structure automatically.
+Lệnh này tự động tạo cấu trúc hexagonal hoàn chỉnh.
 
-## See Also
+## Xem Thêm
 
-- [Backend Module Structure](../02-architecture/README.md#backend-module-structure)
-- [Roadmap Feature](../03-features/roadmap.md)
+- [Cấu Trúc Backend Module](../02-architecture/README.md#backend-module-structure)
+- [Tính Năng Roadmap](../03-features/roadmap.md)

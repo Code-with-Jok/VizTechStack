@@ -1,12 +1,12 @@
-# Progress Tracking Feature
+# Tính Năng Theo Dõi Tiến Độ
 
-## Overview
+## Tổng Quan
 
-The Progress Tracking feature allows users to track their learning progress across roadmaps by marking topics as not-started, in-progress, or completed.
+Tính năng Theo Dõi Tiến Độ cho phép người dùng theo dõi tiến độ học tập của họ trên các roadmap bằng cách đánh dấu topic là not-started, in-progress, hoặc completed.
 
-## Module Structure
+## Cấu Trúc Module
 
-Located at `apps/api/src/modules/progress/` following hexagonal architecture.
+Nằm tại `apps/api/src/modules/progress/` tuân theo hexagonal architecture.
 
 ## Data Model
 
@@ -22,16 +22,16 @@ interface ProgressEntity {
 }
 ```
 
-## Key Operations
+## Các Thao Tác Chính
 
-- Update progress status
-- Get user progress for a roadmap
-- Calculate completion statistics
+- Cập nhật trạng thái tiến độ
+- Lấy tiến độ người dùng cho một roadmap
+- Tính toán thống kê hoàn thành
 
 ## Frontend Components
 
-Located at `apps/web/src/features/progress/components/ProgressTracker.tsx`
+Nằm tại `apps/web/src/features/progress/components/ProgressTracker.tsx`
 
-## See Also
+## Xem Thêm
 
-- [Roadmap Feature](./roadmap.md)
+- [Tính Năng Roadmap](./roadmap.md)

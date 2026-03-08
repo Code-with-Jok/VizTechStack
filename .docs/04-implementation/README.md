@@ -1,57 +1,57 @@
-# Implementation Guides
+# Hướng Dẫn Triển Khai
 
-This section provides detailed implementation guides for key technical patterns and practices used in VizTechStack.
+Phần này cung cấp hướng dẫn triển khai chi tiết cho các pattern và practice kỹ thuật chính được sử dụng trong VizTechStack.
 
-## Contents
+## Nội Dung
 
-- [Hexagonal Architecture](./hexagonal-architecture.md) - Backend module architecture pattern
-- [GraphQL Code Generation](./graphql-codegen.md) - Type generation and validation
-- [Git Hooks](./git-hooks.md) - Code quality automation with Husky
-- [Testing Strategy](./testing.md) - Testing approaches and best practices
-- [Error Handling](./error-handling.md) - Error handling patterns
+- [Hexagonal Architecture](./hexagonal-architecture.md) - Pattern kiến trúc backend module
+- [GraphQL Code Generation](./graphql-codegen.md) - Tạo type và validation
+- [Git Hooks](./git-hooks.md) - Tự động hóa chất lượng code với Husky
+- [Testing Strategy](./testing.md) - Phương pháp testing và best practices
+- [Error Handling](./error-handling.md) - Pattern xử lý lỗi
 
-## Key Implementation Patterns
+## Pattern Triển Khai Chính
 
 ### Backend Patterns
 
 1. **Hexagonal Architecture**
-   - Clear layer separation
+   - Phân tách layer rõ ràng
    - Dependency inversion
-   - Testable business logic
+   - Business logic có thể test được
 
 2. **CQRS (Command Query Responsibility Segregation)**
-   - Separate read and write operations
-   - Commands for writes
-   - Queries for reads
+   - Tách biệt thao tác đọc và ghi
+   - Commands cho ghi
+   - Queries cho đọc
 
 3. **Repository Pattern**
    - Abstract data access
-   - Interface-based contracts
-   - Swappable implementations
+   - Contract dựa trên interface
+   - Implementation có thể thay thế
 
 ### Frontend Patterns
 
 1. **Feature-Based Structure**
-   - Organize by feature, not by type
-   - Co-locate related code
-   - Improved maintainability
+   - Tổ chức theo feature, không theo type
+   - Co-locate code liên quan
+   - Cải thiện khả năng maintain
 
 2. **Custom Hooks**
-   - Extract reusable logic
-   - Separate concerns
-   - Testable components
+   - Trích xuất logic có thể tái sử dụng
+   - Tách biệt concerns
+   - Component có thể test được
 
 3. **Type-Safe API Calls**
-   - Generated TypeScript types
-   - Runtime validation with Zod
-   - Error handling
+   - TypeScript types được generate
+   - Runtime validation với Zod
+   - Xử lý lỗi
 
 ### Shared Patterns
 
 1. **Code Generation**
-   - GraphQL schema as source of truth
-   - Auto-generated types and schemas
-   - Reduced duplication
+   - GraphQL schema là source of truth
+   - Auto-generated types và schemas
+   - Giảm duplication
 
 2. **Monorepo Organization**
    - Shared packages
@@ -63,9 +63,9 @@ This section provides detailed implementation guides for key technical patterns 
    - Compile-time checking
    - Runtime validation
 
-## Development Workflow
+## Quy Trình Development
 
-### 1. Define GraphQL Schema
+### 1. Định Nghĩa GraphQL Schema
 
 ```graphql
 type Roadmap {
@@ -81,7 +81,7 @@ type Roadmap {
 pnpm codegen
 ```
 
-### 3. Implement Backend
+### 3. Triển Khai Backend
 
 ```typescript
 // Domain entity
@@ -97,7 +97,7 @@ export class RoadmapApplicationService { ... }
 export class RoadmapResolver { ... }
 ```
 
-### 4. Implement Frontend
+### 4. Triển Khai Frontend
 
 ```typescript
 // Custom hook
@@ -121,36 +121,36 @@ git commit -m "feat(roadmap): add roadmap listing"
 
 ## Best Practices
 
-### Code Organization
+### Tổ Chức Code
 
-- Keep modules small and focused
-- Follow naming conventions
-- Use barrel exports (index.ts)
-- Co-locate related code
+- Giữ module nhỏ và tập trung
+- Tuân theo naming conventions
+- Sử dụng barrel exports (index.ts)
+- Co-locate code liên quan
 
 ### Type Safety
 
-- Use generated types
-- Avoid `any` type
-- Validate at boundaries
-- Use Zod for runtime validation
+- Sử dụng generated types
+- Tránh type `any`
+- Validate tại boundaries
+- Sử dụng Zod cho runtime validation
 
 ### Testing
 
-- Write unit tests for business logic
+- Viết unit tests cho business logic
 - Test edge cases
 - Mock external dependencies
-- Maintain coverage ≥ 25%
+- Duy trì coverage ≥ 25%
 
 ### Git Workflow
 
-- Use conventional commits
-- Keep commits atomic
-- Write descriptive messages
-- Review before pushing
+- Sử dụng conventional commits
+- Giữ commits atomic
+- Viết message mô tả rõ ràng
+- Review trước khi push
 
-## Navigation
+## Điều Hướng
 
-← [Previous: Features](../03-features/README.md)  
-→ [Next: Deployment](../05-deployment/README.md)  
-↑ [Documentation Index](../README.md)
+← [Trước: Tính Năng](../03-features/README.md)  
+→ [Tiếp: Deployment](../05-deployment/README.md)  
+↑ [Mục Lục Tài Liệu](../README.md)

@@ -1,26 +1,26 @@
-# Analysis
+# Phân Tích
 
-This section contains codebase analysis, technical debt tracking, and performance metrics.
+Phần này chứa phân tích codebase, theo dõi technical debt, và performance metrics.
 
-## Contents
+## Nội Dung
 
-- [Codebase Analysis](./codebase-analysis.md) - Comprehensive codebase analysis
-- [Completed Tasks](./completed-tasks.md) - Historical task completion records
-- [Technical Debt](./technical-debt.md) - Known technical debt items
-- [Performance Metrics](./performance.md) - Performance benchmarks and optimization
+- [Phân Tích Codebase](./codebase-analysis.md) - Phân tích codebase toàn diện
+- [Completed Tasks](./completed-tasks.md) - Lịch sử hoàn thành task
+- [Technical Debt](./technical-debt.md) - Các mục technical debt đã biết
+- [Performance Metrics](./performance.md) - Performance benchmarks và optimization
 
-## Overview
+## Tổng Quan
 
-Regular analysis helps maintain code quality and identify areas for improvement.
+Phân tích thường xuyên giúp duy trì chất lượng code và xác định các khu vực cần cải thiện.
 
-## Key Metrics
+## Metrics Chính
 
 - **Test Coverage**: ≥ 25%
-- **Build Time**: Monitored via Turbo cache
-- **Bundle Size**: Tracked via analyze:bundle script
-- **Dependencies**: Validated via validate:deps script
+- **Build Time**: Theo dõi qua Turbo cache
+- **Bundle Size**: Theo dõi qua script analyze:bundle
+- **Dependencies**: Xác thực qua script validate:deps
 
-## Navigation
+## Điều Hướng
 
-← [Previous: Deployment](../05-deployment/README.md)  
-↑ [Documentation Index](../README.md)
+← [Trước: Deployment](../05-deployment/README.md)  
+↑ [Mục Lục Tài Liệu](../README.md)

@@ -1,56 +1,56 @@
 # Getting Started
 
-Welcome to VizTechStack! This section will help you get up and running with the project.
+Chào mừng đến với VizTechStack! Phần này sẽ giúp bạn bắt đầu với project.
 
-## Overview
+## Tổng Quan
 
-VizTechStack is an interactive learning platform that helps users explore and track technology learning roadmaps. The platform visualizes learning paths as interactive graphs, allowing users to navigate through topics, track progress, and access educational content.
+VizTechStack là nền tảng học tập tương tác giúp users khám phá và theo dõi technology learning roadmaps. Nền tảng này visualize learning paths dưới dạng interactive graphs, cho phép users điều hướng qua các topics, theo dõi progress, và truy cập educational content.
 
-## Quick Start
+## Bắt Đầu Nhanh
 
-1. **Prerequisites**
+1. **Yêu Cầu Trước**
    - Node.js >= 20.11.0
    - pnpm 9.15.0
    - Git
 
-2. **Installation**
+2. **Cài Đặt**
    ```bash
-   # Clone the repository
+   # Clone repository
    git clone <repository-url>
    cd viztechstack
 
-   # Install dependencies
+   # Cài đặt dependencies
    pnpm install
    ```
 
 3. **Development**
    ```bash
-   # Start all services
+   # Start tất cả services
    pnpm dev
 
-   # Or start specific services
-   pnpm dev --filter @viztechstack/web    # Frontend only
-   pnpm dev --filter @viztechstack/api    # Backend only
+   # Hoặc start services cụ thể
+   pnpm dev --filter @viztechstack/web    # Chỉ Frontend
+   pnpm dev --filter @viztechstack/api    # Chỉ Backend
    ```
 
-4. **Access the Application**
+4. **Truy Cập Application**
    - Frontend: http://localhost:3000
    - API: http://localhost:4000/graphql
 
-## Contents
+## Nội Dung
 
-- [Installation Guide](./installation.md) - Detailed installation instructions
-- [Development Workflow](./development.md) - Development best practices and workflows
-- [Admin Setup Guide](./admin-setup.md) - Setting up admin access
+- [Hướng Dẫn Cài Đặt](./installation.md) - Hướng dẫn cài đặt chi tiết
+- [Quy Trình Development](./development.md) - Best practices và workflows development
+- [Hướng Dẫn Cài Đặt Admin](./admin-setup.md) - Cài đặt admin access
 
 ## Tech Stack
 
 - **Frontend**: Next.js 16.1.6, React 19.2.3, TypeScript 5.7, Tailwind CSS 4
 - **Backend**: NestJS 11.0.1, GraphQL (Apollo Server 5.4.0)
 - **Database**: Convex (serverless database)
-- **Monorepo**: pnpm workspaces with Turbo 2.4.0
+- **Monorepo**: pnpm workspaces với Turbo 2.4.0
 
-## Navigation
+## Điều Hướng
 
-→ [Next: Architecture](../02-architecture/README.md)  
-↑ [Documentation Index](../README.md)
+→ [Tiếp: Architecture](../02-architecture/README.md)  
+↑ [Mục Lục Documentation](../README.md)

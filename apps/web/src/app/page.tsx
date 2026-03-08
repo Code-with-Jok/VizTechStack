@@ -26,7 +26,7 @@ export default async function Home() {
       revalidate: 120,
       tags: ["roadmaps-public"],
     });
-    console.log('[Homepage] Successfully fetched roadmaps:', {
+    console.log("[Homepage] Successfully fetched roadmaps:", {
       count: roadmapsPage.items.length,
       isDone: roadmapsPage.isDone,
     });
@@ -34,7 +34,7 @@ export default async function Home() {
     roadmaps = roadmapsPage.items;
   } catch (error) {
     // Keep homepage available even when API is unreachable at build/runtime.
-    console.error('[Homepage] Failed to fetch roadmaps for homepage.', {
+    console.error("[Homepage] Failed to fetch roadmaps for homepage.", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
@@ -51,7 +51,7 @@ export default async function Home() {
       <main className="flex-1 container mx-auto max-w-5xl px-4 py-12">
         <div className="flex flex-col items-center mb-16 space-y-4 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-zinc-900 dark:text-zinc-50">
-            Developer Roadmaps
+            VizTechStack
           </h1>
           <p className="max-w-[85%] text-lg text-zinc-600 dark:text-zinc-400 sm:text-xl">
             Step by step guides and paths to learn different tools or

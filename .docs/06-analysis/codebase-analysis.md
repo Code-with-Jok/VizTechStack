@@ -2,7 +2,6 @@
 
 **Ngày phân tích:** 2026-03-08  
 **Phiên bản:** 2.0.0 (Phân tích chi tiết)  
-**Người phân tích:** Kiro AI Assistant  
 **Ngôn ngữ:** Tiếng Việt
 
 ---

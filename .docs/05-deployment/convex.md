@@ -1,54 +1,54 @@
-# Convex Database Migration Plan
+# Kế Hoạch Migration Convex Database
 
-## Overview
+## Tổng Quan
 
-This document outlines the database migration strategy for deploying the VizTechStack Roadmap feature to production.
+Tài liệu này mô tả chiến lược migration database để deploy tính năng VizTechStack Roadmap lên production.
 
-## Current Schema Status
+## Trạng Thái Schema Hiện Tại
 
-**Location:** `convex/schema.ts`
+**Vị trí:** `convex/schema.ts`
 
-**Tables Defined:**
-- `roadmaps` - Main roadmap data with graph structure
-- `roadmapSummaries` - Denormalized data for list queries
-- `topics` - Detailed content for nodes
-- `progress` - User progress tracking
-- `bookmarks` - User bookmarks
+**Tables Đã Định Nghĩa:**
+- `roadmaps` - Dữ liệu roadmap chính với cấu trúc graph
+- `roadmapSummaries` - Dữ liệu denormalized cho list queries
+- `topics` - Nội dung chi tiết cho nodes
+- `progress` - Theo dõi progress của user
+- `bookmarks` - Bookmarks của user
 
 **Indexes:**
-- `by_slug` on roadmaps
-- `by_category` on roadmaps
-- `by_status` on roadmaps
-- `by_createdAt` on roadmaps
-- User-specific indexes on progress and bookmarks
+- `by_slug` trên roadmaps
+- `by_category` trên roadmaps
+- `by_status` trên roadmaps
+- `by_createdAt` trên roadmaps
+- User-specific indexes trên progress và bookmarks
 
-## Deployment Strategy
+## Chiến Lược Deployment
 
 ### Phase 1: Schema Deployment
 
-1. **Deploy to Convex Cloud**
+1. **Deploy Lên Convex Cloud**
    ```bash
    npx convex deploy
    ```
-   - Convex automatically handles schema migrations
-   - No downtime required for additive changes
-   - Indexes are created automatically
+   - Convex tự động xử lý schema migrations
+   - Không cần downtime cho additive changes
+   - Indexes được tạo tự động
 
 2. **Verify Schema**
-   - Check Convex dashboard for table creation
-   - Verify indexes are active
-   - Test queries in Convex dashboard
+   - Kiểm tra Convex dashboard để xem table creation
+   - Verify indexes đang active
+   - Test queries trong Convex dashboard
 
-### Phase 2: Data Seeding (Optional)
+### Phase 2: Data Seeding (Tùy Chọn)
 
-If seeding initial data:
+Nếu seeding initial data:
 
-1. **Create Seed Script**
-   - Location: `convex/seed.ts`
-   - Seed sample roadmaps for testing
-   - Seed admin user data if needed
+1. **Tạo Seed Script**
+   - Vị trí: `convex/seed.ts`
+   - Seed sample roadmaps để testing
+   - Seed admin user data nếu cần
 
-2. **Run Seed**
+2. **Chạy Seed**
    ```bash
    npx convex run seed:seedRoadmaps
    ```
@@ -58,41 +58,41 @@ If seeding initial data:
 1. **Test Queries**
    - List roadmaps: `npx convex run roadmaps:list`
    - Get by slug: `npx convex run roadmaps:getBySlug --slug "frontend-developer"`
-   - Verify real-time subscriptions work
+   - Verify real-time subscriptions hoạt động
 
 2. **Test Mutations**
-   - Create test roadmap via GraphQL API
+   - Tạo test roadmap qua GraphQL API
    - Update roadmap
-   - Delete test roadmap
+   - Xóa test roadmap
 
 3. **Performance Testing**
-   - Test with 100+ nodes roadmap
+   - Test với roadmap có 100+ nodes
    - Verify query performance
-   - Check real-time sync latency
+   - Kiểm tra real-time sync latency
 
-## Rollback Plan
+## Kế Hoạch Rollback
 
 ### Scenario 1: Schema Issues
 
-**Problem:** Schema deployment fails or causes errors
+**Vấn đề:** Schema deployment fails hoặc gây ra errors
 
-**Solution:**
-1. Convex maintains schema history
-2. Revert to previous deployment:
+**Giải pháp:**
+1. Convex duy trì schema history
+2. Revert về previous deployment:
    ```bash
    npx convex rollback
    ```
-3. Fix schema issues locally
-4. Redeploy when ready
+3. Fix schema issues ở local
+4. Redeploy khi sẵn sàng
 
 ### Scenario 2: Data Corruption
 
-**Problem:** Data becomes corrupted or invalid
+**Vấn đề:** Data bị corrupted hoặc invalid
 
-**Solution:**
-1. Convex provides point-in-time recovery
-2. Contact Convex support for data restoration
-3. Alternatively, clear affected tables and reseed:
+**Giải pháp:**
+1. Convex cung cấp point-in-time recovery
+2. Liên hệ Convex support để data restoration
+3. Hoặc, clear affected tables và reseed:
    ```bash
    npx convex run admin:clearTable --table "roadmaps"
    npx convex run seed:seedRoadmaps
@@ -100,30 +100,30 @@ If seeding initial data:
 
 ### Scenario 3: Performance Issues
 
-**Problem:** Queries are slow or timing out
+**Vấn đề:** Queries chậm hoặc timing out
 
-**Solution:**
-1. Check index usage in Convex dashboard
-2. Add missing indexes if needed
-3. Optimize queries to use indexes
-4. Consider denormalization (already done with roadmapSummaries)
+**Giải pháp:**
+1. Kiểm tra index usage trong Convex dashboard
+2. Thêm missing indexes nếu cần
+3. Tối ưu queries để sử dụng indexes
+4. Cân nhắc denormalization (đã làm với roadmapSummaries)
 
 ## Production Checklist
 
-- [ ] Convex project created in production environment
-- [ ] Environment variables configured in Vercel
+- [ ] Convex project đã tạo trong production environment
+- [ ] Environment variables đã cấu hình trong Vercel
   - `CONVEX_URL` - Production Convex URL
   - `NEXT_PUBLIC_CONVEX_URL` - Public Convex URL
-- [ ] Schema deployed to production
-- [ ] Indexes verified active
-- [ ] Test queries executed successfully
-- [ ] Real-time subscriptions tested
-- [ ] Performance benchmarks met
-- [ ] Monitoring and alerts configured
+- [ ] Schema đã deploy lên production
+- [ ] Indexes đã verify active
+- [ ] Test queries đã thực thi thành công
+- [ ] Real-time subscriptions đã test
+- [ ] Performance benchmarks đạt yêu cầu
+- [ ] Monitoring và alerts đã cấu hình
 
 ## Monitoring
 
-### Key Metrics to Monitor
+### Metrics Quan Trọng Cần Theo Dõi
 
 1. **Query Performance**
    - Average query time < 100ms
@@ -132,65 +132,65 @@ If seeding initial data:
 
 2. **Database Size**
    - Monitor table sizes
-   - Set up alerts for rapid growth
-   - Plan for scaling if needed
+   - Cài đặt alerts cho rapid growth
+   - Lên kế hoạch scaling nếu cần
 
 3. **Error Rates**
    - Monitor failed queries
    - Track validation errors
-   - Alert on error spikes
+   - Alert khi error spikes
 
 ### Convex Dashboard
 
-- Access: https://dashboard.convex.dev
+- Truy cập: https://dashboard.convex.dev
 - Monitor real-time metrics
-- View query logs
-- Check function execution times
+- Xem query logs
+- Kiểm tra function execution times
 
-## Backup Strategy
+## Chiến Lược Backup
 
 **Convex Automatic Backups:**
-- Convex maintains automatic backups
+- Convex duy trì automatic backups
 - Point-in-time recovery available
-- Contact support for restoration
+- Liên hệ support để restoration
 
-**Manual Backups (Optional):**
-- Export data periodically via queries
-- Store exports in secure location
+**Manual Backups (Tùy Chọn):**
+- Export data định kỳ qua queries
+- Lưu exports ở vị trí an toàn
 - Document restoration procedure
 
-## Migration Timeline
+## Timeline Migration
 
-**Estimated Time:** 30 minutes
+**Thời Gian Ước Tính:** 30 phút
 
-1. Schema deployment: 5 minutes
-2. Verification: 10 minutes
-3. Performance testing: 10 minutes
-4. Monitoring setup: 5 minutes
+1. Schema deployment: 5 phút
+2. Verification: 10 phút
+3. Performance testing: 10 phút
+4. Monitoring setup: 5 phút
 
-**Recommended Window:** Low-traffic period (e.g., late night)
+**Khung Giờ Khuyến Nghị:** Thời gian ít traffic (ví dụ: đêm khuya)
 
-## Post-Migration Tasks
+## Tasks Sau Migration
 
-1. Monitor error logs for 24 hours
-2. Verify all features working in production
-3. Check performance metrics
-4. Gather user feedback
-5. Document any issues encountered
+1. Monitor error logs trong 24 giờ
+2. Verify tất cả features hoạt động trong production
+3. Kiểm tra performance metrics
+4. Thu thập user feedback
+5. Ghi chép các issues gặp phải
 
-## Contact Information
+## Thông Tin Liên Hệ
 
 **Convex Support:**
 - Email: support@convex.dev
 - Discord: https://discord.gg/convex
 - Documentation: https://docs.convex.dev
 
-**Team Contacts:**
-- Database Admin: [Your contact]
-- DevOps Lead: [Your contact]
-- On-call Engineer: [Your contact]
+**Liên Hệ Team:**
+- Database Admin: [Thông tin liên hệ của bạn]
+- DevOps Lead: [Thông tin liên hệ của bạn]
+- On-call Engineer: [Thông tin liên hệ của bạn]
 
 ---
 
-**Last Updated:** 2026-03-07
-**Status:** Ready for deployment
+**Cập Nhật Lần Cuối:** 2026-03-07
+**Trạng Thái:** Sẵn sàng để deployment

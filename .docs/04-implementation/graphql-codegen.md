@@ -1,10 +1,10 @@
 # GraphQL Code Generation
 
-## Overview
+## Tổng Quan
 
-VizTechStack uses GraphQL Code Generator to automatically generate TypeScript types and Zod validation schemas from GraphQL schema definitions, ensuring type safety and runtime validation across the stack.
+VizTechStack sử dụng GraphQL Code Generator để tự động tạo TypeScript types và Zod validation schemas từ GraphQL schema definitions, đảm bảo type safety và runtime validation trên toàn stack.
 
-## Architecture
+## Kiến Trúc
 
 ```
 GraphQL Schema (Source of Truth)
@@ -15,9 +15,9 @@ GraphQL Code Generator
     └─→ Zod Schemas (Runtime validation)
 ```
 
-## Configuration
+## Cấu Hình
 
-Located in `codegen.ts` at project root:
+Nằm trong `codegen.ts` ở thư mục root:
 
 ```typescript
 const config: CodegenConfig = {
@@ -41,22 +41,22 @@ const config: CodegenConfig = {
 };
 ```
 
-## Usage
+## Sử Dụng
 
 ### Generate Types
 
 ```bash
-# Generate once
+# Generate một lần
 pnpm codegen
 
 # Watch mode (development)
 pnpm codegen:watch
 
-# Check if generated files are up to date
+# Kiểm tra file generated có up to date không
 pnpm codegen:check
 ```
 
-### Using Generated Types
+### Sử Dụng Generated Types
 
 ```typescript
 import { Roadmap, RoadmapSchema } from '@viztechstack/graphql-generated'
@@ -68,22 +68,22 @@ const roadmap: Roadmap = { ... }
 const validated = RoadmapSchema.parse(data)
 ```
 
-## Benefits
+## Lợi Ích
 
-- **Single Source of Truth**: GraphQL schema drives all types
-- **Type Safety**: Compile-time checking with TypeScript
-- **Runtime Validation**: Zod schemas catch runtime errors
-- **Auto-sync**: Types update automatically when schema changes
-- **Zero Duplication**: No manual type definitions needed
+- **Single Source of Truth**: GraphQL schema điều khiển tất cả types
+- **Type Safety**: Compile-time checking với TypeScript
+- **Runtime Validation**: Zod schemas bắt runtime errors
+- **Auto-sync**: Types tự động cập nhật khi schema thay đổi
+- **Zero Duplication**: Không cần định nghĩa type thủ công
 
-## Workflow
+## Quy Trình
 
-1. Define GraphQL schema in `.graphql` files
-2. Run `pnpm codegen` to generate types and schemas
-3. Import generated types in your code
-4. Use Zod schemas for runtime validation
+1. Định nghĩa GraphQL schema trong file `.graphql`
+2. Chạy `pnpm codegen` để generate types và schemas
+3. Import generated types trong code của bạn
+4. Sử dụng Zod schemas cho runtime validation
 
-## See Also
+## Xem Thêm
 
 - [GraphQL Schema Package](../../packages/shared/graphql-schema/)
 - [Generated Types Package](../../packages/shared/graphql-generated/)

@@ -1,12 +1,12 @@
-# Bookmark Feature
+# Tính Năng Bookmark
 
-## Overview
+## Tổng Quan
 
-The Bookmark feature allows users to save their favorite roadmaps for quick access.
+Tính năng Bookmark cho phép người dùng lưu roadmap yêu thích để truy cập nhanh.
 
-## Module Structure
+## Cấu Trúc Module
 
-Located at `apps/api/src/modules/bookmark/` following hexagonal architecture.
+Nằm tại `apps/api/src/modules/bookmark/` tuân theo hexagonal architecture.
 
 ## Data Model
 
@@ -19,19 +19,19 @@ interface BookmarkEntity {
 }
 ```
 
-## Key Operations
+## Các Thao Tác Chính
 
-- Add bookmark
-- Remove bookmark
-- Get user bookmarks
-- Check if roadmap is bookmarked
+- Thêm bookmark
+- Xóa bookmark
+- Lấy bookmark của người dùng
+- Kiểm tra roadmap đã được bookmark chưa
 
 ## Frontend Components
 
-Located at `apps/web/src/features/bookmark/`:
+Nằm tại `apps/web/src/features/bookmark/`:
 - `BookmarkButton.tsx` - Toggle bookmark
-- `BookmarkedRoadmapsList.tsx` - List of bookmarked roadmaps
+- `BookmarkedRoadmapsList.tsx` - Danh sách roadmap đã bookmark
 
-## See Also
+## Xem Thêm
 
-- [Roadmap Feature](./roadmap.md)
+- [Tính Năng Roadmap](./roadmap.md)

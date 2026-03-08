@@ -1,43 +1,43 @@
 # Architecture
 
-This section provides comprehensive documentation of VizTechStack's architecture, design decisions, and technical implementation.
+Phần này cung cấp documentation toàn diện về architecture, quyết định thiết kế, và technical implementation của VizTechStack.
 
-## Overview
+## Tổng Quan
 
-VizTechStack follows a modern, scalable architecture with clear separation of concerns:
+VizTechStack tuân theo architecture hiện đại, có khả năng mở rộng với sự tách biệt rõ ràng các concerns:
 
-- **Monorepo Structure**: pnpm workspaces with Turbo for build orchestration
-- **Backend**: NestJS with hexagonal architecture
-- **Frontend**: Next.js with feature-based structure
+- **Cấu Trúc Monorepo**: pnpm workspaces với Turbo cho build orchestration
+- **Backend**: NestJS với hexagonal architecture
+- **Frontend**: Next.js với feature-based structure
 - **Database**: Convex serverless database
-- **API**: GraphQL with code-first approach
+- **API**: GraphQL với code-first approach
 
-## Contents
+## Nội Dung
 
-- [Overview](./overview.md) - High-level architecture overview
-- [Tech Stack](./tech-stack.md) - Technology choices and evaluation
-- [Business Logic](./business-logic.md) - Business logic flow and patterns
-- [Improvements](./improvements.md) - Identified issues and improvements
+- [Tổng Quan](./overview.md) - Tổng quan architecture cấp cao
+- [Tech Stack](./tech-stack.md) - Lựa chọn công nghệ và đánh giá
+- [Business Logic](./business-logic.md) - Business logic flow và patterns
+- [Cải Tiến](./improvements.md) - Issues đã xác định và cải tiến
 
-## Key Architectural Principles
+## Nguyên Tắc Architectural Chính
 
 ### 1. Hexagonal Architecture (Backend)
 
-Each backend module follows hexagonal architecture with clear layer separation:
+Mỗi backend module tuân theo hexagonal architecture với sự tách biệt layer rõ ràng:
 
 ```
 Transport Layer (GraphQL) → Application Layer → Domain Layer → Infrastructure Layer
 ```
 
-Benefits:
-- Clear separation of concerns
-- Testable business logic
-- Easy to swap implementations
-- Independent of frameworks
+Lợi ích:
+- Tách biệt concerns rõ ràng
+- Business logic có thể test
+- Dễ dàng swap implementations
+- Độc lập với frameworks
 
 ### 2. Feature-Based Structure (Frontend)
 
-Frontend code is organized by feature rather than by type:
+Frontend code được tổ chức theo feature thay vì theo type:
 
 ```
 features/
@@ -49,29 +49,29 @@ features/
 └── progress/
 ```
 
-Benefits:
-- Better code organization
-- Improved HMR performance
-- Easier to locate code
-- Reduced coupling
+Lợi ích:
+- Tổ chức code tốt hơn
+- Cải thiện HMR performance
+- Dễ dàng locate code
+- Giảm coupling
 
-### 3. Monorepo with Workspaces
+### 3. Monorepo với Workspaces
 
-Using pnpm workspaces and Turbo for:
-- Shared code reuse
-- Consistent tooling
-- Efficient builds with caching
+Sử dụng pnpm workspaces và Turbo cho:
+- Tái sử dụng shared code
+- Tooling nhất quán
+- Builds hiệu quả với caching
 - Atomic changes across packages
 
 ### 4. Type Safety
 
-End-to-end type safety:
+Type safety end-to-end:
 - TypeScript throughout
 - GraphQL code generation
 - Zod runtime validation
 - Shared types across frontend/backend
 
-## Architecture Diagrams
+## Sơ Đồ Architecture
 
 ### System Architecture
 
@@ -94,7 +94,7 @@ End-to-end type safety:
 └─────────────────┘
 ```
 
-### Backend Module Structure
+### Cấu Trúc Backend Module
 
 ```
 Module
@@ -129,33 +129,33 @@ Repository (Infrastructure)
 Convex Database
 ```
 
-## Design Decisions
+## Quyết Định Thiết Kế
 
-### Why NestJS?
+### Tại Sao NestJS?
 
 - Enterprise-grade framework
 - Built-in dependency injection
-- Excellent TypeScript support
-- GraphQL integration
+- Hỗ trợ TypeScript xuất sắc
+- Tích hợp GraphQL
 - Modular architecture
 
-### Why Next.js?
+### Tại Sao Next.js?
 
-- React framework with SSR/SSG
-- App Router for modern routing
-- Server Components for performance
+- React framework với SSR/SSG
+- App Router cho routing hiện đại
+- Server Components cho performance
 - Built-in optimization
-- Vercel deployment integration
+- Tích hợp Vercel deployment
 
-### Why Convex?
+### Tại Sao Convex?
 
 - Serverless database
 - Real-time sync
 - TypeScript-first
 - Built-in validation
-- Easy deployment
+- Deployment dễ dàng
 
-### Why GraphQL?
+### Tại Sao GraphQL?
 
 - Type-safe API
 - Flexible queries
@@ -163,16 +163,16 @@ Convex Database
 - Single endpoint
 - Strong tooling
 
-### Why Monorepo?
+### Tại Sao Monorepo?
 
 - Code sharing
-- Consistent tooling
+- Tooling nhất quán
 - Atomic changes
-- Better collaboration
-- Simplified dependencies
+- Collaboration tốt hơn
+- Dependencies đơn giản hóa
 
-## Navigation
+## Điều Hướng
 
-← [Previous: Getting Started](../01-getting-started/README.md)  
-→ [Next: Features](../03-features/README.md)  
-↑ [Documentation Index](../README.md)
+← [Trước: Getting Started](../01-getting-started/README.md)  
+→ [Tiếp: Features](../03-features/README.md)  
+↑ [Mục Lục Documentation](../README.md)

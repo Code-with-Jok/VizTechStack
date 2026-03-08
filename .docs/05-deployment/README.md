@@ -1,14 +1,17 @@
 # Deployment
 
-This section covers deployment procedures and configuration for VizTechStack.
+Phần này bao gồm các quy trình deployment và cấu hình cho VizTechStack.
 
-## Contents
+## Nội Dung
 
-- [Convex Database](./convex.md) - Convex database setup and deployment
-- [Vercel Deployment](./vercel.md) - Frontend and API deployment
-- [Environment Configuration](./environment.md) - Environment variables and secrets
+- [Hướng Dẫn Deployment](./deployment-guide.md) - Hướng dẫn deployment từng bước đầy đủ
+- [Checklist Deployment](./deployment-checklist.md) - Checklist deployment toàn diện
+- [Issues Deployment](./deployment-issues.md) - Log theo dõi và giải quyết issues
+- [Convex Database](./convex.md) - Cài đặt và deployment Convex database
+- [Vercel Deployment](./vercel.md) - Deployment Frontend và API
+- [Cấu Hình Environment](./environment.md) - Environment variables và secrets
 
-## Deployment Architecture
+## Kiến Trúc Deployment
 
 ```
 ┌─────────────────┐
@@ -24,7 +27,7 @@ This section covers deployment procedures and configuration for VizTechStack.
 └─────────────────┘
 ```
 
-## Quick Deployment
+## Deployment Nhanh
 
 ### 1. Deploy Database
 
@@ -36,7 +39,7 @@ pnpm convex deploy
 ### 2. Deploy Application
 
 ```bash
-# Connect to Vercel
+# Kết nối với Vercel
 vercel link
 
 # Deploy
@@ -45,7 +48,7 @@ vercel --prod
 
 ## Environment Variables
 
-Required for production:
+Yêu cầu cho production:
 
 ```env
 # Clerk Authentication
@@ -60,8 +63,8 @@ NEXT_PUBLIC_CONVEX_URL=
 NEXT_PUBLIC_API_URL=
 ```
 
-## Navigation
+## Điều Hướng
 
-← [Previous: Implementation](../04-implementation/README.md)  
-→ [Next: Analysis](../06-analysis/README.md)  
-↑ [Documentation Index](../README.md)
+← [Trước: Implementation](../04-implementation/README.md)  
+→ [Tiếp: Analysis](../06-analysis/README.md)  
+↑ [Mục Lục Documentation](../README.md)

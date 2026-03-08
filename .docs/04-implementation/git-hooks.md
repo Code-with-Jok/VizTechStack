@@ -1,10 +1,10 @@
-# Git Hooks with Husky
+# Git Hooks với Husky
 
-## Overview
+## Tổng Quan
 
-VizTechStack uses Husky to manage Git hooks that enforce code quality and commit message standards before code is committed to the repository.
+VizTechStack sử dụng Husky để quản lý Git hooks nhằm đảm bảo chất lượng code và chuẩn commit message trước khi code được commit vào repository.
 
-## Architecture
+## Kiến Trúc
 
 ```
 git commit
@@ -12,11 +12,11 @@ git commit
 Pre-commit Hook
     ↓
 turbo lint typecheck
-    ↓ (if pass)
+    ↓ (nếu pass)
 Commit-msg Hook
     ↓
 commitlint
-    ↓ (if pass)
+    ↓ (nếu pass)
 Commit Created ✅
 ```
 
@@ -24,13 +24,13 @@ Commit Created ✅
 
 ### Pre-commit Hook
 
-**Purpose**: Ensure code quality before commit
+**Mục Đích**: Đảm bảo chất lượng code trước khi commit
 
-**Runs**:
+**Chạy**:
 - ESLint (code linting)
 - TypeScript type checking
 
-**Location**: `.husky/pre-commit`
+**Vị Trí**: `.husky/pre-commit`
 
 ```bash
 #!/usr/bin/env sh
@@ -39,20 +39,20 @@ pnpm turbo lint typecheck
 
 ### Commit-msg Hook
 
-**Purpose**: Enforce conventional commit message format
+**Mục Đích**: Đảm bảo format commit message theo chuẩn conventional
 
-**Runs**: Commitlint validation
+**Chạy**: Commitlint validation
 
-**Location**: `.husky/commit-msg`
+**Vị Trí**: `.husky/commit-msg`
 
 ```bash
 #!/usr/bin/env sh
 pnpm commitlint --edit $1
 ```
 
-## Commit Message Format
+## Format Commit Message
 
-Follows [Conventional Commits](https://www.conventionalcommits.org/):
+Tuân theo [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 <type>(<scope>): <description>
@@ -64,15 +64,15 @@ Follows [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting)
+- `feat`: Tính năng mới
+- `fix`: Sửa bug
+- `docs`: Thay đổi documentation
+- `style`: Thay đổi code style (formatting)
 - `refactor`: Code refactoring
-- `test`: Adding or updating tests
+- `test`: Thêm hoặc cập nhật tests
 - `chore`: Maintenance tasks
 
-### Examples
+### Ví Dụ
 
 ```bash
 feat(roadmap): add bookmark functionality
@@ -81,11 +81,11 @@ docs(readme): update installation instructions
 refactor(web): extract hooks from components
 ```
 
-## Configuration
+## Cấu Hình
 
 ### Commitlint Config
 
-Located in `.commitlintrc.json`:
+Nằm trong `.commitlintrc.json`:
 
 ```json
 {
@@ -95,7 +95,7 @@ Located in `.commitlintrc.json`:
 
 ### Husky Setup
 
-Automatically installed via `pnpm prepare` script in `package.json`:
+Tự động cài đặt qua script `pnpm prepare` trong `package.json`:
 
 ```json
 {
@@ -105,34 +105,34 @@ Automatically installed via `pnpm prepare` script in `package.json`:
 }
 ```
 
-## Benefits
+## Lợi Ích
 
-- **Early Error Detection**: Catch issues before they reach CI/CD
-- **Consistent Code Quality**: Enforce standards automatically
-- **Clean Git History**: Professional commit messages
-- **Faster CI/CD**: Reduce failed builds
-- **Better Onboarding**: New developers follow standards automatically
+- **Early Error Detection**: Bắt lỗi trước khi đến CI/CD
+- **Consistent Code Quality**: Đảm bảo standards tự động
+- **Clean Git History**: Commit messages chuyên nghiệp
+- **Faster CI/CD**: Giảm failed builds
+- **Better Onboarding**: Developer mới tự động tuân theo standards
 
-## Troubleshooting
+## Xử Lý Sự Cố
 
-### Hooks Not Running
+### Hooks Không Chạy
 
 ```bash
-# Reinstall Husky
+# Cài đặt lại Husky
 rm -rf .husky
 pnpm prepare
 ```
 
-### Bypass Hooks (Emergency Only)
+### Bypass Hooks (Chỉ Khẩn Cấp)
 
 ```bash
-# Skip pre-commit hook
+# Bỏ qua pre-commit hook
 git commit --no-verify
 
-# Not recommended for regular use!
+# Không khuyến nghị sử dụng thường xuyên!
 ```
 
-## See Also
+## Xem Thêm
 
-- [Development Workflow](../01-getting-started/development.md)
+- [Quy Trình Development](../01-getting-started/development.md)
 - [Conventional Commits](https://www.conventionalcommits.org/)

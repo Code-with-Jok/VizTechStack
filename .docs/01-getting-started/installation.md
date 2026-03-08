@@ -1,61 +1,61 @@
-# Installation Guide
+# Hướng Dẫn Cài Đặt
 
-This guide provides detailed instructions for setting up the VizTechStack development environment.
+Tài liệu này cung cấp hướng dẫn chi tiết để thiết lập môi trường development cho VizTechStack.
 
-## Prerequisites
+## Yêu Cầu Hệ Thống
 
-### Required Software
+### Phần Mềm Bắt Buộc
 
 - **Node.js**: >= 20.11.0
-  - Download from [nodejs.org](https://nodejs.org/)
-  - Verify: `node --version`
+  - Tải từ [nodejs.org](https://nodejs.org/)
+  - Kiểm tra: `node --version`
 
 - **pnpm**: 9.15.0
-  - Install: `npm install -g pnpm@9.15.0`
-  - Verify: `pnpm --version`
+  - Cài đặt: `npm install -g pnpm@9.15.0`
+  - Kiểm tra: `pnpm --version`
 
-- **Git**: Latest version
-  - Download from [git-scm.com](https://git-scm.com/)
-  - Verify: `git --version`
+- **Git**: Phiên bản mới nhất
+  - Tải từ [git-scm.com](https://git-scm.com/)
+  - Kiểm tra: `git --version`
 
-### Optional Tools
+### Công Cụ Tùy Chọn
 
-- **VS Code**: Recommended IDE with extensions:
+- **VS Code**: IDE được khuyến nghị với các extension:
   - ESLint
   - Prettier
   - TypeScript and JavaScript Language Features
   - GraphQL: Language Feature Support
 
-## Installation Steps
+## Các Bước Cài Đặt
 
-### 1. Clone the Repository
+### 1. Clone Repository
 
 ```bash
 git clone <repository-url>
 cd viztechstack
 ```
 
-### 2. Install Dependencies
+### 2. Cài Đặt Dependencies
 
 ```bash
 pnpm install
 ```
 
-This will:
-- Install all workspace dependencies
-- Set up Git hooks (Husky)
-- Link workspace packages
+Lệnh này sẽ:
+- Cài đặt tất cả workspace dependencies
+- Thiết lập Git hooks (Husky)
+- Liên kết các workspace packages
 
-### 3. Environment Configuration
+### 3. Cấu Hình Environment
 
-Create environment files:
+Tạo file environment:
 
 ```bash
-# Copy example environment files
+# Copy file environment mẫu
 cp .env.example .env.local
 ```
 
-Configure the following variables in `.env.local`:
+Cấu hình các biến sau trong `.env.local`:
 
 ```env
 # Clerk Authentication
@@ -70,23 +70,23 @@ NEXT_PUBLIC_CONVEX_URL=your_convex_url
 NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
 ```
 
-### 4. Database Setup
+### 4. Thiết Lập Database
 
-Initialize Convex database:
+Khởi tạo Convex database:
 
 ```bash
 cd convex
 pnpm convex dev
 ```
 
-This will:
-- Create a new Convex project (if needed)
-- Set up the database schema
-- Run migrations
+Lệnh này sẽ:
+- Tạo Convex project mới (nếu cần)
+- Thiết lập database schema
+- Chạy migrations
 
-### 5. Verify Installation
+### 5. Xác Minh Cài Đặt
 
-Run the following commands to verify everything is set up correctly:
+Chạy các lệnh sau để xác minh mọi thứ đã được thiết lập đúng:
 
 ```bash
 # Type checking
@@ -99,61 +99,61 @@ pnpm lint
 pnpm build
 ```
 
-All commands should complete without errors.
+Tất cả lệnh phải hoàn thành không có lỗi.
 
-## Development Workflow
+## Quy Trình Development
 
-### Start Development Servers
+### Khởi Động Development Servers
 
 ```bash
-# Start all services (recommended)
+# Khởi động tất cả services (khuyến nghị)
 pnpm dev
 
-# Or start individual services
-pnpm dev --filter @viztechstack/web    # Frontend only
-pnpm dev --filter @viztechstack/api    # Backend only
+# Hoặc khởi động từng service riêng lẻ
+pnpm dev --filter @viztechstack/web    # Chỉ frontend
+pnpm dev --filter @viztechstack/api    # Chỉ backend
 ```
 
-### Access the Application
+### Truy Cập Ứng Dụng
 
 - **Frontend**: http://localhost:3000
 - **API GraphQL Playground**: http://localhost:4000/graphql
 - **Convex Dashboard**: https://dashboard.convex.dev
 
-## Troubleshooting
+## Xử Lý Sự Cố
 
-### Port Already in Use
+### Port Đã Được Sử Dụng
 
-If ports 3000 or 4000 are already in use:
+Nếu port 3000 hoặc 4000 đã được sử dụng:
 
 ```bash
-# Find and kill the process using the port
-# On Windows
+# Tìm và kill process đang sử dụng port
+# Trên Windows
 netstat -ano | findstr :3000
 taskkill /PID <process_id> /F
 
-# On macOS/Linux
+# Trên macOS/Linux
 lsof -ti:3000 | xargs kill -9
 ```
 
-### pnpm Install Fails
+### pnpm Install Thất Bại
 
-1. Clear pnpm cache:
+1. Xóa pnpm cache:
    ```bash
    pnpm store prune
    ```
 
-2. Delete node_modules and lockfile:
+2. Xóa node_modules và lockfile:
    ```bash
    rm -rf node_modules pnpm-lock.yaml
    pnpm install
    ```
 
-### TypeScript Errors
+### Lỗi TypeScript
 
-1. Restart TypeScript server in VS Code:
-   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS)
-   - Type "TypeScript: Restart TS Server"
+1. Khởi động lại TypeScript server trong VS Code:
+   - Nhấn `Ctrl+Shift+P` (hoặc `Cmd+Shift+P` trên macOS)
+   - Gõ "TypeScript: Restart TS Server"
 
 2. Rebuild packages:
    ```bash
@@ -161,18 +161,18 @@ lsof -ti:3000 | xargs kill -9
    pnpm build
    ```
 
-### Convex Connection Issues
+### Lỗi Kết Nối Convex
 
-1. Verify Convex deployment URL in `.env.local`
-2. Check Convex dashboard for deployment status
-3. Restart Convex dev server:
+1. Kiểm tra Convex deployment URL trong `.env.local`
+2. Kiểm tra trạng thái deployment trên Convex dashboard
+3. Khởi động lại Convex dev server:
    ```bash
    cd convex
    pnpm convex dev
    ```
 
-## Next Steps
+## Bước Tiếp Theo
 
-- [Development Workflow](./development.md) - Learn about development best practices
-- [Admin Setup](./admin-setup.md) - Set up admin access
-- [Architecture Overview](../02-architecture/README.md) - Understand the system architecture
+- [Quy Trình Development](./development.md) - Tìm hiểu về best practices
+- [Thiết Lập Admin](./admin-setup.md) - Thiết lập quyền admin
+- [Tổng Quan Kiến Trúc](../02-architecture/README.md) - Hiểu về kiến trúc hệ thống

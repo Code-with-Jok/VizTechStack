@@ -1,98 +1,109 @@
 # VizTechStack Documentation
 
-Welcome to the VizTechStack documentation! This guide will help you understand, develop, and deploy the interactive learning platform.
+Chào mừng đến với documentation VizTechStack! Tài liệu này sẽ giúp bạn hiểu, phát triển, và deploy nền tảng học tập tương tác.
 
-## 📚 Documentation Structure
+## 📚 Cấu Trúc Documentation
 
 ### [01. Getting Started](./01-getting-started/README.md)
-Quick start guide, installation, and development workflow.
+Hướng dẫn bắt đầu nhanh, cài đặt, và quy trình development.
 
-- [Installation Guide](./01-getting-started/installation.md)
-- [Development Workflow](./01-getting-started/development.md)
-- [Admin Setup](./01-getting-started/admin-setup.md)
+- [Hướng Dẫn Cài Đặt](./01-getting-started/installation.md)
+- [Quy Trình Development](./01-getting-started/development.md)
+- [Cài Đặt Admin](./01-getting-started/admin-setup.md)
 
 ### [02. Architecture](./02-architecture/README.md)
-System architecture, design decisions, and technical stack.
+Kiến trúc hệ thống, quyết định thiết kế, và technical stack.
 
-- [Overview](./02-architecture/overview.md)
+- [Tổng Quan](./02-architecture/overview.md)
 - [Tech Stack](./02-architecture/tech-stack.md)
 - [Business Logic](./02-architecture/business-logic.md)
-- [Improvements](./02-architecture/improvements.md)
+- [Cải Tiến](./02-architecture/improvements.md)
 
 ### [03. Features](./03-features/README.md)
-Core features and their implementation details.
+Các features chính và chi tiết implementation.
 
 - [Roadmap Feature](./03-features/roadmap.md)
-- [Roadmap Implementation Guide](./03-features/roadmap-implementation.md)
-- [Topic Management](./03-features/topic.md)
-- [Progress Tracking](./03-features/progress.md)
-- [Bookmark System](./03-features/bookmark.md)
+- [Hướng Dẫn Implementation Roadmap](./03-features/roadmap-implementation.md)
+- [Quản Lý Topic](./03-features/topic.md)
+- [Theo Dõi Progress](./03-features/progress.md)
+- [Hệ Thống Bookmark](./03-features/bookmark.md)
 - [Authentication](./03-features/authentication.md)
 
 ### [04. Implementation](./04-implementation/README.md)
-Implementation guides and technical patterns.
+Hướng dẫn implementation và technical patterns.
 
 - [Hexagonal Architecture](./04-implementation/hexagonal-architecture.md)
 - [GraphQL Code Generation](./04-implementation/graphql-codegen.md)
 - [Git Hooks](./04-implementation/git-hooks.md)
 
 ### [05. Deployment](./05-deployment/README.md)
-Deployment procedures and configuration.
+Quy trình deployment và cấu hình.
 
 - [Convex Database](./05-deployment/convex.md)
+- [Hướng Dẫn Deployment](./05-deployment/deployment-guide.md)
+- [Checklist Deployment](./05-deployment/deployment-checklist.md)
+- [Vercel Deployment](./05-deployment/vercel.md)
+- [Cấu Hình Environment](./05-deployment/environment.md)
 
 ### [06. Analysis](./06-analysis/README.md)
-Codebase analysis and performance metrics.
+Phân tích codebase và performance metrics.
 
-- [Codebase Analysis](./06-analysis/codebase-analysis.md)
-- [Completed Tasks](./06-analysis/completed-tasks.md)
+- [Phân Tích Codebase](./06-analysis/codebase-analysis.md)
+- [Tasks Đã Hoàn Thành](./06-analysis/completed-tasks.md)
 
-## 🚀 Quick Links
+### [Archive](./archive/README.md)
+Documentation lịch sử từ các giai đoạn development và migration.
 
-### For New Developers
-1. [Installation Guide](./01-getting-started/installation.md) - Set up your development environment
-2. [Development Workflow](./01-getting-started/development.md) - Learn the development process
-3. [Architecture Overview](./02-architecture/README.md) - Understand the system architecture
+- Tài liệu development đã archive
+- Files theo dõi tasks cũ
+- Build logs và summaries
 
-### For Contributors
+## 🚀 Links Nhanh
+
+### Cho Developers Mới
+1. [Hướng Dẫn Cài Đặt](./01-getting-started/installation.md) - Cài đặt môi trường development
+2. [Quy Trình Development](./01-getting-started/development.md) - Học quy trình development
+3. [Tổng Quan Architecture](./02-architecture/README.md) - Hiểu kiến trúc hệ thống
+
+### Cho Contributors
 1. [Hexagonal Architecture](./04-implementation/hexagonal-architecture.md) - Backend patterns
 2. [GraphQL Code Generation](./04-implementation/graphql-codegen.md) - Type generation
-3. [Git Hooks](./04-implementation/git-hooks.md) - Code quality automation
+3. [Git Hooks](./04-implementation/git-hooks.md) - Tự động hóa code quality
 
-### For Administrators
-1. [Admin Setup Guide](./01-getting-started/admin-setup.md) - Configure admin access
-2. [Deployment Guide](./05-deployment/README.md) - Deploy to production
+### Cho Administrators
+1. [Hướng Dẫn Cài Đặt Admin](./01-getting-started/admin-setup.md) - Cấu hình admin access
+2. [Hướng Dẫn Deployment](./05-deployment/README.md) - Deploy lên production
 
-## 🏗️ Project Overview
+## 🏗️ Tổng Quan Project
 
-**VizTechStack** is an interactive learning platform that helps users explore and track technology learning roadmaps through graph-based visualization.
+**VizTechStack** là nền tảng học tập tương tác giúp users khám phá và theo dõi technology learning roadmaps thông qua graph-based visualization.
 
-### Core Features
-- 🗺️ Interactive roadmap visualization
-- 📊 Progress tracking
-- 📚 Content management
+### Features Chính
+- 🗺️ Visualization roadmap tương tác
+- 📊 Theo dõi progress
+- 📚 Quản lý content
 - 🔐 Authentication & authorization
-- ⭐ Bookmark system
+- ⭐ Hệ thống bookmark
 
 ### Tech Stack
 - **Frontend**: Next.js 16.1.6, React 19.2.3, TypeScript 5.7
 - **Backend**: NestJS 11.0.1, GraphQL (Apollo Server 5.4.0)
 - **Database**: Convex (serverless)
-- **Monorepo**: pnpm workspaces with Turbo 2.4.0
+- **Monorepo**: pnpm workspaces với Turbo 2.4.0
 
-## 📖 Common Commands
+## 📖 Commands Thường Dùng
 
 ```bash
 # Development
-pnpm dev                    # Start all services
-pnpm dev --filter @viztechstack/web    # Frontend only
-pnpm dev --filter @viztechstack/api    # Backend only
+pnpm dev                    # Start tất cả services
+pnpm dev --filter @viztechstack/web    # Chỉ Frontend
+pnpm dev --filter @viztechstack/api    # Chỉ Backend
 
 # Code Quality
-pnpm lint                   # Lint all packages
+pnpm lint                   # Lint tất cả packages
 pnpm typecheck              # Type check
 pnpm format                 # Format code
-pnpm test                   # Run tests
+pnpm test                   # Chạy tests
 
 # Code Generation
 pnpm codegen                # Generate GraphQL types
@@ -101,54 +112,54 @@ pnpm codegen:watch          # Watch mode
 # Utility Scripts
 pnpm generate:module <name>    # Generate backend module
 pnpm generate:feature <name>   # Generate frontend feature
-pnpm validate:deps             # Check circular dependencies
-pnpm analyze:bundle            # Analyze bundle size
+pnpm validate:deps             # Kiểm tra circular dependencies
+pnpm analyze:bundle            # Phân tích bundle size
 
 # Building
-pnpm build                  # Build all packages
+pnpm build                  # Build tất cả packages
 ```
 
 ## 🤝 Contributing
 
-### Commit Message Format
+### Format Commit Message
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+Tuân theo [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 <type>(<scope>): <description>
 
-Examples:
+Ví dụ:
 feat(roadmap): add bookmark functionality
 fix(api): resolve circular dependency
 docs(readme): update installation instructions
 ```
 
-### Development Workflow
+### Quy Trình Development
 
-1. Create feature branch: `git checkout -b feature/feature-name`
-2. Make changes and commit: `git commit -m "feat: description"`
-3. Push and create PR: `git push origin feature/feature-name`
-4. Wait for review and CI checks
-5. Merge to main
+1. Tạo feature branch: `git checkout -b feature/feature-name`
+2. Thực hiện changes và commit: `git commit -m "feat: description"`
+3. Push và tạo PR: `git push origin feature/feature-name`
+4. Đợi review và CI checks
+5. Merge vào main
 
 ### Code Quality
 
-- Pre-commit hooks run linting and type checking
-- Commit messages are validated
-- All tests must pass
-- Maintain test coverage ≥ 25%
+- Pre-commit hooks chạy linting và type checking
+- Commit messages được validate
+- Tất cả tests phải pass
+- Duy trì test coverage ≥ 25%
 
-## 📞 Support
+## 📞 Hỗ Trợ
 
-- **Issues**: Report bugs or request features via GitHub Issues
-- **Discussions**: Ask questions in GitHub Discussions
-- **Documentation**: Check this documentation first
+- **Issues**: Báo cáo bugs hoặc request features qua GitHub Issues
+- **Discussions**: Đặt câu hỏi trong GitHub Discussions
+- **Documentation**: Kiểm tra documentation này trước
 
 ## 📄 License
 
-[Add license information here]
+[Thêm thông tin license ở đây]
 
 ---
 
-**Last Updated**: 2026-03-08  
-**Version**: 1.0.0
+**Cập Nhật Lần Cuối**: 2026-03-08  
+**Phiên Bản**: 1.0.0

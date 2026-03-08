@@ -1,12 +1,12 @@
-# Topic Feature
+# Tính Năng Topic
 
-## Overview
+## Tổng Quan
 
-The Topic feature manages topic content and learning resources associated with roadmap nodes.
+Tính năng Topic quản lý nội dung topic và tài nguyên học tập liên kết với roadmap node.
 
-## Architecture
+## Kiến Trúc
 
-Topics follow the hexagonal architecture pattern in the backend:
+Topic tuân theo mẫu hexagonal architecture trong backend:
 
 ```
 apps/api/src/modules/topic/
@@ -49,7 +49,7 @@ interface TopicEntity {
   roadmapId: string
   title: string
   description: string
-  content: string  // Markdown content
+  content: string  // Nội dung Markdown
   resources: ResourceEntity[]
   createdAt: Date
   updatedAt: Date
@@ -65,7 +65,7 @@ interface ResourceEntity {
 
 ## Use Cases
 
-### Create Topic (Admin Only)
+### Tạo Topic (Chỉ Admin)
 
 ```typescript
 const topic = await topicService.createTopic({
@@ -84,13 +84,13 @@ const topic = await topicService.createTopic({
 })
 ```
 
-### Get Topic by Node ID
+### Lấy Topic Theo Node ID
 
 ```typescript
 const topic = await topicService.getTopicByNodeId('node-123')
 ```
 
-### Update Topic (Admin Only)
+### Cập Nhật Topic (Chỉ Admin)
 
 ```typescript
 await topicService.updateTopic('topic-123', {
@@ -104,10 +104,10 @@ await topicService.updateTopic('topic-123', {
 ```
 apps/web/src/features/topic/
 ├── components/
-│   ├── TopicPanel.tsx        # Main topic display panel
-│   ├── TopicNode.tsx         # Topic node in graph
-│   ├── ResourceList.tsx      # List of learning resources
-│   └── MarkdownRenderer.tsx  # Markdown content renderer
+│   ├── TopicPanel.tsx        # Panel hiển thị topic chính
+│   ├── TopicNode.tsx         # Topic node trong graph
+│   ├── ResourceList.tsx      # Danh sách tài nguyên học tập
+│   └── MarkdownRenderer.tsx  # Renderer nội dung markdown
 ├── hooks/
 │   ├── useTopicByNodeId.ts
 │   └── useCreateTopic.ts
@@ -136,7 +136,7 @@ type Mutation {
 }
 ```
 
-## See Also
+## Xem Thêm
 
-- [Roadmap Feature](./roadmap.md)
-- [Implementation Guide](../04-implementation/hexagonal-architecture.md)
+- [Tính Năng Roadmap](./roadmap.md)
+- [Hướng Dẫn Triển Khai](../04-implementation/hexagonal-architecture.md)

@@ -1,81 +1,81 @@
-# Features
+# Tính Năng
 
-This section documents the core features of VizTechStack and their implementation details.
+Phần này tài liệu hóa các tính năng cốt lõi của VizTechStack và chi tiết triển khai.
 
-## Overview
+## Tổng Quan
 
-VizTechStack provides an interactive learning platform with the following core features:
+VizTechStack cung cấp nền tảng học tập tương tác với các tính năng cốt lõi sau:
 
-1. **Roadmap Management** - Create, view, and manage learning roadmaps
-2. **Topic Management** - Manage topic content and resources
-3. **Progress Tracking** - Track user learning progress
-4. **Bookmark System** - Save and organize favorite roadmaps
-5. **Authentication & Authorization** - User management and role-based access
+1. **Quản Lý Roadmap** - Tạo, xem và quản lý roadmap học tập
+2. **Quản Lý Topic** - Quản lý nội dung topic và tài nguyên
+3. **Theo Dõi Tiến Độ** - Theo dõi tiến độ học tập của người dùng
+4. **Hệ Thống Bookmark** - Lưu và tổ chức roadmap yêu thích
+5. **Authentication & Authorization** - Quản lý người dùng và kiểm soát truy cập dựa trên vai trò
 
-## Contents
+## Nội Dung
 
-- [Roadmap Feature](./roadmap.md) - Roadmap architecture and implementation
-- [Roadmap Implementation Guide](./roadmap-implementation.md) - Detailed implementation guide
-- [Topic Feature](./topic.md) - Topic management
-- [Progress Tracking](./progress.md) - Progress tracking system
-- [Bookmark Feature](./bookmark.md) - Bookmark functionality
-- [Authentication](./authentication.md) - Auth and authorization
+- [Tính Năng Roadmap](./roadmap.md) - Kiến trúc và triển khai roadmap
+- [Hướng Dẫn Triển Khai Roadmap](./roadmap-implementation.md) - Hướng dẫn triển khai chi tiết
+- [Tính Năng Topic](./topic.md) - Quản lý topic
+- [Theo Dõi Tiến Độ](./progress.md) - Hệ thống theo dõi tiến độ
+- [Tính Năng Bookmark](./bookmark.md) - Chức năng bookmark
+- [Authentication](./authentication.md) - Auth và authorization
 
-## Feature Overview
+## Tổng Quan Tính Năng
 
-### Roadmap Feature
+### Tính Năng Roadmap
 
-**Purpose**: Manage learning roadmaps with graph-based visualization
+**Mục Đích**: Quản lý roadmap học tập với visualization dạng graph
 
-**Key Capabilities**:
-- Create/update/delete roadmaps (Admin only)
-- View roadmaps with interactive graph
-- Filter by category and difficulty
-- Public/draft/private status management
+**Khả Năng Chính**:
+- Tạo/cập nhật/xóa roadmap (Chỉ Admin)
+- Xem roadmap với graph tương tác
+- Lọc theo category và difficulty
+- Quản lý trạng thái public/draft/private
 
 **Tech Stack**:
-- Backend: NestJS module with hexagonal architecture
-- Frontend: React Flow for graph visualization
-- Database: Convex for real-time sync
+- Backend: NestJS module với hexagonal architecture
+- Frontend: React Flow cho graph visualization
+- Database: Convex cho real-time sync
 
-### Topic Feature
+### Tính Năng Topic
 
-**Purpose**: Manage topic content and learning resources
+**Mục Đích**: Quản lý nội dung topic và tài nguyên học tập
 
-**Key Capabilities**:
-- Create/update/delete topics (Admin only)
-- View topic details with markdown content
-- Manage learning resources (links, videos, articles)
-- Associate topics with roadmap nodes
+**Khả Năng Chính**:
+- Tạo/cập nhật/xóa topic (Chỉ Admin)
+- Xem chi tiết topic với nội dung markdown
+- Quản lý tài nguyên học tập (links, videos, articles)
+- Liên kết topic với roadmap node
 
 **Tech Stack**:
 - Backend: NestJS topic module
-- Frontend: Markdown renderer for content
+- Frontend: Markdown renderer cho nội dung
 - Database: Convex topics table
 
-### Progress Tracking
+### Theo Dõi Tiến Độ
 
-**Purpose**: Track user learning progress across roadmaps
+**Mục Đích**: Theo dõi tiến độ học tập của người dùng trên các roadmap
 
-**Key Capabilities**:
-- Mark topics as not-started/in-progress/completed
-- View progress statistics
-- Track completion history
-- Progress visualization on roadmap graph
+**Khả Năng Chính**:
+- Đánh dấu topic là not-started/in-progress/completed
+- Xem thống kê tiến độ
+- Theo dõi lịch sử hoàn thành
+- Visualization tiến độ trên roadmap graph
 
 **Tech Stack**:
 - Backend: NestJS progress module
-- Frontend: Progress indicators on nodes
+- Frontend: Progress indicators trên node
 - Database: Convex progress table
 
-### Bookmark Feature
+### Tính Năng Bookmark
 
-**Purpose**: Allow users to save favorite roadmaps
+**Mục Đích**: Cho phép người dùng lưu roadmap yêu thích
 
-**Key Capabilities**:
-- Add/remove bookmarks
-- View bookmarked roadmaps
-- Quick access to saved content
+**Khả Năng Chính**:
+- Thêm/xóa bookmark
+- Xem roadmap đã bookmark
+- Truy cập nhanh vào nội dung đã lưu
 
 **Tech Stack**:
 - Backend: NestJS bookmark module
@@ -84,51 +84,51 @@ VizTechStack provides an interactive learning platform with the following core f
 
 ### Authentication & Authorization
 
-**Purpose**: Secure user management and role-based access control
+**Mục Đích**: Quản lý người dùng bảo mật và kiểm soát truy cập dựa trên vai trò
 
-**Key Capabilities**:
-- User authentication via Clerk
-- Role-based access (User/Admin)
-- JWT token validation
-- Protected routes and endpoints
+**Khả Năng Chính**:
+- Authentication người dùng qua Clerk
+- Kiểm soát truy cập dựa trên vai trò (User/Admin)
+- Xác thực JWT token
+- Protected routes và endpoints
 
 **Tech Stack**:
 - Auth Provider: Clerk
-- Backend: JWT validation with @clerk/backend
+- Backend: JWT validation với @clerk/backend
 - Frontend: Clerk React components
 
-## User Roles
+## Vai Trò Người Dùng
 
-### User Role
+### Vai Trò User
 
-**Permissions**:
-- ✅ View public roadmaps
-- ✅ Track progress
-- ✅ Bookmark roadmaps
-- ✅ View topics and resources
-- ❌ Create/edit/delete content
-
-**Use Cases**:
-- Browse learning roadmaps
-- Track learning progress
-- Save favorite roadmaps
-- Access learning resources
-
-### Admin Role
-
-**Permissions**:
-- ✅ All User permissions
-- ✅ Create roadmaps
-- ✅ Edit roadmaps
-- ✅ Delete roadmaps
-- ✅ Manage topics
-- ✅ Publish/unpublish content
+**Quyền**:
+- ✅ Xem roadmap công khai
+- ✅ Theo dõi tiến độ
+- ✅ Bookmark roadmap
+- ✅ Xem topic và tài nguyên
+- ❌ Tạo/sửa/xóa nội dung
 
 **Use Cases**:
-- Create new learning paths
-- Update existing content
-- Manage roadmap visibility
-- Curate learning resources
+- Duyệt roadmap học tập
+- Theo dõi tiến độ học tập
+- Lưu roadmap yêu thích
+- Truy cập tài nguyên học tập
+
+### Vai Trò Admin
+
+**Quyền**:
+- ✅ Tất cả quyền của User
+- ✅ Tạo roadmap
+- ✅ Sửa roadmap
+- ✅ Xóa roadmap
+- ✅ Quản lý topic
+- ✅ Publish/unpublish nội dung
+
+**Use Cases**:
+- Tạo learning path mới
+- Cập nhật nội dung hiện có
+- Quản lý khả năng hiển thị roadmap
+- Quản lý tài nguyên học tập
 
 ## Data Models
 
@@ -215,12 +215,12 @@ query GetUserBookmarks($userId: ID!)
 ### GraphQL Mutations
 
 ```graphql
-# Roadmaps (Admin only)
+# Roadmaps (Chỉ Admin)
 mutation CreateRoadmap($input: CreateRoadmapInput!)
 mutation UpdateRoadmap($id: ID!, $input: UpdateRoadmapInput!)
 mutation DeleteRoadmap($id: ID!)
 
-# Topics (Admin only)
+# Topics (Chỉ Admin)
 mutation CreateTopic($input: CreateTopicInput!)
 mutation UpdateTopic($id: ID!, $input: UpdateTopicInput!)
 mutation DeleteTopic($id: ID!)
@@ -233,7 +233,7 @@ mutation AddBookmark($roadmapId: ID!)
 mutation RemoveBookmark($roadmapId: ID!)
 ```
 
-## Feature Dependencies
+## Phụ Thuộc Tính Năng
 
 ```
 Authentication
@@ -243,13 +243,13 @@ Roadmap ← Topic
 Progress  Bookmark
 ```
 
-- **Authentication** is required for all features
-- **Topic** depends on **Roadmap** (topics belong to roadmap nodes)
-- **Progress** depends on **Roadmap** (tracks progress on roadmap nodes)
-- **Bookmark** depends on **Roadmap** (bookmarks reference roadmaps)
+- **Authentication** là bắt buộc cho tất cả tính năng
+- **Topic** phụ thuộc vào **Roadmap** (topic thuộc về roadmap node)
+- **Progress** phụ thuộc vào **Roadmap** (theo dõi tiến độ trên roadmap node)
+- **Bookmark** phụ thuộc vào **Roadmap** (bookmark tham chiếu đến roadmap)
 
-## Navigation
+## Điều Hướng
 
-← [Previous: Architecture](../02-architecture/README.md)  
-→ [Next: Implementation](../04-implementation/README.md)  
-↑ [Documentation Index](../README.md)
+← [Trước: Kiến Trúc](../02-architecture/README.md)  
+→ [Tiếp: Triển Khai](../04-implementation/README.md)  
+↑ [Mục Lục Tài Liệu](../README.md)
