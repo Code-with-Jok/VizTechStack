@@ -4,7 +4,7 @@ import { GetProgressQuery } from '../queries/get-progress.query';
 import { PROGRESS_REPOSITORY } from '../ports/progress.repository';
 import type { ProgressRepository } from '../ports/progress.repository';
 import { ProgressEntity } from '../../domain/entities/progress.entity';
-import { RoadmapValidationDomainError } from '../../domain/errors/roadmap-domain-error';
+import { RoadmapValidationDomainError } from '../../../roadmap/domain/errors/roadmap-domain-error';
 
 /**
  * Application service for progress tracking operations

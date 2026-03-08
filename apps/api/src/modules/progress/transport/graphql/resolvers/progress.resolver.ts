@@ -13,7 +13,7 @@ import {
   mapUpdateProgressInputToCommand,
 } from '../mappers';
 import { Progress, UpdateProgressInput } from '../schemas/progress.schema';
-import { RoadmapDomainExceptionFilter } from '../filters/roadmap-domain-exception.filter';
+import { RoadmapDomainExceptionFilter } from '../../../../roadmap/transport/graphql/filters/roadmap-domain-exception.filter';
 
 @Resolver(() => Progress)
 @UseGuards(ClerkAuthGuard, RolesGuard)

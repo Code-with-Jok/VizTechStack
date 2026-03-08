@@ -12,7 +12,7 @@ import {
   mapBookmarkEntitiesToGraphQL,
 } from '../mappers';
 import { Bookmark } from '../schemas/bookmark.schema';
-import { RoadmapDomainExceptionFilter } from '../filters/roadmap-domain-exception.filter';
+import { RoadmapDomainExceptionFilter } from '../../../../roadmap/transport/graphql/filters/roadmap-domain-exception.filter';
 
 @Resolver(() => Bookmark)
 @UseGuards(ClerkAuthGuard, RolesGuard)

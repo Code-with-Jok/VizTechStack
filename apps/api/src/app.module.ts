@@ -7,6 +7,10 @@ import { AppService } from './app.service';
 import { PingModule } from './modules/ping/ping.module';
 import { ConvexModule } from './common/convex/convex.module';
 import { RoadmapModule } from './modules/roadmap/roadmap.module';
+import { TopicModule } from './modules/topic/topic.module';
+import { ProgressModule } from './modules/progress/progress.module';
+import { BookmarkModule } from './modules/bookmark/bookmark.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -25,6 +29,10 @@ import { RoadmapModule } from './modules/roadmap/roadmap.module';
     }),
     PingModule,
     RoadmapModule,
+    TopicModule,
+    ProgressModule,
+    BookmarkModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

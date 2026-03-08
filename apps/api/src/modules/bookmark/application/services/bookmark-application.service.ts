@@ -5,7 +5,7 @@ import { GetUserBookmarksQuery } from '../queries/get-user-bookmarks.query';
 import { BOOKMARK_REPOSITORY } from '../ports/bookmark.repository';
 import type { BookmarkRepository } from '../ports/bookmark.repository';
 import { BookmarkEntity } from '../../domain/entities/bookmark.entity';
-import { RoadmapValidationDomainError } from '../../domain/errors/roadmap-domain-error';
+import { RoadmapValidationDomainError } from '../../../roadmap/domain/errors/roadmap-domain-error';
 
 /**
  * Application service for bookmark operations

@@ -4,7 +4,7 @@ import { GetTopicByNodeIdQuery } from '../queries/get-topic-by-node-id.query';
 import { TOPIC_REPOSITORY } from '../ports/topic.repository';
 import type { TopicRepository } from '../ports/topic.repository';
 import { TopicEntity } from '../../domain/entities/topic.entity';
-import { RoadmapValidationDomainError } from '../../domain/errors/roadmap-domain-error';
+import { RoadmapValidationDomainError } from '../../../roadmap/domain/errors/roadmap-domain-error';
 
 /**
  * Application service for topic operations

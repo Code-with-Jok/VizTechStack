@@ -10,7 +10,7 @@ import {
   mapCreateTopicInputToCommand,
 } from '../mappers';
 import { Topic, CreateTopicInput } from '../schemas/topic.schema';
-import { RoadmapDomainExceptionFilter } from '../filters/roadmap-domain-exception.filter';
+import { RoadmapDomainExceptionFilter } from '../../../../roadmap/transport/graphql/filters/roadmap-domain-exception.filter';
 
 @Resolver(() => Topic)
 @UseGuards(ClerkAuthGuard, RolesGuard)
