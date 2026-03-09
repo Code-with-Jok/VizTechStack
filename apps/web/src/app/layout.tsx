@@ -17,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "VizTechStack",
-  description: "A clean application shell prepared for the next product redesign.",
+  description:
+    "A clean application shell prepared for the next product redesign.",
 };
 
 export default function RootLayout({

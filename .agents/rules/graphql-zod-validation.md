@@ -9,18 +9,21 @@ Quy tắc này định nghĩa các nguyên tắc và constraints khi làm việc
 ## 🎯 Core Principles
 
 ### 1. Schema First Development
+
 - **RULE:** GraphQL schema là single source of truth
 - **DO:** Luôn bắt đầu với GraphQL schema definition
 - **DON'T:** Viết TypeScript types hoặc Zod schemas thủ công
 - **WHY:** Đảm bảo consistency giữa schema, types, và validation
 
 ### 2. Automatic Code Generation
+
 - **RULE:** Tất cả types và schemas phải được generate tự động
 - **DO:** Chạy `pnpm codegen` sau mỗi thay đổi schema
 - **DON'T:** Edit generated files (`types.ts`, `zod-schemas.ts`)
 - **WHY:** Tránh drift giữa schema và implementation
 
 ### 3. Runtime Validation
+
 - **RULE:** Validate tất cả external data với Zod
 - **DO:** Sử dụng generated Zod schemas
 - **DON'T:** Trust external data without validation
@@ -37,6 +40,7 @@ Quy tắc này định nghĩa các nguyên tắc và constraints khi làm việc
 **Purpose:** Chứa GraphQL schema definitions
 
 **Rules:**
+
 - ✅ Chỉ chứa `.graphql` files
 - ✅ Organize theo domain (roadmap.graphql, user.graphql, etc.)
 - ✅ Sử dụng GraphQL best practices (naming conventions, descriptions)
@@ -44,6 +48,7 @@ Quy tắc này định nghĩa các nguyên tắc và constraints khi làm việc
 - ❌ Không chứa business logic
 
 **Example Structure:**
+
 ```
 packages/shared/graphql-schema/
 ├── package.json
@@ -61,6 +66,7 @@ packages/shared/graphql-schema/
 **Purpose:** Chứa generated code từ GraphQL schema
 
 **Rules:**
+
 - ✅ Tất cả files trong `src/` là auto-generated
 - ✅ Chỉ edit `index.ts` để control exports
 - ✅ Commit generated files vào Git
@@ -68,25 +74,27 @@ packages/shared/graphql-schema/
 - ❌ Không thêm custom logic vào package này
 
 **Generated Files:**
+
 - `types.ts` - TypeScript types
 - `zod-schemas.ts` - Zod validation schemas
 - `operations.ts` - Generated operations (khi có GraphQL operations)
 - `hooks.ts` - Generated React hooks (khi có GraphQL operations)
 
 **Export Rules:**
+
 ```typescript
 // ✅ GOOD: Export all types
-export * from './types';
+export * from "./types";
 
 // ✅ GOOD: Export only existing schemas
 export {
   RoadmapCategorySchema,
   RoadmapDifficultySchema,
   // ... only schemas that exist
-} from './zod-schemas';
+} from "./zod-schemas";
 
 // ❌ BAD: Export non-existent schemas
-export { NonExistentSchema } from './zod-schemas';
+export { NonExistentSchema } from "./zod-schemas";
 ```
 
 ### Validation Package (`@viztechstack/validation`)
@@ -96,6 +104,7 @@ export { NonExistentSchema } from './zod-schemas';
 **Purpose:** Validation utilities và error handling
 
 **Rules:**
+
 - ✅ Chứa reusable validation utilities
 - ✅ Custom error classes
 - ✅ Error formatting helpers
@@ -103,6 +112,7 @@ export { NonExistentSchema } from './zod-schemas';
 - ❌ Không depend on GraphQL generated types
 
 **Required Exports:**
+
 - `ValidationError` class
 - `handleValidationError()` function
 - `safeParse()` function
@@ -114,6 +124,7 @@ export { NonExistentSchema } from './zod-schemas';
 **Purpose:** GraphQL client với Zod validation
 
 **Rules:**
+
 - ✅ Wrap Apollo Client với validation layer
 - ✅ Provide validated hooks
 - ✅ Handle validation errors gracefully
@@ -121,6 +132,7 @@ export { NonExistentSchema } from './zod-schemas';
 - ❌ Không expose unvalidated data
 
 **Required Exports:**
+
 - `ValidatedGraphQLClient` class
 - Validated React hooks (useRoadmaps, etc.)
 
@@ -133,6 +145,7 @@ export { NonExistentSchema } from './zod-schemas';
 **Location:** `codegen.ts` (root level)
 
 **Rules:**
+
 - ✅ Use local schema files (not remote server)
 - ✅ Generate to `packages/shared/graphql-generated/src/`
 - ✅ Enable both TypeScript and Zod plugins
@@ -141,18 +154,20 @@ export { NonExistentSchema } from './zod-schemas';
 - ❌ Không mix local và remote schemas
 
 **Required Plugins:**
+
 ```typescript
 {
   plugins: [
-    'typescript',                              // Generate TS types
-    'typescript-validation-schema',            // Generate Zod schemas
+    "typescript", // Generate TS types
+    "typescript-validation-schema", // Generate Zod schemas
     // 'typescript-operations',                // Uncomment when needed
     // 'typescript-react-apollo',              // Uncomment when needed
-  ]
+  ];
 }
 ```
 
 **Scalars Configuration:**
+
 ```typescript
 {
   scalars: {
@@ -170,28 +185,33 @@ export { NonExistentSchema } from './zod-schemas';
 **MUST follow this order:**
 
 1. **Edit GraphQL Schema**
+
    ```bash
    # Edit: packages/shared/graphql-schema/src/*.graphql
    ```
 
 2. **Run Code Generator**
+
    ```bash
    pnpm codegen
    ```
 
 3. **Verify Generated Files**
+
    ```bash
    # Check: packages/shared/graphql-generated/src/types.ts
    # Check: packages/shared/graphql-generated/src/zod-schemas.ts
    ```
 
 4. **Update Exports (if needed)**
+
    ```bash
    # Edit: packages/shared/graphql-generated/src/index.ts
    # Only export schemas that exist
    ```
 
 5. **Build Packages**
+
    ```bash
    pnpm turbo build --filter='./packages/**'
    ```
@@ -208,6 +228,7 @@ export { NonExistentSchema } from './zod-schemas';
 ### When to Validate
 
 **MUST validate:**
+
 - ✅ All GraphQL API responses
 - ✅ External API data
 - ✅ User input from forms
@@ -216,6 +237,7 @@ export { NonExistentSchema } from './zod-schemas';
 - ✅ File uploads content
 
 **DON'T validate:**
+
 - ❌ Internal function parameters (use TypeScript types)
 - ❌ Constants and hardcoded values
 - ❌ Data already validated in the same request cycle
@@ -223,6 +245,7 @@ export { NonExistentSchema } from './zod-schemas';
 ### How to Validate
 
 **Option 1: Using ValidatedGraphQLClient**
+
 ```typescript
 // ✅ GOOD: Automatic validation
 const client = new ValidatedGraphQLClient(apolloClient);
@@ -233,12 +256,14 @@ const data = await client.query({
 ```
 
 **Option 2: Using Validated Hooks**
+
 ```typescript
 // ✅ GOOD: Hook with built-in validation
 const { data, loading, error } = useRoadmaps();
 ```
 
 **Option 3: Manual Validation**
+
 ```typescript
 // ✅ GOOD: Manual validation with error handling
 try {
@@ -252,6 +277,7 @@ try {
 ```
 
 **❌ BAD: No validation**
+
 ```typescript
 // ❌ BAD: Trusting external data
 const data = await apolloClient.query({ query: GET_ROADMAP });
@@ -265,8 +291,9 @@ return data.roadmap; // No validation!
 ### ValidationError Usage
 
 **MUST use ValidationError class:**
+
 ```typescript
-import { ValidationError } from '@viztechstack/validation';
+import { ValidationError } from "@viztechstack/validation";
 
 try {
   schema.parse(data);
@@ -277,6 +304,7 @@ try {
 ```
 
 **Available Methods:**
+
 - `getUserMessage()` - User-friendly error message
 - `getFieldErrors()` - Field-level errors for forms
 - `getDetailedErrors()` - Detailed errors for debugging
@@ -288,11 +316,11 @@ try {
 // ✅ GOOD: Handle validation errors
 function MyComponent() {
   const { data, error } = useRoadmaps();
-  
+
   if (error instanceof ValidationError) {
     return <ErrorMessage>{error.getUserMessage()}</ErrorMessage>;
   }
-  
+
   return <div>{data?.roadmaps.map(...)}</div>;
 }
 ```
@@ -304,6 +332,7 @@ function MyComponent() {
 ### TypeScript Configuration
 
 **MUST enable strict mode:**
+
 ```json
 {
   "compilerOptions": {
@@ -318,6 +347,7 @@ function MyComponent() {
 ### Type Usage
 
 **✅ DO:**
+
 ```typescript
 // Use generated types
 import { Roadmap, RoadmapCategory } from '@viztechstack/graphql-generated';
@@ -327,6 +357,7 @@ const category: RoadmapCategory = "ROLE";
 ```
 
 **❌ DON'T:**
+
 ```typescript
 // Don't use any
 const roadmap: any = { ... };
@@ -345,17 +376,21 @@ const roadmap = data as Roadmap; // Unsafe!
 ### Package Dependencies
 
 **GraphQL Schema Package:**
+
 - ✅ No dependencies (pure schema)
 
 **GraphQL Generated Package:**
+
 - ✅ `zod` (for Zod schemas)
 - ❌ No other dependencies
 
 **Validation Package:**
+
 - ✅ `zod` (peer dependency)
 - ❌ No GraphQL dependencies
 
 **API Client Package:**
+
 - ✅ `@apollo/client`
 - ✅ `@viztechstack/graphql-generated`
 - ✅ `@viztechstack/validation`
@@ -364,6 +399,7 @@ const roadmap = data as Roadmap; // Unsafe!
 ### Version Constraints
 
 **MUST use compatible versions:**
+
 - `zod`: ^3.24.1 or higher
 - `@apollo/client`: ^3.11.0 or higher
 - `@graphql-codegen/cli`: ^5.0.0 or higher
@@ -375,19 +411,21 @@ const roadmap = data as Roadmap; // Unsafe!
 ### What to Test
 
 **MUST test:**
+
 - ✅ Validation logic với invalid data
 - ✅ Error handling và error messages
 - ✅ Schema parsing với edge cases
 - ✅ ValidatedGraphQLClient behavior
 
 **Example Test:**
+
 ```typescript
 describe('RoadmapSchema', () => {
   it('should validate valid roadmap data', () => {
     const validData = { ... };
     expect(() => RoadmapSchema.parse(validData)).not.toThrow();
   });
-  
+
   it('should reject invalid roadmap data', () => {
     const invalidData = { ... };
     expect(() => RoadmapSchema.parse(invalidData)).toThrow(ValidationError);
@@ -402,12 +440,14 @@ describe('RoadmapSchema', () => {
 ### When to Regenerate Code
 
 **MUST regenerate when:**
+
 - ✅ GraphQL schema changes
 - ✅ Adding new types/queries/mutations
 - ✅ Changing field types
 - ✅ Adding/removing fields
 
 **Steps:**
+
 1. Edit GraphQL schema
 2. Run `pnpm codegen`
 3. Update exports in `index.ts` if needed
@@ -418,15 +458,18 @@ describe('RoadmapSchema', () => {
 ### When to Update Validation
 
 **MUST update when:**
+
 - ✅ Business rules change
 - ✅ New validation requirements
 - ✅ Error messages need improvement
 
 **DON'T:**
+
 - ❌ Modify generated Zod schemas
 - ❌ Add custom validation to generated files
 
 **Instead:**
+
 - ✅ Create custom schemas that extend generated ones
 - ✅ Add validation in business logic layer
 
@@ -437,11 +480,13 @@ describe('RoadmapSchema', () => {
 ### Validation Performance
 
 **DO:**
+
 - ✅ Validate once at API boundary
 - ✅ Cache validated data
 - ✅ Use `.safeParse()` for non-critical paths
 
 **DON'T:**
+
 - ❌ Validate same data multiple times
 - ❌ Validate in render loops
 - ❌ Validate internal data structures
@@ -449,11 +494,13 @@ describe('RoadmapSchema', () => {
 ### Code Generation Performance
 
 **DO:**
+
 - ✅ Run codegen in development only
 - ✅ Commit generated files to Git
 - ✅ Use CI to verify generated files are up-to-date
 
 **DON'T:**
+
 - ❌ Run codegen in production builds
 - ❌ Generate code on every file change
 
@@ -464,12 +511,14 @@ describe('RoadmapSchema', () => {
 ### Pre-commit Checks
 
 **MUST pass:**
+
 - ✅ `pnpm turbo lint`
 - ✅ `pnpm turbo typecheck`
 
 ### CI Pipeline Checks
 
 **MUST pass:**
+
 - ✅ Build shared packages
 - ✅ Lint
 - ✅ Check no-any
@@ -480,6 +529,7 @@ describe('RoadmapSchema', () => {
 ### Generated Files
 
 **MUST:**
+
 - ✅ Commit generated files to Git
 - ✅ Verify generated files are up-to-date in CI
 - ✅ Fail CI if generated files are outdated
@@ -491,11 +541,13 @@ describe('RoadmapSchema', () => {
 ### Code Comments
 
 **MUST document:**
+
 - ✅ Custom validation logic
 - ✅ Complex error handling
 - ✅ Non-obvious type transformations
 
 **Example:**
+
 ```typescript
 // Validate roadmap data from external API
 // This ensures data integrity before storing in database
@@ -505,6 +557,7 @@ const validated = RoadmapSchema.parse(externalData);
 ### Schema Documentation
 
 **MUST document in GraphQL schema:**
+
 ```graphql
 """
 Represents a learning roadmap with topics and connections
@@ -514,7 +567,7 @@ type Roadmap {
   Unique identifier for the roadmap
   """
   _id: ID!
-  
+
   """
   Human-readable title (max 100 characters)
   """
@@ -527,22 +580,27 @@ type Roadmap {
 ## ⚠️ Common Pitfalls
 
 ### 1. Editing Generated Files
+
 **Problem:** Manually editing `types.ts` or `zod-schemas.ts`  
 **Solution:** Edit GraphQL schema và regenerate
 
 ### 2. Missing Validation
+
 **Problem:** Trusting external data without validation  
 **Solution:** Always validate với Zod schemas
 
 ### 3. Duplicate Type Definitions
+
 **Problem:** Defining types manually khi đã có generated types  
 **Solution:** Import từ `@viztechstack/graphql-generated`
 
 ### 4. Outdated Generated Files
+
 **Problem:** Schema thay đổi nhưng quên regenerate  
 **Solution:** Run `pnpm codegen` sau mỗi schema change
 
 ### 5. Wrong Export in index.ts
+
 **Problem:** Export schemas không tồn tại  
 **Solution:** Chỉ export schemas có trong `zod-schemas.ts`
 

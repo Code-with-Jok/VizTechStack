@@ -1,5 +1,5 @@
-import { ZodError } from 'zod';
-import { ValidationError } from './errors';
+import { ZodError } from "zod";
+import { ValidationError } from "./errors";
 
 /**
  * Handle validation errors and convert to ValidationError
@@ -9,13 +9,13 @@ import { ValidationError } from './errors';
 export function handleValidationError(error: unknown): Error {
   if (error instanceof ZodError) {
     const validationError = new ValidationError(
-      'Data validation failed',
+      "Data validation failed",
       error,
     );
 
     // Log in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('🔴 Validation Error:', {
+    if (process.env.NODE_ENV === "development") {
+      console.error("🔴 Validation Error:", {
         errors: error.errors,
         formatted: validationError.getUserFriendlyMessages(),
       });
@@ -52,17 +52,23 @@ export function safeParse<T>(
  * @returns Object with success flag and data or error
  */
 export function validateSafe<T>(
-  schema: { safeParse: (data: unknown) => { success: boolean; data?: T; error?: ZodError } },
+  schema: {
+    safeParse: (data: unknown) => {
+      success: boolean;
+      data?: T;
+      error?: ZodError;
+    };
+  },
   data: unknown,
 ): { success: true; data: T } | { success: false; error: ValidationError } {
   const result = schema.safeParse(data);
-  
+
   if (result.success) {
     return { success: true, data: result.data as T };
   }
-  
+
   return {
     success: false,
-    error: new ValidationError('Validation failed', result.error as ZodError),
+    error: new ValidationError("Validation failed", result.error as ZodError),
   };
 }

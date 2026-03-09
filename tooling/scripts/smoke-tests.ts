@@ -42,7 +42,8 @@ class SmokeTestRunner {
 
       if (response.ok) {
         const html = await response.text();
-        const hasTitle = html.includes("VizTechStack") || html.includes("rebuilt");
+        const hasTitle =
+          html.includes("VizTechStack") || html.includes("rebuilt");
 
         if (hasTitle) {
           this.results.push({ name: testName, passed: true, duration });
@@ -62,7 +63,9 @@ class SmokeTestRunner {
         error: error instanceof Error ? error.message : String(error),
       });
       console.log(`FAIL ${testName} (${duration}ms)`);
-      console.log(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.log(
+        `   Error: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -109,7 +112,9 @@ class SmokeTestRunner {
         error: error instanceof Error ? error.message : String(error),
       });
       console.log(`FAIL ${testName} (${duration}ms)`);
-      console.log(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.log(
+        `   Error: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -150,7 +155,9 @@ class SmokeTestRunner {
         error: error instanceof Error ? error.message : String(error),
       });
       console.log(`FAIL ${testName} (${duration}ms)`);
-      console.log(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.log(
+        `   Error: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -166,7 +173,9 @@ class SmokeTestRunner {
         this.results.push({ name: testName, passed: true, duration });
         console.log(`PASS ${testName} (${duration}ms)`);
       } else if (duration >= 3000) {
-        throw new Error(`Page load too slow: ${duration}ms (expected < 3000ms)`);
+        throw new Error(
+          `Page load too slow: ${duration}ms (expected < 3000ms)`,
+        );
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -179,7 +188,9 @@ class SmokeTestRunner {
         error: error instanceof Error ? error.message : String(error),
       });
       console.log(`FAIL ${testName} (${duration}ms)`);
-      console.log(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.log(
+        `   Error: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -230,8 +241,11 @@ async function main() {
   let apiUrl: string;
 
   if (environment === "staging") {
-    webUrl = process.env.STAGING_WEB_URL || "https://viztechstack-staging.vercel.app";
-    apiUrl = process.env.STAGING_API_URL || "https://viz-tech-stack-api-staging.vercel.app";
+    webUrl =
+      process.env.STAGING_WEB_URL || "https://viztechstack-staging.vercel.app";
+    apiUrl =
+      process.env.STAGING_API_URL ||
+      "https://viz-tech-stack-api-staging.vercel.app";
   } else {
     webUrl = process.env.PRODUCTION_WEB_URL || "https://viztechstack.com";
     apiUrl = process.env.PRODUCTION_API_URL || "https://api.viztechstack.com";

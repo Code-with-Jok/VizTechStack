@@ -9,17 +9,19 @@ Quy tắc tổng quát cho việc implement, fix và refactor các tính năng t
 ## 🎯 Core Principles
 
 ### 1. Documentation First
+
 - **RULE:** Luôn đọc và hiểu documentation trước khi code
-- **DO:** 
+- **DO:**
   - Đọc `.docs/architecture/` để hiểu kiến trúc
   - Đọc existing code để hiểu patterns
   - Đọc `.agents/rules/` và `.agents/workflows/` liên quan
-- **DON'T:** 
+- **DON'T:**
   - Bắt đầu code ngay mà không hiểu context
   - Ignore existing patterns và conventions
 - **WHY:** Đảm bảo consistency và avoid breaking changes
 
 ### 2. Incremental Implementation
+
 - **RULE:** Chia nhỏ task thành các bước có thể verify
 - **DO:**
   - Implement từng bước một
@@ -32,6 +34,7 @@ Quy tắc tổng quát cho việc implement, fix và refactor các tính năng t
 - **WHY:** Dễ debug, dễ rollback, dễ review
 
 ### 3. Type Safety First
+
 - **RULE:** TypeScript strict mode là bắt buộc
 - **DO:**
   - Enable strict mode trong tsconfig.json
@@ -44,6 +47,7 @@ Quy tắc tổng quát cho việc implement, fix và refactor các tính năng t
 - **WHY:** Catch errors at compile time, better IDE support
 
 ### 4. Test Coverage
+
 - **RULE:** Mọi feature phải có tests
 - **DO:**
   - Write unit tests cho business logic
@@ -56,6 +60,7 @@ Quy tắc tổng quát cho việc implement, fix và refactor các tính năng t
 - **WHY:** Prevent regressions, document behavior
 
 ### 5. Error Handling
+
 - **RULE:** Handle errors gracefully
 - **DO:**
   - Validate external data
@@ -99,6 +104,7 @@ VizTechStack/
 **Format:** `@viztechstack/<package-name>`
 
 **Examples:**
+
 - `@viztechstack/types`
 - `@viztechstack/validation`
 - `@viztechstack/api-client`
@@ -106,6 +112,7 @@ VizTechStack/
 ### File Naming Convention
 
 **TypeScript/JavaScript:**
+
 - Components: `PascalCase.tsx` (e.g., `UserProfile.tsx`)
 - Utilities: `kebab-case.ts` (e.g., `format-date.ts`)
 - Hooks: `camelCase.ts` with `use` prefix (e.g., `useAuth.ts`)
@@ -113,6 +120,7 @@ VizTechStack/
 - Tests: `*.test.ts` or `*.spec.ts`
 
 **Documentation:**
+
 - Architecture: `kebab-case.md` (e.g., `graphql-zod-architecture.md`)
 - Rules: `kebab-case.md` (e.g., `feature-implementation-standard.md`)
 - Workflows: `kebab-case.md` (e.g., `feature-development-workflow.md`)
@@ -124,8 +132,10 @@ VizTechStack/
 ### Phase 1: Planning
 
 #### Step 1: Understand Requirements
+
 ```markdown
 Questions to answer:
+
 - [ ] What problem are we solving?
 - [ ] Who are the users?
 - [ ] What are the acceptance criteria?
@@ -134,6 +144,7 @@ Questions to answer:
 ```
 
 #### Step 2: Research Existing Code
+
 ```bash
 # Search for similar implementations
 grep -r "similar-feature" apps/ packages/
@@ -146,8 +157,10 @@ cat .docs/architecture/*.md
 ```
 
 #### Step 3: Design Solution
+
 ```markdown
 Design checklist:
+
 - [ ] Identify affected packages/apps
 - [ ] Plan data models
 - [ ] Design API contracts
@@ -157,26 +170,32 @@ Design checklist:
 ```
 
 #### Step 4: Create Implementation Plan
+
 ```markdown
 # Implementation Plan
 
 ## Packages to Create/Modify
+
 - [ ] Package 1: Description
 - [ ] Package 2: Description
 
 ## Files to Create/Modify
+
 - [ ] File 1: Purpose
 - [ ] File 2: Purpose
 
 ## Dependencies to Add
+
 - [ ] Dependency 1: Version
 - [ ] Dependency 2: Version
 
 ## Testing Strategy
+
 - [ ] Unit tests for X
 - [ ] Integration tests for Y
 
 ## Rollout Plan
+
 - [ ] Step 1
 - [ ] Step 2
 ```
@@ -184,6 +203,7 @@ Design checklist:
 ### Phase 2: Implementation
 
 #### Step 1: Setup Package Structure
+
 ```bash
 # Create package if needed
 mkdir -p packages/shared/new-package/src
@@ -212,6 +232,7 @@ EOF
 ```
 
 #### Step 2: Implement Core Logic
+
 ```typescript
 // Start with types
 export interface Entity {
@@ -225,13 +246,14 @@ export class EntityService {
 }
 
 // Export from index
-export * from './types';
-export * from './service';
+export * from "./types";
+export * from "./service";
 ```
 
 #### Step 3: Add Validation
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // Define schema
 export const EntitySchema = z.object({
@@ -246,15 +268,16 @@ export function validateEntity(data: unknown): Entity {
 ```
 
 #### Step 4: Add Error Handling
+
 ```typescript
 export class EntityError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: unknown
+    public details?: unknown,
   ) {
     super(message);
-    this.name = 'EntityError';
+    this.name = "EntityError";
   }
 }
 
@@ -262,19 +285,20 @@ export function handleEntityError(error: unknown): EntityError {
   if (error instanceof EntityError) {
     return error;
   }
-  return new EntityError('Unknown error', 'UNKNOWN', error);
+  return new EntityError("Unknown error", "UNKNOWN", error);
 }
 ```
 
 #### Step 5: Write Tests
+
 ```typescript
-describe('EntityService', () => {
-  describe('create', () => {
-    it('should create entity with valid data', () => {
+describe("EntityService", () => {
+  describe("create", () => {
+    it("should create entity with valid data", () => {
       // Test implementation
     });
-    
-    it('should throw error with invalid data', () => {
+
+    it("should throw error with invalid data", () => {
       // Test implementation
     });
   });
@@ -282,10 +306,11 @@ describe('EntityService', () => {
 ```
 
 #### Step 6: Add Documentation
-```typescript
+
+````typescript
 /**
  * Service for managing entities
- * 
+ *
  * @example
  * ```typescript
  * const service = new EntityService();
@@ -295,7 +320,7 @@ describe('EntityService', () => {
 export class EntityService {
   /**
    * Create a new entity
-   * 
+   *
    * @param data - Entity data
    * @returns Created entity
    * @throws {EntityError} If validation fails
@@ -304,11 +329,12 @@ export class EntityService {
     // Implementation
   }
 }
-```
+````
 
 ### Phase 3: Integration
 
 #### Step 1: Update Dependencies
+
 ```bash
 # Add to consuming package
 cd apps/web
@@ -316,18 +342,20 @@ pnpm add @viztechstack/new-package
 ```
 
 #### Step 2: Integrate with Existing Code
+
 ```typescript
 // Import and use
-import { EntityService } from '@viztechstack/new-package';
+import { EntityService } from "@viztechstack/new-package";
 
 const service = new EntityService();
 const entity = await service.create(data);
 ```
 
 #### Step 3: Update Types
+
 ```typescript
 // Ensure type compatibility
-import type { Entity } from '@viztechstack/new-package';
+import type { Entity } from "@viztechstack/new-package";
 
 interface ExtendedEntity extends Entity {
   // Additional fields
@@ -337,6 +365,7 @@ interface ExtendedEntity extends Entity {
 ### Phase 4: Verification
 
 #### Step 1: Build All Packages
+
 ```bash
 pnpm turbo build --filter='./packages/**'
 ```
@@ -344,6 +373,7 @@ pnpm turbo build --filter='./packages/**'
 **Expected:** ✅ All packages build successfully
 
 #### Step 2: Run Linting
+
 ```bash
 pnpm turbo lint
 ```
@@ -351,6 +381,7 @@ pnpm turbo lint
 **Expected:** ✅ No linting errors
 
 #### Step 3: Run Type Checking
+
 ```bash
 pnpm turbo typecheck
 ```
@@ -358,6 +389,7 @@ pnpm turbo typecheck
 **Expected:** ✅ No type errors
 
 #### Step 4: Run Tests
+
 ```bash
 pnpm turbo test
 ```
@@ -365,6 +397,7 @@ pnpm turbo test
 **Expected:** ✅ All tests pass
 
 #### Step 5: Build Apps
+
 ```bash
 pnpm turbo build --filter='./apps/**'
 ```
@@ -372,8 +405,10 @@ pnpm turbo build --filter='./apps/**'
 **Expected:** ✅ Apps build successfully
 
 #### Step 6: Manual Testing
+
 ```markdown
 Manual testing checklist:
+
 - [ ] Feature works as expected
 - [ ] Error handling works
 - [ ] UI/UX is acceptable
@@ -384,30 +419,35 @@ Manual testing checklist:
 ### Phase 5: Documentation
 
 #### Step 1: Update Architecture Docs
+
 ```bash
 # Create or update architecture doc
 vim .docs/architecture/new-feature.md
 ```
 
 #### Step 2: Create Implementation Guide
+
 ```bash
 # Create implementation guide
 vim .docs/architecture/new-feature/implementation-guide.md
 ```
 
 #### Step 3: Update README (if needed)
+
 ```bash
 # Update package README
 vim packages/shared/new-package/README.md
 ```
 
 #### Step 4: Create Rule File (if needed)
+
 ```bash
 # Create rule file for AI agents
 vim .agents/rules/new-feature-rules.md
 ```
 
 #### Step 5: Create Workflow File (if needed)
+
 ```bash
 # Create workflow file for AI agents
 vim .agents/workflows/new-feature-workflow.md
@@ -420,42 +460,45 @@ vim .agents/workflows/new-feature-workflow.md
 ### Error Types
 
 #### 1. Validation Errors
+
 ```typescript
 export class ValidationError extends Error {
   constructor(
     message: string,
     public field: string,
-    public value: unknown
+    public value: unknown,
   ) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 ```
 
 #### 2. Business Logic Errors
+
 ```typescript
 export class BusinessError extends Error {
   constructor(
     message: string,
-    public code: string
+    public code: string,
   ) {
     super(message);
-    this.name = 'BusinessError';
+    this.name = "BusinessError";
   }
 }
 ```
 
 #### 3. External Service Errors
+
 ```typescript
 export class ExternalServiceError extends Error {
   constructor(
     message: string,
     public service: string,
-    public originalError?: unknown
+    public originalError?: unknown,
   ) {
     super(message);
-    this.name = 'ExternalServiceError';
+    this.name = "ExternalServiceError";
   }
 }
 ```
@@ -467,25 +510,24 @@ export async function performOperation(): Promise<Result> {
   try {
     // Validate input
     const validated = schema.parse(input);
-    
+
     // Perform operation
     const result = await operation(validated);
-    
+
     // Validate output
     return outputSchema.parse(result);
-    
   } catch (error) {
     // Handle specific errors
     if (error instanceof ValidationError) {
-      throw new BusinessError('Invalid input', 'INVALID_INPUT');
+      throw new BusinessError("Invalid input", "INVALID_INPUT");
     }
-    
+
     if (error instanceof ExternalServiceError) {
-      throw new BusinessError('Service unavailable', 'SERVICE_ERROR');
+      throw new BusinessError("Service unavailable", "SERVICE_ERROR");
     }
-    
+
     // Handle unknown errors
-    throw new BusinessError('Operation failed', 'UNKNOWN_ERROR');
+    throw new BusinessError("Operation failed", "UNKNOWN_ERROR");
   }
 }
 ```
@@ -497,34 +539,34 @@ export async function performOperation(): Promise<Result> {
 ### Test Structure
 
 ```typescript
-describe('Feature/Component Name', () => {
+describe("Feature/Component Name", () => {
   // Setup
   beforeEach(() => {
     // Setup code
   });
-  
+
   // Teardown
   afterEach(() => {
     // Cleanup code
   });
-  
+
   // Happy path tests
-  describe('when conditions are met', () => {
-    it('should perform expected action', () => {
+  describe("when conditions are met", () => {
+    it("should perform expected action", () => {
       // Test
     });
   });
-  
+
   // Error cases
-  describe('when conditions are not met', () => {
-    it('should throw appropriate error', () => {
+  describe("when conditions are not met", () => {
+    it("should throw appropriate error", () => {
       // Test
     });
   });
-  
+
   // Edge cases
-  describe('edge cases', () => {
-    it('should handle edge case X', () => {
+  describe("edge cases", () => {
+    it("should handle edge case X", () => {
       // Test
     });
   });
@@ -534,11 +576,13 @@ describe('Feature/Component Name', () => {
 ### Test Coverage Requirements
 
 **Minimum coverage:**
+
 - Unit tests: 80%
 - Integration tests: 60%
 - E2E tests: Critical paths only
 
 **What to test:**
+
 - ✅ Business logic
 - ✅ Validation logic
 - ✅ Error handling
@@ -546,6 +590,7 @@ describe('Feature/Component Name', () => {
 - ✅ Integration points
 
 **What NOT to test:**
+
 - ❌ Third-party libraries
 - ❌ Generated code (unless custom logic added)
 - ❌ Simple getters/setters
@@ -558,8 +603,10 @@ describe('Feature/Component Name', () => {
 ### Adding Dependencies
 
 #### Step 1: Evaluate Necessity
+
 ```markdown
 Questions:
+
 - [ ] Is this dependency really needed?
 - [ ] Can we implement it ourselves?
 - [ ] What's the bundle size impact?
@@ -568,6 +615,7 @@ Questions:
 ```
 
 #### Step 2: Check Compatibility
+
 ```bash
 # Check version compatibility
 pnpm info <package-name> versions
@@ -577,6 +625,7 @@ pnpm info <package-name> peerDependencies
 ```
 
 #### Step 3: Add to Correct Location
+
 ```bash
 # Workspace root (for tools)
 pnpm add -D <package-name> -w
@@ -589,12 +638,14 @@ pnpm add <package-name> --filter @viztechstack/web
 ```
 
 #### Step 4: Document Usage
+
 ```markdown
 # In package README or architecture doc
 
 ## Dependencies
 
 ### @package/name (version)
+
 - **Purpose:** Why we use this
 - **Usage:** Where it's used
 - **Alternatives:** What we considered
@@ -618,6 +669,7 @@ pnpm update --latest
 ## 🔒 Security Standards
 
 ### Input Validation
+
 - ✅ Validate all external input
 - ✅ Sanitize user input
 - ✅ Use parameterized queries
@@ -625,6 +677,7 @@ pnpm update --latest
 - ❌ Never execute user input as code
 
 ### Authentication & Authorization
+
 - ✅ Use Clerk for authentication
 - ✅ Verify JWT tokens
 - ✅ Check user roles/permissions
@@ -632,6 +685,7 @@ pnpm update --latest
 - ❌ Never expose sensitive data in logs
 
 ### Data Protection
+
 - ✅ Use environment variables for secrets
 - ✅ Encrypt sensitive data
 - ✅ Use HTTPS for all communications
@@ -643,6 +697,7 @@ pnpm update --latest
 ## 🚀 Performance Standards
 
 ### Code Performance
+
 - ✅ Use memoization for expensive computations
 - ✅ Lazy load components when possible
 - ✅ Optimize database queries
@@ -650,6 +705,7 @@ pnpm update --latest
 - ❌ Don't make unnecessary re-renders
 
 ### Bundle Size
+
 - ✅ Code split large features
 - ✅ Tree-shake unused code
 - ✅ Use dynamic imports
@@ -657,6 +713,7 @@ pnpm update --latest
 - ❌ Don't bundle dev dependencies
 
 ### Monitoring
+
 - ✅ Log performance metrics
 - ✅ Monitor error rates
 - ✅ Track user interactions
@@ -719,7 +776,7 @@ counter++;
 // ✅ GOOD: Document complex logic
 /**
  * Calculate discount based on user tier and order total
- * 
+ *
  * Tier 1: 5% discount on orders > $100
  * Tier 2: 10% discount on orders > $50
  * Tier 3: 15% discount on all orders
@@ -738,6 +795,7 @@ function calculateDiscount(tier: number, total: number): number {
 **Format:** `<type>(<scope>): <subject>`
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -747,6 +805,7 @@ function calculateDiscount(tier: number, total: number): number {
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```bash
 feat(api): add user authentication endpoint
 fix(web): resolve navigation bug on mobile
@@ -760,6 +819,7 @@ test(api-client): add validation error tests
 **Format:** `<type>/<short-description>`
 
 **Examples:**
+
 ```bash
 feature/user-authentication
 fix/navigation-bug
@@ -784,6 +844,7 @@ docs/architecture-update
 
 ```markdown
 Before committing:
+
 - [ ] Code builds successfully
 - [ ] All tests pass
 - [ ] No linting errors
@@ -802,6 +863,7 @@ Before committing:
 **CRITICAL PRIORITY - Immediate Action Required**
 
 #### Prerequisites
+
 - Vercel CLI installed: `pnpm add -g vercel`
 - Vercel account authenticated: `vercel login`
 - Access to production logs and monitoring
@@ -809,6 +871,7 @@ Before committing:
 #### Phase 1: Immediate Assessment (0-5 minutes)
 
 **Step 1: Check Vercel Dashboard**
+
 ```bash
 # Open Vercel dashboard
 open https://vercel.com/viztechstack/dashboard
@@ -818,12 +881,14 @@ vercel ls
 ```
 
 **Quick Assessment Checklist:**
+
 - [ ] Is the entire site down or specific pages?
 - [ ] When did the crash start?
 - [ ] What was the last deployment?
 - [ ] Are there any error messages visible?
 
 **Step 2: Check Vercel Logs**
+
 ```bash
 # View real-time logs
 vercel logs --follow
@@ -836,6 +901,7 @@ vercel logs --output=json | grep "ERROR"
 ```
 
 **Step 3: Check Monitoring & Alerts**
+
 ```bash
 # Check error rate
 vercel inspect [deployment-url]
@@ -847,6 +913,7 @@ open https://vercel.com/viztechstack/analytics
 #### Phase 2: Identify Root Cause (5-15 minutes)
 
 **Step 1: Review Recent Changes**
+
 ```bash
 # Check recent deployments
 vercel ls --limit 10
@@ -859,6 +926,7 @@ git log --oneline -10
 ```
 
 **Step 2: Analyze Error Logs**
+
 ```bash
 # Download logs for analysis
 vercel logs [deployment-url] > crash-logs.txt
@@ -871,6 +939,7 @@ grep -i "out of memory\|timeout\|connection" crash-logs.txt
 ```
 
 **Common Crash Causes:**
+
 - ❌ Build failure
 - ❌ Runtime error (uncaught exception)
 - ❌ Memory limit exceeded
@@ -880,6 +949,7 @@ grep -i "out of memory\|timeout\|connection" crash-logs.txt
 - ❌ Database connection failed
 
 **Step 3: Reproduce Locally (if time permits)**
+
 ```bash
 # Pull latest code
 git pull origin main
@@ -898,6 +968,7 @@ pnpm start
 #### Phase 3: Immediate Mitigation (5-20 minutes)
 
 **Option A: Rollback to Last Working Deployment (FASTEST)**
+
 ```bash
 # List recent deployments
 vercel ls
@@ -916,6 +987,7 @@ curl -I https://your-domain.com
 ```
 
 **Option B: Quick Hotfix (if rollback not possible)**
+
 ```bash
 # Create hotfix branch
 git checkout -b hotfix/production-crash
@@ -940,6 +1012,7 @@ vercel --prod --branch hotfix/production-crash
 ```
 
 **Option C: Environment Variable Fix**
+
 ```bash
 # If crash is due to missing env var
 
@@ -954,6 +1027,7 @@ vercel --prod --force
 ```
 
 **Option D: Enable Maintenance Mode**
+
 ```bash
 # If fix will take time, show maintenance page
 
@@ -961,10 +1035,10 @@ vercel --prod --force
 cat > apps/web/pages/maintenance.tsx << 'EOF'
 export default function Maintenance() {
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       height: '100vh',
       flexDirection: 'column'
     }}>
@@ -983,6 +1057,7 @@ vercel --prod
 #### Phase 4: Verification (5-10 minutes)
 
 **Step 1: Verify Fix**
+
 ```bash
 # Check deployment status
 vercel ls
@@ -998,8 +1073,10 @@ watch -n 10 'curl -s -o /dev/null -w "%{http_code}" https://your-domain.com'
 ```
 
 **Step 2: Smoke Testing**
+
 ```markdown
 Critical path testing:
+
 - [ ] Homepage loads
 - [ ] User can login
 - [ ] Main features work
@@ -1008,6 +1085,7 @@ Critical path testing:
 ```
 
 **Step 3: Monitor Metrics**
+
 ```bash
 # Check error rate
 vercel inspect [deployment-url]
@@ -1022,6 +1100,7 @@ open https://vercel.com/viztechstack/analytics
 #### Phase 5: Communication (Throughout incident)
 
 **Step 1: Notify Stakeholders**
+
 ```markdown
 ## Incident Notification Template
 
@@ -1032,6 +1111,7 @@ open https://vercel.com/viztechstack/analytics
 **ETA:** [Estimated time to resolution]
 
 **Current Actions:**
+
 - [ ] Investigating root cause
 - [ ] Implementing fix
 - [ ] Testing solution
@@ -1040,12 +1120,14 @@ open https://vercel.com/viztechstack/analytics
 ```
 
 **Step 2: Update Status Page (if available)**
+
 ```bash
 # Update status page or create status tweet
 # Keep users informed
 ```
 
 **Step 3: Internal Communication**
+
 ```markdown
 # Post in team channel
 
@@ -1057,12 +1139,14 @@ open https://vercel.com/viztechstack/analytics
 **Owner:** [Your name]
 
 **Timeline:**
+
 - [Time] - Incident detected
 - [Time] - Root cause identified
 - [Time] - Fix deployed
 - [Time] - Verified resolved
 
 **Next Steps:**
+
 - [ ] Monitor for 1 hour
 - [ ] Post-mortem scheduled
 ```
@@ -1070,6 +1154,7 @@ open https://vercel.com/viztechstack/analytics
 #### Phase 6: Post-Incident (After resolution)
 
 **Step 1: Document Incident**
+
 ```bash
 # Create incident report
 vim .docs/incidents/YYYY-MM-DD-production-crash.md
@@ -1079,38 +1164,47 @@ vim .docs/incidents/YYYY-MM-DD-production-crash.md
 # Production Incident Report - [Date]
 
 ## Summary
+
 Brief description of what happened
 
 ## Timeline
+
 - **[Time]** - Incident detected
-- **[Time]** - Root cause identified  
+- **[Time]** - Root cause identified
 - **[Time]** - Fix deployed
 - **[Time]** - Incident resolved
 
 ## Root Cause
+
 Detailed explanation of what caused the crash
 
 ## Impact
+
 - **Duration:** X minutes
 - **Users Affected:** Estimate
 - **Revenue Impact:** If applicable
 
 ## Resolution
+
 How was it fixed?
 
 ## Prevention
+
 What can we do to prevent this in the future?
 
 ## Action Items
+
 - [ ] Action 1
 - [ ] Action 2
 - [ ] Action 3
 
 ## Lessons Learned
+
 What did we learn?
 ```
 
 **Step 2: Create Prevention Tasks**
+
 ```bash
 # Create GitHub issues for prevention
 gh issue create --title "Add error boundary for X" --body "..."
@@ -1119,6 +1213,7 @@ gh issue create --title "Improve logging for Z" --body "..."
 ```
 
 **Step 3: Update Runbooks**
+
 ```bash
 # Update this document with new learnings
 vim .agents/rules/feature-implementation-standard.md
@@ -1128,12 +1223,14 @@ vim .agents/workflows/incident-response-[type].md
 ```
 
 **Step 4: Schedule Post-Mortem**
+
 ```markdown
 ## Post-Mortem Meeting
 
 **When:** Within 24-48 hours
 **Who:** Engineering team + stakeholders
 **Agenda:**
+
 1. Timeline review
 2. Root cause analysis
 3. What went well
@@ -1145,6 +1242,7 @@ vim .agents/workflows/incident-response-[type].md
 ### Vercel CLI Quick Reference
 
 **Essential Commands:**
+
 ```bash
 # Authentication
 vercel login
@@ -1183,6 +1281,7 @@ vercel build             # Build locally
 ```
 
 **Advanced Debugging:**
+
 ```bash
 # Enable debug mode
 vercel --debug
@@ -1200,6 +1299,7 @@ vercel logs [deployment-url] > full-logs.txt
 ### Prevention Checklist
 
 **Before Every Production Deploy:**
+
 - [ ] All tests pass locally
 - [ ] Build succeeds locally
 - [ ] Environment variables verified
@@ -1210,6 +1310,7 @@ vercel logs [deployment-url] > full-logs.txt
 - [ ] Rollback plan ready
 
 **Monitoring Setup:**
+
 - [ ] Error tracking (Sentry, etc.)
 - [ ] Performance monitoring
 - [ ] Uptime monitoring
@@ -1217,6 +1318,7 @@ vercel logs [deployment-url] > full-logs.txt
 - [ ] Alert configuration
 
 **Emergency Contacts:**
+
 - [ ] Team lead contact
 - [ ] DevOps contact
 - [ ] Vercel support (if needed)
@@ -1227,6 +1329,7 @@ vercel logs [deployment-url] > full-logs.txt
 ## 🎓 Best Practices Summary
 
 ### DO
+
 1. ✅ Read documentation first
 2. ✅ Follow existing patterns
 3. ✅ Write tests
@@ -1239,6 +1342,7 @@ vercel logs [deployment-url] > full-logs.txt
 10. ✅ Commit frequently
 
 ### DON'T
+
 1. ❌ Use `any` type
 2. ❌ Skip tests
 3. ❌ Ignore errors

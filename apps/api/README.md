@@ -1,98 +1,186 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# VizTechStack API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+GraphQL API backend cho VizTechStack - nền tảng trực quan hóa roadmap công nghệ.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech Stack
 
-## Description
+- **Framework**: NestJS 11.0.1
+- **GraphQL**: Apollo Server 5.4.0 (code-first approach)
+- **Authentication**: Clerk JWT validation
+- **Database**: Convex (serverless database)
+- **Testing**: Jest 30.0.0
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Quick Start
 
 ```bash
-$ pnpm install
+# Install dependencies
+pnpm install
+
+# Development
+pnpm dev --filter @viztechstack/api
+
+# Build
+pnpm build --filter @viztechstack/api
+
+# Run tests
+pnpm test --filter @viztechstack/api
 ```
 
-## Compile and run the project
+## API Endpoints
 
-```bash
-# development
-$ pnpm run start
+- **GraphQL API**: `http://localhost:3001/graphql`
+- **GraphQL Playground**: `http://localhost:3001/graphql` (dev only)
+- **Swagger Documentation**: `http://localhost:3001/api` (dev only)
 
-# watch mode
-$ pnpm run start:dev
+## Documentation
 
-# production mode
-$ pnpm run start:prod
+Xem [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) để biết chi tiết về:
+
+- GraphQL Schema
+- Queries và Mutations
+- Authentication & Authorization
+- Error Handling
+- Examples
+
+## Features
+
+### Roadmap Management
+
+- ✅ CRUD operations cho roadmaps
+- ✅ Role-based access control (Admin/User/Guest)
+- ✅ Public read access cho published roadmaps
+- ✅ Admin-only write operations
+
+### Authentication & Authorization
+
+- ✅ Clerk JWT authentication
+- ✅ ClerkAuthGuard cho protected endpoints
+- ✅ RolesGuard cho role-based authorization
+- ✅ @Public decorator cho public endpoints
+- ✅ @CurrentUser decorator để extract user context
+
+## Project Structure
+
+```
+apps/api/
+├── src/
+│   ├── common/
+│   │   ├── convex/          # Convex service wrapper
+│   │   ├── decorators/      # Custom decorators (@Public, @Roles, @CurrentUser)
+│   │   └── guards/          # Auth guards (ClerkAuthGuard, RolesGuard)
+│   ├── modules/
+│   │   ├── health/          # Health check module
+│   │   ├── ping/            # Ping module
+│   │   └── roadmap/         # Roadmap CRUD module
+│   │       ├── domain/      # Domain models
+│   │       ├── application/ # Services
+│   │       └── transport/   # GraphQL resolvers & schemas
+│   ├── app.module.ts
+│   └── main.ts
+├── test/
+│   └── e2e/                 # E2E tests
+└── API_DOCUMENTATION.md     # Detailed API docs
 ```
 
-## Run tests
+## Testing
 
 ```bash
-# unit tests
-$ pnpm run test
+# Unit tests
+pnpm test --filter @viztechstack/api
 
-# e2e tests
-$ pnpm run test:e2e
+# E2E tests
+pnpm test:e2e --filter @viztechstack/api
 
-# test coverage
-$ pnpm run test:cov
+# Test coverage
+pnpm test:cov --filter @viztechstack/api
+```
+
+### Test Coverage
+
+- ✅ 69 unit tests (RoadmapService, RoadmapResolver)
+- ✅ 13 property-based tests (100 iterations each)
+- ✅ 18 E2E tests (CRUD workflows, access control)
+
+## Environment Variables
+
+```env
+# Server
+PORT=3001
+NODE_ENV=development
+
+# Clerk Authentication
+CLERK_SECRET_KEY=your_clerk_secret_key
+CLERK_JWT_ISSUER_DOMAIN=https://your-domain.clerk.accounts.dev
+
+# Convex Database
+CONVEX_URL=https://your-convex-url.convex.cloud
+
+# CORS
+WEB_APP_ORIGIN=http://localhost:3000
+```
+
+## GraphQL Schema
+
+### Queries (Public)
+
+```graphql
+roadmaps: [Roadmap!]!
+roadmap(slug: String!): Roadmap
+```
+
+### Mutations (Admin Only)
+
+```graphql
+createRoadmap(input: CreateRoadmapInput!): String!
+updateRoadmap(input: UpdateRoadmapInput!): String!
+deleteRoadmap(id: String!): String!
+```
+
+## Development
+
+### Adding New Features
+
+1. Create module in `src/modules/`
+2. Define domain models in `domain/models/`
+3. Implement service in `application/services/`
+4. Create GraphQL schemas in `transport/graphql/schemas/`
+5. Implement resolver in `transport/graphql/resolvers/`
+6. Register module in `app.module.ts`
+7. Write tests
+
+### Code Quality
+
+```bash
+# Linting
+pnpm lint --filter @viztechstack/api
+
+# Type checking
+pnpm typecheck --filter @viztechstack/api
+
+# Format code
+pnpm format --filter @viztechstack/api
 ```
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+API được deploy trên Vercel as serverless functions.
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+# Build for production
+pnpm build --filter @viztechstack/api
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+# Start production server
+pnpm start --filter @viztechstack/api
+```
 
 ## Resources
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- [NestJS Documentation](https://docs.nestjs.com)
+- [GraphQL Documentation](https://graphql.org/learn/)
+- [Apollo Server Documentation](https://www.apollographql.com/docs/apollo-server/)
+- [Clerk Documentation](https://clerk.com/docs)
+- [Convex Documentation](https://docs.convex.dev)
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT

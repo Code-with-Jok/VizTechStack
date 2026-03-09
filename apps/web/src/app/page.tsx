@@ -22,7 +22,8 @@ export default async function Home() {
             VizTechStack is being rebuilt
           </h1>
           <p className="text-base leading-7 text-zinc-700 sm:text-lg">
-            The previous product implementation has been cleared out. What remains is a clean shell for the next product direction.
+            The previous product implementation has been cleared out. What
+            remains is a clean shell for the next product direction.
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/70 bg-white/75 p-4 text-sm font-medium text-zinc-700 backdrop-blur">
@@ -37,7 +38,8 @@ export default async function Home() {
           </div>
           {isAdmin && (
             <p className="rounded-2xl border border-zinc-200 bg-white/70 px-4 py-3 text-sm text-zinc-600">
-              Admin-only feature surfaces were removed together with the previous implementation.
+              Admin-only feature surfaces were removed together with the
+              previous implementation.
             </p>
           )}
         </div>
