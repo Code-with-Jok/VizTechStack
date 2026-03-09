@@ -1,14 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import type { RoadmapSummary } from "@viztechstack/types";
-import Link from "next/link";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { getRoadmapsPageServer } from "@/lib/api-client/roadmaps";
 
 interface ClerkSessionClaims {
   metadata?: {
@@ -17,77 +7,41 @@ interface ClerkSessionClaims {
 }
 
 export default async function Home() {
-  let roadmaps: RoadmapSummary[] = [];
-
-  try {
-    const roadmapsPage = await getRoadmapsPageServer({
-      limit: 24,
-      cache: "force-cache",
-      revalidate: 120,
-      tags: ["roadmaps-public"],
-    });
-    console.log("[Homepage] Successfully fetched roadmaps:", {
-      count: roadmapsPage.items.length,
-      isDone: roadmapsPage.isDone,
-    });
-
-    roadmaps = roadmapsPage.items;
-  } catch (error) {
-    // Keep homepage available even when API is unreachable at build/runtime.
-    console.error("[Homepage] Failed to fetch roadmaps for homepage.", {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-  }
-
-  // Keep auth check for future use
   const { sessionClaims } = await auth();
   const claims = sessionClaims as ClerkSessionClaims | null;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _isAdmin = claims?.metadata?.role === "admin";
+  const isAdmin = claims?.metadata?.role === "admin";
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
-      <main className="flex-1 container mx-auto max-w-5xl px-4 py-12">
-        <div className="flex flex-col items-center mb-16 space-y-4 text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-zinc-900 dark:text-zinc-50">
-            VizTechStack
-          </h1>
-          <p className="max-w-[85%] text-lg text-zinc-600 dark:text-zinc-400 sm:text-xl">
-            Step by step guides and paths to learn different tools or
-            technologies
+    <main className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-4 py-16">
+      <section className="rounded-[2rem] border border-zinc-200 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(251,191,36,0.18),transparent_40%),linear-gradient(135deg,#ffffff,#f4f4f5)] p-8 shadow-sm sm:p-12">
+        <div className="max-w-3xl space-y-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-zinc-500">
+            Product reset
           </p>
+          <h1 className="text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">
+            VizTechStack is being rebuilt
+          </h1>
+          <p className="text-base leading-7 text-zinc-700 sm:text-lg">
+            The previous product implementation has been cleared out. What remains is a clean shell for the next product direction.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/70 bg-white/75 p-4 text-sm font-medium text-zinc-700 backdrop-blur">
+              Only the base layout and authentication shell remain.
+            </div>
+            <div className="rounded-2xl border border-white/70 bg-white/75 p-4 text-sm font-medium text-zinc-700 backdrop-blur">
+              API and data contracts were reduced to the minimum surface.
+            </div>
+            <div className="rounded-2xl border border-white/70 bg-white/75 p-4 text-sm font-medium text-zinc-700 backdrop-blur">
+              The app is ready for a fresh redesign pass.
+            </div>
+          </div>
+          {isAdmin && (
+            <p className="rounded-2xl border border-zinc-200 bg-white/70 px-4 py-3 text-sm text-zinc-600">
+              Admin-only feature surfaces were removed together with the previous implementation.
+            </p>
+          )}
         </div>
-
-        {roadmaps.length === 0 ? (
-          <div className="text-center text-zinc-500 py-12">
-            No roadmaps found or Backend is not running yet.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {roadmaps.map((r: RoadmapSummary) => (
-              <Link key={r.id} href={`/roadmaps/${r.slug}`}>
-                <Card className="h-full transition-all hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer flex flex-col">
-                  <CardHeader>
-                    <div className="flex justify-between items-start mb-2">
-                      <Badge variant="secondary" className="capitalize">
-                        {r.category || "Role"}
-                      </Badge>
-                      <Badge variant="outline" className="capitalize text-xs">
-                        {r.difficulty || "Beginner"}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-xl">{r.title}</CardTitle>
-                    <CardDescription className="line-clamp-2 mt-2">
-                      {r.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }

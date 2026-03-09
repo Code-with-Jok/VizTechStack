@@ -1,23 +1,8 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { GqlExecutionContext } from '@nestjs/graphql';
 import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { ClerkAuthGuard } from '../src/common/guards/clerk-auth.guard';
-import { ROADMAP_REPOSITORY } from '../src/modules/roadmap/application/ports/roadmap.repository';
-import type { RoadmapRepository } from '../src/modules/roadmap/application/ports/roadmap.repository';
-
-interface GraphQLRequestContext {
-  req: {
-    headers: Record<string, string | string[] | undefined>;
-    user?: {
-      id: string;
-      role: string;
-    };
-  };
-}
 
 interface GraphQLErrorPayload {
   message: string;
@@ -32,75 +17,19 @@ function toGraphQLResponse<TData>(payload: unknown): GraphQLResponse<TData> {
   return payload as GraphQLResponse<TData>;
 }
 
-@Injectable()
-class TestClerkAuthGuard {
-  canActivate(context: ExecutionContext): boolean {
-    const gqlContext =
-      GqlExecutionContext.create(context).getContext<GraphQLRequestContext>();
-    const roleHeader = gqlContext.req.headers['x-test-role'];
-    const role = Array.isArray(roleHeader) ? roleHeader[0] : roleHeader;
-
-    gqlContext.req.user = {
-      id: 'test-user',
-      role: typeof role === 'string' ? role : 'user',
-    };
-
-    return true;
-  }
-}
-
-describe('Roadmap GraphQL (e2e)', () => {
+describe('Application (e2e)', () => {
   let app: INestApplication<App>;
-  let repository: jest.Mocked<RoadmapRepository>;
-  let listMock: jest.MockedFunction<RoadmapRepository['list']>;
-  let findBySlugMock: jest.MockedFunction<RoadmapRepository['findBySlug']>;
-  let createMock: jest.MockedFunction<RoadmapRepository['create']>;
-
-  const roadmapEntity = {
-    id: 'roadmap_1',
-    slug: 'frontend-engineer',
-    title: 'Frontend Engineer',
-    description: 'Frontend roadmap',
-    category: 'role' as const,
-    difficulty: 'beginner' as const,
-    nodesJson: '[]',
-    edgesJson: '[]',
-    topicCount: 12,
-    status: 'public' as const,
-    createdAt: Date.now(),
-  };
 
   beforeAll(() => {
     process.env.NODE_ENV = 'test';
-    process.env.CONVEX_DEPLOYMENT ??= 'dev:test-deployment';
-    process.env.CONVEX_URL ??= 'https://dummy.convex.cloud';
     process.env.CLERK_JWT_ISSUER_DOMAIN ??= 'https://dummy.clerk.accounts.dev';
     process.env.WEB_APP_ORIGIN ??= 'http://localhost:3000';
   });
 
   beforeEach(async () => {
-    listMock = jest.fn();
-    findBySlugMock = jest.fn();
-    createMock = jest.fn();
-
-    repository = {
-      list: listMock,
-      findBySlug: findBySlugMock,
-      create: createMock,
-      update: jest.fn(),
-      delete: jest.fn(),
-      findById: jest.fn(),
-      findSkillRoadmaps: jest.fn(),
-    } as jest.Mocked<RoadmapRepository>;
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(ROADMAP_REPOSITORY)
-      .useValue(repository)
-      .overrideGuard(ClerkAuthGuard)
-      .useClass(TestClerkAuthGuard)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -110,190 +39,69 @@ describe('Roadmap GraphQL (e2e)', () => {
     await app.close();
   });
 
-  it('lists roadmaps through GraphQL page query', async () => {
-    listMock.mockResolvedValue({
-      items: [roadmapEntity],
-      nextCursor: null,
-      isDone: true,
-    });
+  it('returns the hello message on GET /', async () => {
+    const response = await request(app.getHttpServer()).get('/');
 
+    expect(response.status).toBe(200);
+    expect(response.text).toBe('Hello World!');
+  });
+
+  it('returns ping on GraphQL', async () => {
     const response = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         query: `
-        query ListRoadmaps($input: RoadmapPageInput) {
-          listRoadmaps(input: $input) {
-            items {
-              id
-              slug
-              title
-            }
-            nextCursor
-            isDone
-          }
+        query Ping {
+          ping
         }
       `,
-        variables: {
-          input: {
-            limit: 1,
-          },
-        },
       });
 
-    const body = toGraphQLResponse<{
-      listRoadmaps: {
-        items: Array<{ id: string; slug: string; title: string }>;
-        nextCursor: string | null;
-        isDone: boolean;
-      };
-    }>(response.body as unknown);
+    const body = toGraphQLResponse<{ ping: string }>(response.body as unknown);
 
     expect(response.status).toBe(200);
     expect(body.errors).toBeUndefined();
-    expect(body.data?.listRoadmaps).toEqual({
-      items: [
-        {
-          id: 'roadmap_1',
-          slug: 'frontend-engineer',
-          title: 'Frontend Engineer',
-        },
-      ],
-      nextCursor: null,
-      isDone: true,
-    });
+    expect(body.data?.ping).toBe('pong');
   });
 
-  it('gets roadmap detail by slug', async () => {
-    findBySlugMock.mockResolvedValue(roadmapEntity);
-
+  it('returns health on GraphQL', async () => {
     const response = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         query: `
-        query GetRoadmapBySlug($slug: String!) {
-          getRoadmapBySlug(slug: $slug) {
-            id
-            slug
-            title
-          }
-        }
-      `,
-        variables: {
-          slug: 'frontend-engineer',
-        },
-      });
-
-    const body = toGraphQLResponse<{
-      getRoadmapBySlug: { id: string; slug: string; title: string } | null;
-    }>(response.body as unknown);
-
-    expect(response.status).toBe(200);
-    expect(body.errors).toBeUndefined();
-    expect(body.data?.getRoadmapBySlug).toEqual({
-      id: 'roadmap_1',
-      slug: 'frontend-engineer',
-      title: 'Frontend Engineer',
-    });
-  });
-
-  it('creates roadmap when requester has admin role', async () => {
-    createMock.mockResolvedValue(roadmapEntity);
-
-    const response = await request(app.getHttpServer())
-      .post('/graphql')
-      .set('x-test-role', 'admin')
-      .send({
-        query: `
-          mutation CreateRoadmap($input: CreateRoadmapInput!) {
-            createRoadmap(input: $input) {
-              id
-              slug
-              title
-              description
-              category
-              difficulty
-              topicCount
+        query Health {
+          health {
+            status
+            services {
+              name
               status
-              createdAt
+              responseTime
             }
           }
-        `,
-        variables: {
-          input: {
-            slug: 'frontend-engineer',
-            title: 'Frontend Engineer',
-            description: 'Frontend roadmap',
-            category: 'ROLE',
-            difficulty: 'BEGINNER',
-            topicCount: 12,
-            status: 'PUBLIC',
-            nodes: [],
-            edges: [],
-          },
-        },
+        }
+      `,
       });
 
     const body = toGraphQLResponse<{
-      createRoadmap: {
-        id: string;
-        slug: string;
-        title: string;
-        description: string;
-        category: string;
-        difficulty: string;
-        topicCount: number;
+      health: {
         status: string;
-        createdAt: number;
+        services: Array<{
+          name: string;
+          status: string;
+          responseTime: number;
+        }>;
       };
     }>(response.body as unknown);
 
     expect(response.status).toBe(200);
     expect(body.errors).toBeUndefined();
-    expect(body.data?.createRoadmap.id).toBe('roadmap_1');
-    expect(createMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('rejects create roadmap when requester is not admin', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/graphql')
-      .set('x-test-role', 'user')
-      .send({
-        query: `
-          mutation CreateRoadmap($input: CreateRoadmapInput!) {
-            createRoadmap(input: $input) {
-              id
-              slug
-              title
-            }
-          }
-        `,
-        variables: {
-          input: {
-            slug: 'frontend-engineer',
-            title: 'Frontend Engineer',
-            description: 'Frontend roadmap',
-            category: 'ROLE',
-            difficulty: 'BEGINNER',
-            topicCount: 12,
-            status: 'PUBLIC',
-            nodes: [],
-            edges: [],
-          },
-        },
-      });
-
-    const body = toGraphQLResponse<{
-      createRoadmap: {
-        id: string;
-        slug: string;
-        title: string;
-      } | null;
-    }>(response.body as unknown);
-
-    expect(response.status).toBe(200);
-    expect(body.data).toBeNull();
-    expect(body.errors).toBeDefined();
-    expect(body.errors?.[0]?.message).toContain('Insufficient permissions');
-    expect(createMock).not.toHaveBeenCalled();
+    expect(body.data?.health.status).toBe('HEALTHY');
+    expect(body.data?.health.services).toEqual([
+      {
+        name: 'api',
+        status: 'UP',
+        responseTime: 0,
+      },
+    ]);
   });
 });

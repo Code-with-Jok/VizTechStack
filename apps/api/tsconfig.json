@@ -6,15 +6,8 @@
     "paths": {
       "@viztechstack/env/server": ["../../tooling/env/dist/server"],
       "@viztechstack/env/client": ["../../tooling/env/dist/client"],
-      "@viztechstack/env": ["../../tooling/env/dist/index"],
-      "@viztechstack/convex": ["../../convex/_generated/api"],
-      "@viztechstack/convex/*": ["../../convex/_generated/*"]
+      "@viztechstack/env": ["../../tooling/env/dist/index"]
     }
   },
-  "include": [
-    "src",
-    "test",
-    "../../convex/_generated/*.ts",
-    "../../convex/_generated/*.d.ts"
-  ]
+  "include": ["src", "test"]
 }

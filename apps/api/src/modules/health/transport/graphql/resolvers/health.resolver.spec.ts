@@ -29,7 +29,7 @@ describe('HealthResolver', () => {
   });
 
   describe('health', () => {
-    it('should return health status', async () => {
+    it('should return health status', () => {
       const mockHealthStatus = {
         status: HealthStatusEnum.HEALTHY,
         timestamp: new Date().toISOString(),
@@ -44,15 +44,15 @@ describe('HealthResolver', () => {
 
       const checkHealthSpy = jest
         .spyOn(healthCheckService, 'checkHealth')
-        .mockResolvedValue(mockHealthStatus);
+        .mockReturnValue(mockHealthStatus);
 
-      const result = await resolver.health();
+      const result = resolver.health();
 
       expect(result).toEqual(mockHealthStatus);
       expect(checkHealthSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should return unhealthy status when services are down', async () => {
+    it('should return unhealthy status when services are down', () => {
       const mockHealthStatus = {
         status: HealthStatusEnum.UNHEALTHY,
         timestamp: new Date().toISOString(),
@@ -67,9 +67,9 @@ describe('HealthResolver', () => {
 
       const checkHealthSpy = jest
         .spyOn(healthCheckService, 'checkHealth')
-        .mockResolvedValue(mockHealthStatus);
+        .mockReturnValue(mockHealthStatus);
 
-      const result = await resolver.health();
+      const result = resolver.health();
 
       expect(result.status).toBe(HealthStatusEnum.UNHEALTHY);
       expect(result.services[0].status).toBe(ServiceStatus.DOWN);

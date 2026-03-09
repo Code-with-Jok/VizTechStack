@@ -178,8 +178,8 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
       console.log("\n=== FIX VERIFIED: Production Pattern Now Works ===");
       console.log("This exact pattern is used in:");
       console.log("  - apps/web/src/app/page.tsx");
-      console.log("  - apps/web/src/app/admin/roadmap/page.tsx");
-      console.log("  - apps/web/src/app/roadmap/[slug]/page.tsx");
+      console.log("  - apps/web/src/app/page.tsx");
+      console.log("  - apps/web/src/app/layout.tsx");
       console.log(
         "\nThe pattern now renders correctly without hydration errors"
       );

@@ -1,10 +1,29 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
+interface GraphQLErrorPayload {
+  message: string;
+}
+
+interface GraphQLResponse<TData> {
+  data: TData | null;
+  errors?: GraphQLErrorPayload[];
+}
+
+function toGraphQLResponse<TData>(payload: unknown): GraphQLResponse<TData> {
+  return payload as GraphQLResponse<TData>;
+}
+
 describe('Health (e2e)', () => {
   let app: INestApplication;
+
+  beforeAll(() => {
+    process.env.NODE_ENV = 'test';
+    process.env.CLERK_JWT_ISSUER_DOMAIN ??= 'https://dummy.clerk.accounts.dev';
+    process.env.WEB_APP_ORIGIN ??= 'http://localhost:3000';
+  });
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -19,7 +38,7 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
-  it('should return health status via GraphQL', () => {
+  it('should return health status via GraphQL', async () => {
     const query = `
       query {
         health {
@@ -34,40 +53,36 @@ describe('Health (e2e)', () => {
       }
     `;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post('/graphql')
       .send({ query })
-      .expect(200)
-      .expect((res: request.Response) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(res.body.data).toBeDefined();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(res.body.data.health).toBeDefined();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(res.body.data.health.status).toMatch(
-          /^(healthy|unhealthy|HEALTHY|UNHEALTHY)$/i,
-        );
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(res.body.data.health.timestamp).toBeDefined();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(res.body.data.health.services).toBeInstanceOf(Array);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(res.body.data.health.services.length).toBeGreaterThan(0);
+      .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const convexService = res.body.data.health.services.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-          (s: any) => s.name === 'convex',
-        );
+    const body = toGraphQLResponse<{
+      health: {
+        status: string;
+        timestamp: string;
+        services: Array<{
+          name: string;
+          status: string;
+          responseTime: number;
+        }>;
+      };
+    }>(response.body);
 
-        expect(convexService).toBeDefined();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(convexService.status).toMatch(/^(up|down|UP|DOWN)$/i);
-      });
+    expect(body.errors).toBeUndefined();
+    expect(body.data?.health.status).toBe('HEALTHY');
+    expect(body.data?.health.timestamp).toBeDefined();
+    expect(body.data?.health.services).toEqual([
+      {
+        name: 'api',
+        status: 'UP',
+        responseTime: 0,
+      },
+    ]);
   });
 
-  it('should be accessible without authentication (public endpoint)', () => {
+  it('should be accessible without authentication', async () => {
     const query = `
       query {
         health {
@@ -76,10 +91,16 @@ describe('Health (e2e)', () => {
       }
     `;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post('/graphql')
       .send({ query })
       .expect(200);
+
+    const body = toGraphQLResponse<{ health: { status: string } }>(
+      response.body,
+    );
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data?.health.status).toBe('HEALTHY');
   });
 });
