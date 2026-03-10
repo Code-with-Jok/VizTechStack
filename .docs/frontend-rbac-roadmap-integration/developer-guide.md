@@ -82,7 +82,46 @@ const GET_ROADMAPS = gql`
 `;
 ```
 
-### 3. Next.js App Router
+### 3. Backend Architecture - Queries & Permissions
+
+**Hiểu về 2 loại queries:**
+
+```typescript
+// 1. PUBLIC QUERY - roadmaps:list
+// Trả về: Chỉ published roadmaps
+// Được gọi bởi: GET_ROADMAPS
+// Ai dùng: Guest, User, Admin (khi xem public)
+const GET_ROADMAPS = gql`
+  query GetRoadmaps {
+    roadmaps {  # Gọi resolver roadmaps() → roadmaps:list
+      id
+      title
+      isPublished  # Luôn = true
+    }
+  }
+`;
+
+// 2. ADMIN QUERY - roadmaps:listAll  
+// Trả về: TẤT CẢ roadmaps (published + drafts)
+// Được gọi bởi: GET_ROADMAPS_FOR_ADMIN
+// Ai dùng: Chỉ Admin (có @Roles('admin'))
+const GET_ROADMAPS_FOR_ADMIN = gql`
+  query GetRoadmapsForAdmin {
+    roadmapsForAdmin {  # Gọi resolver roadmapsForAdmin() → roadmaps:listAll
+      id
+      title
+      isPublished  # Có thể = true hoặc false
+    }
+  }
+`;
+```
+
+**Tại sao tách biệt?**
+- **Security**: Guest/User không thể thấy draft content
+- **Performance**: Public query nhanh hơn (ít data hơn)
+- **UX**: Admin cần thấy drafts để quản lý, public không cần
+
+### 4. Next.js App Router
 
 ```typescript
 // Server Component (mặc định)
@@ -98,7 +137,7 @@ export default function Page() {
 }
 ```
 
-### 4. TypeScript Basics
+### 5. TypeScript Basics
 
 ```typescript
 // Interface - Định nghĩa kiểu dữ liệu
@@ -118,7 +157,7 @@ type RoadmapFormData = {
 };
 ```
 
-### 5. Clerk Authentication
+### 6. Clerk Authentication
 Clerk là service xử lý authentication:
 
 ```typescript
@@ -290,7 +329,7 @@ console.log('User metadata:', user?.publicMetadata);
 console.log('Role:', user?.publicMetadata?.role);
 ```
 
-#### 2. GraphQL Issues
+#### 2. Component Issues
 ```typescript
 // Problem: Query not updating after mutation
 // Solution: Add refetchQueries to mutation
@@ -316,9 +355,17 @@ cache: new InMemoryCache({
     },
   },
 })
+
+// Problem: Admin không thấy draft roadmaps
+// Solution: Dùng đúng hook cho admin
+// ❌ SAI
+const { roadmaps } = useRoadmaps(); // Chỉ published
+
+// ✅ ĐÚNG  
+const { roadmaps } = useRoadmapsForAdmin(); // Cả published + drafts
 ```
 
-#### 3. Component Issues
+#### 3. Rendering Issues
 ```typescript
 // Problem: Component not re-rendering
 // Solution: Check dependencies in useEffect/useMemo
@@ -555,7 +602,22 @@ test('admin can create roadmap', async ({ page }) => {
 4. ✅ Thấy trang "Quản lý Roadmap"? ✓
 5. ✅ Có nút "Tạo Roadmap Mới"? ✓
 6. ✅ Thấy bảng danh sách roadmaps? ✓
-7. ✅ Có thể xóa roadmap? ✓
+7. ✅ **MỚI**: Thấy cả published VÀ draft roadmaps? ✓
+8. ✅ Có thể xóa roadmap? ✓
+
+**Kiểm tra Query được gọi:**
+```bash
+# Mở DevTools → Network → Filter "Fetch/XHR"
+# Admin dashboard phải gọi:
+# - Query name: "GetRoadmapsForAdmin" 
+# - Backend endpoint: roadmaps:listAll
+# - Response: Có cả isPublished: true và false
+
+# Public page phải gọi:
+# - Query name: "GetRoadmaps"
+# - Backend endpoint: roadmaps:list  
+# - Response: Chỉ có isPublished: true
+```
 
 ### Test GraphQL Operations
 
@@ -566,10 +628,28 @@ test('admin can create roadmap', async ({ page }) => {
 # 3. Filter "XHR/Fetch"
 # 4. Thực hiện các actions:
 
-# - Load roadmaps page → Thấy request GET_ROADMAPS
-# - Login as admin → Load admin page → Thấy request GET_ROADMAPS_FOR_ADMIN
+# - Load roadmaps page → Thấy request GET_ROADMAPS (gọi roadmaps:list)
+# - Login as admin → Load admin page → Thấy request GET_ROADMAPS_FOR_ADMIN (gọi roadmaps:listAll)
 # - Delete roadmap → Thấy request DELETE_ROADMAP
 # - Sau delete → Thấy refetch GET_ROADMAPS và GET_ROADMAPS_FOR_ADMIN
+```
+
+**Hiểu về Backend Queries:**
+```typescript
+// Backend có 2 queries khác nhau:
+
+// 1. roadmaps:list - Chỉ trả về published roadmaps (cho public)
+// Được gọi bởi: GET_ROADMAPS query
+// Dùng cho: Guest, User, Admin khi xem public roadmaps
+
+// 2. roadmaps:listAll - Trả về TẤT CẢ roadmaps (bao gồm drafts)
+// Được gọi bởi: GET_ROADMAPS_FOR_ADMIN query  
+// Dùng cho: Admin operations (CRUD, delete, edit)
+
+// Lý do tách biệt:
+// - Admin cần thấy cả draft để quản lý
+// - Public chỉ thấy published để tránh confusion
+// - Security: Guest/User không thể access draft content
 ```
 
 **Test Error Handling:**
@@ -735,6 +815,16 @@ return {
 };
 ```
 
+2. **MỚI**: Kiểm tra đúng query được gọi:
+```typescript
+// ❌ SAI - Gọi sai query
+const { data } = useQuery(GET_ROADMAPS); // Chỉ có published
+// Nhưng admin cần cả drafts
+
+// ✅ ĐÚNG - Admin dùng query riêng
+const { data } = useQuery(GET_ROADMAPS_FOR_ADMIN); // Có cả drafts
+```
+
 ### Lỗi 3: AdminButton không hiển thị cho admin
 
 **Nguyên nhân**: Role không được set trong Clerk metadata.
@@ -849,6 +939,30 @@ return (
   </div>
 );
 ```
+
+### Lỗi 10: Admin không thấy draft roadmaps
+
+**Nguyên nhân**: Sử dụng sai hook hoặc query.
+
+**Giải pháp**:
+```typescript
+// ❌ SAI - Admin dùng hook public
+function AdminDashboard() {
+  const { roadmaps } = useRoadmaps(); // Chỉ có published
+  // Admin sẽ không thấy drafts!
+}
+
+// ✅ ĐÚNG - Admin dùng hook riêng
+function AdminDashboard() {
+  const { roadmaps } = useRoadmapsForAdmin(); // Có cả drafts
+  // Admin thấy tất cả roadmaps
+}
+```
+
+**Debug steps**:
+1. Kiểm tra query nào được gọi trong Network tab
+2. Verify user có role admin
+3. Check backend logs xem query nào được execute
 
 ## Checklist trước khi commit
 
@@ -991,6 +1105,12 @@ A:
 **Q: Làm sao debug GraphQL requests?**
 A: Mở Browser DevTools → Network tab → Filter "XHR/Fetch" → Thực hiện actions để xem requests.
 
+**Q: Tại sao Admin không thấy draft roadmaps?**
+A: Có thể đang dùng sai hook. Admin phải dùng `useRoadmapsForAdmin()` thay vì `useRoadmaps()`. Hook admin gọi query `roadmaps:listAll` để lấy cả drafts, còn hook public chỉ gọi `roadmaps:list` để lấy published.
+
+**Q: Làm sao biết query nào đang được gọi?**
+A: Mở DevTools → Network → Tìm GraphQL request → Xem trong payload có `operationName` là gì (`roadmaps` hay `roadmapsForAdmin`).
+
 ---
 
 **Chúc bạn code vui vẻ! 🚀**
@@ -1000,6 +1120,21 @@ Nếu gặp vấn đề, hãy hỏi senior developer hoặc tạo issue trên Gi
 ---
 
 **Last Updated:** 2024-12-19  
-**Version:** 2.0.0  
+**Version:** 2.1.0  
 **Maintainer:** VizTechStack Frontend Team  
 **Review Status:** ✅ Ready for Development
+
+## Changelog
+
+### Version 2.1.0 (2024-12-19)
+- **UPDATED**: Clarified backend query architecture (`roadmaps:list` vs `roadmaps:listAll`)
+- **ADDED**: Explanation of why admin needs separate query for draft access
+- **ADDED**: New troubleshooting section for admin not seeing drafts
+- **ADDED**: Backend query debugging instructions
+- **UPDATED**: Testing checklist to verify correct queries are called
+- **ADDED**: FAQ entries about query differences and debugging
+
+### Version 2.0.0 (2024-12-19)
+- Initial comprehensive developer guide for frontend RBAC roadmap integration
+
+---
