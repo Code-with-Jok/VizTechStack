@@ -39,20 +39,15 @@ export class RolesGuard implements CanActivate {
     const gqlContext = ctx.getContext<GraphQLContext>();
     const user = gqlContext.req?.user;
 
-    this.logger.debug('RolesGuard Check Started');
-
     if (!user || !user.role) {
-      this.logger.debug('Access Denied: No role found');
       throw new ForbiddenException('Access denied: No role assigned');
     }
 
     const hasRole = requiredRoles.includes(user.role);
     if (!hasRole) {
-      this.logger.debug('Access Denied: Required roles check failed');
       throw new ForbiddenException('Insufficient permissions');
     }
 
-    this.logger.debug('Access Granted');
     return true;
   }
 }

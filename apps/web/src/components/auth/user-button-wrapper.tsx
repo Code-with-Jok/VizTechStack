@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { UserButton } from '@clerk/nextjs';
+import { UserButton } from "@clerk/nextjs";
 
 export function UserButtonWrapper() {
-    return <UserButton />;
+  return <UserButton />;
 }
 export default UserButtonWrapper;

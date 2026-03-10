@@ -1,4 +1,4 @@
-import { ZodError } from 'zod';
+import { ZodError } from "zod";
 
 /**
  * Custom error class for validation failures
@@ -10,8 +10,8 @@ export class ValidationError extends Error {
     public readonly zodError: ZodError,
   ) {
     super(message);
-    this.name = 'ValidationError';
-    
+    this.name = "ValidationError";
+
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ValidationError);
@@ -24,7 +24,7 @@ export class ValidationError extends Error {
    */
   getUserFriendlyMessages(): string[] {
     return this.zodError.errors.map((err) => {
-      const path = err.path.join('.');
+      const path = err.path.join(".");
       return path ? `${path}: ${err.message}` : err.message;
     });
   }
@@ -37,7 +37,7 @@ export class ValidationError extends Error {
     const fieldErrors: Record<string, string[]> = {};
 
     for (const err of this.zodError.errors) {
-      const field = err.path.join('.');
+      const field = err.path.join(".");
       if (!fieldErrors[field]) {
         fieldErrors[field] = [];
       }
@@ -53,7 +53,7 @@ export class ValidationError extends Error {
    */
   getFirstError(): string {
     const messages = this.getUserFriendlyMessages();
-    return messages[0] || 'Validation failed';
+    return messages[0] || "Validation failed";
   }
 
   /**

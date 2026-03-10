@@ -33,7 +33,7 @@ function createServerEnv(): ServerEnv {
       console.error(`  - ${field}: ${errors?.join(", ")}`);
     });
     throw new Error(
-      `Invalid server environment variables: ${Object.keys(fieldErrors).join(", ")}`
+      `Invalid server environment variables: ${Object.keys(fieldErrors).join(", ")}`,
     );
   }
 

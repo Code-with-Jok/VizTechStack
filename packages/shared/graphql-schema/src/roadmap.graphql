@@ -1,0 +1,45 @@
+# Roadmap GraphQL Schema
+
+type Roadmap {
+  id: ID!
+  slug: String!
+  title: String!
+  description: String!
+  content: String!
+  author: String!
+  tags: [String!]!
+  publishedAt: Float!
+  updatedAt: Float!
+  isPublished: Boolean!
+}
+
+input CreateRoadmapInput {
+  slug: String!
+  title: String!
+  description: String!
+  content: String!
+  tags: [String!]!
+  isPublished: Boolean!
+}
+
+input UpdateRoadmapInput {
+  id: String!
+  slug: String
+  title: String
+  description: String
+  content: String
+  tags: [String]
+  isPublished: Boolean
+}
+
+type Query {
+  roadmaps: [Roadmap!]!
+  roadmapsForAdmin: [Roadmap!]!
+  roadmap(slug: String!): Roadmap
+}
+
+type Mutation {
+  createRoadmap(input: CreateRoadmapInput!): Roadmap!
+  updateRoadmap(input: UpdateRoadmapInput!): Roadmap!
+  deleteRoadmap(id: String!): Roadmap!
+}

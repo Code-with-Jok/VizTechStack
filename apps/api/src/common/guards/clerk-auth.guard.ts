@@ -11,9 +11,14 @@ import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 interface ClerkJwtPayload {
+  sub?: string;
   metadata?: {
     role?: string;
   };
+  public_metadata?: {
+    role?: string;
+  };
+  role?: string;
   [key: string]: unknown;
 }
 
@@ -57,6 +62,7 @@ export class ClerkAuthGuard implements CanActivate {
 
     // Check for Authorization header
     const authHeader = gqlReq.headers?.authorization;
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException(
         'Missing or malformed Authorization header',
@@ -64,19 +70,27 @@ export class ClerkAuthGuard implements CanActivate {
     }
 
     const token = authHeader.split(' ')[1];
+
     try {
       const sessionClaims = (await verifyToken(token, {
         secretKey: this.secretKey,
       })) as unknown as ClerkJwtPayload;
 
+      // Extract role from multiple possible locations in JWT
+      const role =
+        sessionClaims.role ||
+        sessionClaims.metadata?.role ||
+        sessionClaims.public_metadata?.role ||
+        'user';
+
       gqlReq.user = {
         ...sessionClaims,
-        role: sessionClaims.metadata?.role || 'user',
+        id: sessionClaims.sub, // Map Clerk's 'sub' to 'id'
+        role,
       };
 
       return true;
     } catch {
-      this.logger.error('Clerk token verification failed');
       throw new UnauthorizedException('Invalid token');
     }
   }
