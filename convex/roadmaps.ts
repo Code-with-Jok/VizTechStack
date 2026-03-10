@@ -18,6 +18,21 @@ export const list = query({
 });
 
 /**
+ * Query: List all roadmaps (admin only - includes drafts)
+ * Returns all roadmaps ordered by updatedAt descending
+ * Used for admin dashboard
+ */
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("roadmaps")
+      .order("desc")
+      .collect();
+  },
+});
+
+/**
  * Query: Get roadmap by slug (public)
  * Returns a single roadmap or null if not found
  * Requirements: 4.1, 4.2, 4.3, 4.4
@@ -44,6 +59,7 @@ export const create = mutation({
     description: v.string(),
     content: v.string(),
     author: v.string(),
+    // authorName: v.string(), // Temporarily disabled
     tags: v.array(v.string()),
     isPublished: v.boolean(),
   },

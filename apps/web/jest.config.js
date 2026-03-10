@@ -2,7 +2,7 @@
 module.exports = {
     displayName: 'web',
     preset: 'ts-jest',
-    testEnvironment: 'node',
+    testEnvironment: 'jsdom',
     rootDir: '.',
     testMatch: ['**/__tests__/**/*.spec.ts', '**/__tests__/**/*.spec.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
@@ -26,4 +26,5 @@ module.exports = {
     coverageDirectory: 'coverage',
     testTimeout: 10000,
     setupFiles: ['<rootDir>/jest.setup.js'],
+    setupFilesAfterEnv: ['<rootDir>/jest.setup-after-env.js'],
 };

@@ -3,6 +3,7 @@
 import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
 import UserButtonWrapper from "../auth/user-button-wrapper";
+import { AdminButton } from "../auth/admin-button";
 
 export function Header() {
   return (
@@ -14,7 +15,13 @@ export function Header() {
         >
           VizTechStack
         </Link>
-        <div className="flex items-center gap-4">
+        <nav className="flex items-center gap-4">
+          <Link
+            href="/roadmaps"
+            className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
+          >
+            Roadmaps
+          </Link>
           <SignedOut>
             <SignInButton mode="modal">
               <button className="cursor-pointer text-sm font-medium text-zinc-900 hover:underline dark:text-zinc-50">
@@ -23,9 +30,10 @@ export function Header() {
             </SignInButton>
           </SignedOut>
           <SignedIn>
+            <AdminButton />
             <UserButtonWrapper />
           </SignedIn>
-        </div>
+        </nav>
       </div>
     </header>
   );

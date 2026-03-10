@@ -86,6 +86,124 @@ export class RoadmapDocsController {
   }
 
   /**
+   * GraphQL Query: roadmapsForAdmin
+   *
+   * Get all roadmaps including drafts (admin only)
+   */
+  @Get('admin/roadmaps')
+  @ApiOperation({
+    summary: '[GraphQL Query] Get all roadmaps for admin (including drafts)',
+    description:
+      'Admin-only endpoint that returns all roadmaps regardless of publication status.\n\n' +
+      '**GraphQL Query:**\n```graphql\nquery GetRoadmapsForAdmin {\n  roadmapsForAdmin {\n    id\n    slug\n    title\n    description\n    content\n    author\n    tags\n    publishedAt\n    updatedAt\n    isPublished\n  }\n}\n```\n\n' +
+      '**Access:** Admin only (requires valid JWT token and admin role)\n\n' +
+      '**Authorization:** Bearer JWT token required\n\n' +
+      '**Role:** admin\n\n' +
+      'This endpoint is used by the admin dashboard to manage both published and draft roadmaps.',
+  })
+  @ApiTags('roadmap')
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved all roadmaps for admin',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          properties: {
+            roadmapsForAdmin: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', example: 'roadmap_123' },
+                  slug: { type: 'string', example: 'frontend-developer' },
+                  title: {
+                    type: 'string',
+                    example: 'Frontend Developer Roadmap',
+                  },
+                  description: {
+                    type: 'string',
+                    example: 'Complete guide to becoming a frontend developer',
+                  },
+                  content: {
+                    type: 'string',
+                    example: '# Frontend Developer Roadmap\n\nThis roadmap...',
+                  },
+                  author: { type: 'string', example: 'user_456' },
+                  tags: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    example: ['frontend', 'javascript', 'react'],
+                  },
+                  publishedAt: { type: 'number', example: 1704067200000 },
+                  updatedAt: { type: 'number', example: 1704067200000 },
+                  isPublished: { type: 'boolean', example: false },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+    schema: {
+      type: 'object',
+      properties: {
+        errors: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Unauthorized' },
+              extensions: {
+                type: 'object',
+                properties: {
+                  code: { type: 'string', example: 'UNAUTHENTICATED' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - User does not have admin role',
+    schema: {
+      type: 'object',
+      properties: {
+        errors: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Forbidden resource' },
+              extensions: {
+                type: 'object',
+                properties: {
+                  code: { type: 'string', example: 'FORBIDDEN' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  getRoadmapsForAdmin() {
+    return {
+      message:
+        'This is a documentation endpoint. Use GraphQL Playground at /graphql to execute queries.',
+    };
+  }
+
+  /**
    * GraphQL Query: roadmap
    *
    * Get a single roadmap by slug

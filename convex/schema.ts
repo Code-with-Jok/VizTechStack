@@ -25,6 +25,7 @@ export default defineSchema({
     description: v.string(),
     content: v.optional(v.string()),
     author: v.optional(v.string()),
+    // authorName: v.optional(v.string()), // Temporarily disabled
     tags: v.optional(v.array(v.string())),
     publishedAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),

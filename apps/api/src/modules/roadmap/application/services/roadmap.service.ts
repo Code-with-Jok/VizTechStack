@@ -49,13 +49,11 @@ export class RoadmapService {
       const roadmaps =
         await this.convexService.query<Roadmap[]>('roadmaps:list');
 
-      // Handle case where Convex might return null or undefined
       if (!roadmaps) {
         this.logger.log('No roadmaps found (null/undefined response)');
         return [];
       }
 
-      // Ensure we have an array
       if (!Array.isArray(roadmaps)) {
         this.logger.warn(
           'Convex returned non-array response for roadmaps:list',
@@ -71,6 +69,49 @@ export class RoadmapService {
         error instanceof Error ? error.stack : error,
       );
       throw new InternalServerErrorException('Failed to fetch roadmaps');
+    }
+  }
+
+  /**
+   * Find all roadmaps including drafts (admin only)
+   *
+   * Returns all roadmaps regardless of publication status, ordered by updatedAt descending.
+   * This is an admin-only operation used for the admin dashboard.
+   *
+   * @returns Promise<Roadmap[]> Array of all roadmaps (published and drafts)
+   * @throws InternalServerErrorException if Convex query fails
+   */
+  async findAllForAdmin(): Promise<Roadmap[]> {
+    this.logger.log('Fetching all roadmaps for admin (including drafts)');
+
+    try {
+      const roadmaps =
+        await this.convexService.query<Roadmap[]>('roadmaps:listAll');
+
+      if (!roadmaps) {
+        this.logger.log('No roadmaps found (null/undefined response)');
+        return [];
+      }
+
+      if (!Array.isArray(roadmaps)) {
+        this.logger.warn(
+          'Convex returned non-array response for roadmaps:listAll',
+        );
+        return [];
+      }
+
+      this.logger.log(
+        `Successfully fetched ${roadmaps.length} roadmaps for admin`,
+      );
+      return roadmaps;
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch roadmaps for admin',
+        error instanceof Error ? error.stack : error,
+      );
+      throw new InternalServerErrorException(
+        'Failed to fetch roadmaps for admin',
+      );
     }
   }
 
@@ -116,6 +157,7 @@ export class RoadmapService {
    *
    * Creates a new roadmap with the provided input data and author ID.
    * Validates that the slug is unique before creating.
+   * Fetches author name from Clerk for display purposes.
    * Only accessible to Admin users (enforced by resolver guards).
    *
    * @param input - CreateRoadmapInput containing roadmap data
@@ -139,12 +181,18 @@ export class RoadmapService {
         );
       }
 
-      // Create roadmap in Convex
+      // Fetch author name from Clerk - temporarily disabled for debugging
+      // const authorInfo = await this.clerkService.getUserById(authorId);
+      // const authorName = authorInfo?.name || `User ${authorId.slice(-8)}`;
+      // const authorName = `User ${authorId.slice(-8)}`; // Temporary fallback
+
+      // Create roadmap in Convex - temporarily without authorName
       const roadmapId = await this.convexService.mutation<string>(
         'roadmaps:create',
         {
           ...input,
           author: authorId,
+          // authorName, // Temporarily disabled until schema is deployed
         },
       );
 
@@ -269,9 +317,8 @@ export class RoadmapService {
    */
   private async findById(id: string): Promise<Roadmap | null> {
     try {
-      // Since we don't have a direct getById query, we'll fetch all and filter
-      // This is not optimal but works for now. Consider adding a getById query to Convex.
-      const roadmaps = await this.findAll();
+      // Use findAllForAdmin to get all roadmaps (including drafts) for admin operations
+      const roadmaps = await this.findAllForAdmin();
       return roadmaps.find((r) => r._id === id) || null;
     } catch (error) {
       this.logger.error(

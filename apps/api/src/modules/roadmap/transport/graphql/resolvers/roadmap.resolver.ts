@@ -56,7 +56,6 @@ export class RoadmapResolver {
   async roadmaps(): Promise<RoadmapSchema[]> {
     const roadmaps = await this.roadmapService.findAll();
 
-    // Handle case where roadmaps might be null or not an array
     if (!roadmaps || !Array.isArray(roadmaps)) {
       return [];
     }
@@ -64,6 +63,51 @@ export class RoadmapResolver {
     return roadmaps.map((roadmap) => ({
       ...roadmap,
       id: roadmap._id,
+      content: roadmap.content || '',
+      author: roadmap.author || '',
+      title: roadmap.title || '',
+      description: roadmap.description || '',
+      tags: roadmap.tags || [],
+      publishedAt: roadmap.publishedAt || 0,
+      updatedAt: roadmap.updatedAt || 0,
+      isPublished: roadmap.isPublished || false,
+    }));
+  }
+
+  /**
+   * Query all roadmaps including drafts (admin only)
+   *
+   * Admin-only endpoint that returns all roadmaps regardless of publication status.
+   * Used for admin dashboard to manage both published and draft roadmaps.
+   *
+   * Authorization:
+   * - Requires valid JWT token (ClerkAuthGuard)
+   * - Requires 'admin' role (RolesGuard)
+   *
+   * @returns Promise<RoadmapSchema[]> Array of all roadmaps (published and drafts)
+   * @throws UnauthorizedException if JWT token is invalid (401)
+   * @throws ForbiddenException if user is not admin (403)
+   */
+  @Query(() => [RoadmapSchema])
+  @Roles('admin')
+  async roadmapsForAdmin(): Promise<RoadmapSchema[]> {
+    const roadmaps = await this.roadmapService.findAllForAdmin();
+
+    if (!roadmaps || !Array.isArray(roadmaps)) {
+      return [];
+    }
+
+    return roadmaps.map((roadmap) => ({
+      ...roadmap,
+      id: roadmap._id,
+      content: roadmap.content || '',
+      author: roadmap.author || '',
+      title: roadmap.title || '',
+      description: roadmap.description || '',
+      tags: roadmap.tags || [],
+      publishedAt: roadmap.publishedAt || 0,
+      updatedAt: roadmap.updatedAt || 0,
+      isPublished: roadmap.isPublished || false,
     }));
   }
 
@@ -88,6 +132,14 @@ export class RoadmapResolver {
     return {
       ...roadmap,
       id: roadmap._id,
+      content: roadmap.content || '',
+      author: roadmap.author || '',
+      title: roadmap.title || '',
+      description: roadmap.description || '',
+      tags: roadmap.tags || [],
+      publishedAt: roadmap.publishedAt || 0,
+      updatedAt: roadmap.updatedAt || 0,
+      isPublished: roadmap.isPublished || false,
     };
   }
 
@@ -120,6 +172,14 @@ export class RoadmapResolver {
     return {
       ...roadmap,
       id: roadmap._id,
+      content: roadmap.content || '',
+      author: roadmap.author || '',
+      title: roadmap.title || '',
+      description: roadmap.description || '',
+      tags: roadmap.tags || [],
+      publishedAt: roadmap.publishedAt || 0,
+      updatedAt: roadmap.updatedAt || 0,
+      isPublished: roadmap.isPublished || false,
     };
   }
 
@@ -151,6 +211,14 @@ export class RoadmapResolver {
     return {
       ...roadmap,
       id: roadmap._id,
+      content: roadmap.content || '',
+      author: roadmap.author || '',
+      title: roadmap.title || '',
+      description: roadmap.description || '',
+      tags: roadmap.tags || [],
+      publishedAt: roadmap.publishedAt || 0,
+      updatedAt: roadmap.updatedAt || 0,
+      isPublished: roadmap.isPublished || false,
     };
   }
 
@@ -178,6 +246,14 @@ export class RoadmapResolver {
     return {
       ...roadmap,
       id: roadmap._id,
+      content: roadmap.content || '',
+      author: roadmap.author || '',
+      title: roadmap.title || '',
+      description: roadmap.description || '',
+      tags: roadmap.tags || [],
+      publishedAt: roadmap.publishedAt || 0,
+      updatedAt: roadmap.updatedAt || 0,
+      isPublished: roadmap.isPublished || false,
     };
   }
 }

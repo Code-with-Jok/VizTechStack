@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Update API Documentation",
+  "description": "Automatically update Swagger API documentation when GraphQL resolvers or schemas are modified",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "apps/api/src/**/*.resolver.ts",
+      "apps/api/src/**/*.schema.ts",
+      "packages/shared/graphql-schema/src/**/*.graphql"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "pnpm codegen && echo \"API documentation updated after resolver/schema changes\""
+  }
+}

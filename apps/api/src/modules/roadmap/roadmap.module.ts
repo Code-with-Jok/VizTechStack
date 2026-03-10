@@ -3,6 +3,7 @@ import { RoadmapResolver } from './transport/graphql/resolvers/roadmap.resolver'
 import { RoadmapDocsController } from './transport/rest/controllers/roadmap-docs.controller';
 import { RoadmapService } from './application/services/roadmap.service';
 import { ConvexService } from '../../common/convex/convex.service';
+import { ClerkService } from '../../common/clerk/clerk.service';
 
 /**
  * RoadmapModule - NestJS module for roadmap feature
@@ -26,7 +27,7 @@ import { ConvexService } from '../../common/convex/convex.service';
  */
 @Module({
   controllers: [RoadmapDocsController],
-  providers: [RoadmapResolver, RoadmapService, ConvexService],
+  providers: [RoadmapResolver, RoadmapService, ConvexService, ClerkService],
   exports: [RoadmapService],
 })
 export class RoadmapModule {}

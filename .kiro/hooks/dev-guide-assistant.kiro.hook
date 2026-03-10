@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "Developer Guide Assistant",
+  "description": "Tự động hỗ trợ developer với hướng dẫn chi tiết theo style intern/fresher-friendly khi làm việc với frontend RBAC roadmap integration",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "apps/web/src/lib/hooks/use-roadmap.ts",
+      "apps/web/src/lib/apollo/client.ts",
+      "apps/web/src/components/admin/*.tsx",
+      "apps/web/src/components/roadmap/*.tsx",
+      "apps/web/src/components/auth/*.tsx",
+      "apps/web/src/app/roadmaps/**/*.tsx",
+      "apps/web/src/app/admin/**/*.tsx",
+      "apps/api/src/modules/roadmap/**/*.ts",
+      "apps/api/src/common/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "**🚀 Developer Guide Assistant - Hỗ trợ Code Development**\n\nFile trong frontend RBAC roadmap integration vừa được chỉnh sửa. Hãy hỗ trợ developer theo style chi tiết cho intern/fresher:\n\n## 📋 Nhiệm vụ chính:\n\n### 1. **Phân tích thay đổi code**\n- Xem file nào đã được sửa và tác động gì\n- Kiểm tra có breaking changes không\n- Đánh giá impact đến các components khác\n\n### 2. **Hướng dẫn chi tiết (theo style developer-guide)**\n- **Giải thích WHY**: Tại sao thay đổi này cần thiết?\n- **Giải thích HOW**: Làm thế nào để implement đúng?\n- **Code examples**: Với comments tiếng Việt chi tiết\n- **Best practices**: Theo chuẩn VizTechStack\n\n### 3. **Troubleshooting proactive**\n- Dự đoán lỗi có thể xảy ra từ thay đổi này\n- Cung cấp giải pháp cụ thể với code examples\n- Hướng dẫn debug step-by-step\n\n### 4. **Testing guidance**\n- Hướng dẫn test manual cho thay đổi này\n- Unit test examples nếu cần\n- Integration test checklist\n\n### 5. **Performance & Security tips**\n- Kiểm tra performance impact\n- Security best practices\n- Optimization suggestions\n\n## 🎯 Style yêu cầu:\n\n**✅ DO:**\n- Viết như đang hướng dẫn intern/fresher\n- Giải thích từng bước chi tiết\n- Code examples với comments tiếng Việt\n- Troubleshooting với giải pháp cụ thể\n- FAQ cho câu hỏi thường gặp\n- Checklist để verify\n\n**❌ DON'T:**\n- Giả định developer đã biết context\n- Bỏ qua error handling\n- Viết quá technical mà không giải thích\n- Thiếu examples cụ thể\n\n## 📚 Tham khảo:\n- Developer Guide: `.docs/frontend-rbac-roadmap-integration/developer-guide.md`\n- Tech Stack: `tech.md`\n- Implementation Standard: `.agents/rules/feature-implementation-standard.md`\n\n**Mục tiêu**: Giúp developer hiểu rõ, implement đúng, và tránh được lỗi phổ biến!"
+  }
+}

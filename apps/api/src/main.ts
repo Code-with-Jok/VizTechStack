@@ -34,10 +34,25 @@ async function bootstrap() {
           '### Queries (Public)\n' +
           '- `roadmaps`: Get all published roadmaps\n' +
           '- `roadmap(slug: String!)`: Get a single roadmap by slug\n\n' +
+          '### Queries (Admin Only)\n' +
+          '- `roadmapsForAdmin`: Get all roadmaps including drafts (admin only)\n\n' +
           '### Mutations (Admin Only)\n' +
           '- `createRoadmap(input: CreateRoadmapInput!)`: Create a new roadmap\n' +
           '- `updateRoadmap(input: UpdateRoadmapInput!)`: Update an existing roadmap\n' +
           '- `deleteRoadmap(id: String!)`: Delete a roadmap\n\n' +
+          '## Roadmap Fields\n' +
+          '- `id`: Unique identifier\n' +
+          '- `slug`: URL-friendly identifier\n' +
+          '- `title`: Display title\n' +
+          '- `description`: Brief description\n' +
+          '- `content`: Full markdown content\n' +
+          '- `author`: Author Clerk user ID (legacy field)\n' +
+          '- `authorId`: Author Clerk user ID (explicit field)\n' +
+          '- `authorName`: Display name of the author\n' +
+          '- `tags`: Array of category tags\n' +
+          '- `publishedAt`: Publication timestamp\n' +
+          '- `updatedAt`: Last update timestamp\n' +
+          '- `isPublished`: Publication status\n\n' +
           '## Error Codes\n' +
           '- `UNAUTHENTICATED` (401): Missing or invalid JWT token\n' +
           '- `FORBIDDEN` (403): Insufficient permissions for the operation\n' +
