@@ -19,6 +19,11 @@ import { ConvexService } from '../../src/common/convex/convex.service';
 // Mock @clerk/backend module
 jest.mock('@clerk/backend', () => ({
   verifyToken: jest.fn(),
+  createClerkClient: jest.fn(() => ({
+    users: {
+      getUser: jest.fn(),
+    },
+  })),
 }));
 
 import { verifyToken } from '@clerk/backend';
@@ -128,7 +133,14 @@ describe('Roadmap CRUD E2E', () => {
     };
 
     // Step 1: CREATE - Create a new roadmap
+    // First mock: findBySlug for duplicate check (should return null)
+    jest.spyOn(convexService, 'query').mockResolvedValueOnce(null);
+    // Second mock: mutation to create roadmap
     jest.spyOn(convexService, 'mutation').mockResolvedValueOnce(mockRoadmapId);
+    // Third mock: findBySlug to fetch created roadmap
+    jest
+      .spyOn(convexService, 'query')
+      .mockResolvedValueOnce(mockCreatedRoadmap);
 
     const createResponse = await request(app.getHttpServer())
       .post('/graphql')
@@ -136,7 +148,16 @@ describe('Roadmap CRUD E2E', () => {
       .send({
         query: `
                     mutation CreateRoadmap($input: CreateRoadmapInput!) {
-                        createRoadmap(input: $input)
+                        createRoadmap(input: $input) {
+                            id
+                            slug
+                            title
+                            description
+                            content
+                            author
+                            tags
+                            isPublished
+                        }
                     }
                 `,
         variables: {
@@ -151,13 +172,22 @@ describe('Roadmap CRUD E2E', () => {
         },
       });
 
-    const createBody = toGraphQLResponse<{ createRoadmap: string }>(
-      createResponse.body as unknown,
-    );
+    const createBody = toGraphQLResponse<{
+      createRoadmap: {
+        id: string;
+        slug: string;
+        title: string;
+        description: string;
+        content: string;
+        author: string;
+        tags: string[];
+        isPublished: boolean;
+      };
+    }>(createResponse.body as unknown);
 
     expect(createResponse.status).toBe(200);
     expect(createBody.errors).toBeUndefined();
-    expect(createBody.data?.createRoadmap).toBe(mockRoadmapId);
+    expect(createBody.data?.createRoadmap.id).toBe(mockRoadmapId);
 
     // Verify Convex mutation was called with correct data
     expect(convexService.mutation).toHaveBeenCalledWith(
@@ -234,6 +264,10 @@ describe('Roadmap CRUD E2E', () => {
     };
 
     jest.spyOn(convexService, 'mutation').mockResolvedValueOnce(mockRoadmapId);
+    // Mock the findAllForAdmin call that happens in findById after update
+    jest
+      .spyOn(convexService, 'query')
+      .mockResolvedValueOnce([mockUpdatedRoadmap]);
 
     const updateResponse = await request(app.getHttpServer())
       .post('/graphql')
@@ -241,7 +275,11 @@ describe('Roadmap CRUD E2E', () => {
       .send({
         query: `
                     mutation UpdateRoadmap($input: UpdateRoadmapInput!) {
-                        updateRoadmap(input: $input)
+                        updateRoadmap(input: $input) {
+                            id
+                            title
+                            description
+                        }
                     }
                 `,
         variables: {
@@ -253,13 +291,13 @@ describe('Roadmap CRUD E2E', () => {
         },
       });
 
-    const updateBody = toGraphQLResponse<{ updateRoadmap: string }>(
-      updateResponse.body as unknown,
-    );
+    const updateBody = toGraphQLResponse<{
+      updateRoadmap: { id: string; title: string; description: string };
+    }>(updateResponse.body as unknown);
 
     expect(updateResponse.status).toBe(200);
     expect(updateBody.errors).toBeUndefined();
-    expect(updateBody.data?.updateRoadmap).toBe(mockRoadmapId);
+    expect(updateBody.data?.updateRoadmap.id).toBe(mockRoadmapId);
 
     // Verify Convex mutation was called with update data
     expect(convexService.mutation).toHaveBeenCalledWith(
@@ -310,6 +348,10 @@ describe('Roadmap CRUD E2E', () => {
 
     // Step 5: DELETE - Delete the roadmap
     jest.spyOn(convexService, 'mutation').mockResolvedValueOnce(mockRoadmapId);
+    // Mock the findAllForAdmin call that happens in findById before delete
+    jest
+      .spyOn(convexService, 'query')
+      .mockResolvedValueOnce([mockUpdatedRoadmap]);
 
     const deleteResponse = await request(app.getHttpServer())
       .post('/graphql')
@@ -317,7 +359,11 @@ describe('Roadmap CRUD E2E', () => {
       .send({
         query: `
                     mutation DeleteRoadmap($id: String!) {
-                        deleteRoadmap(id: $id)
+                        deleteRoadmap(id: $id) {
+                            id
+                            slug
+                            title
+                        }
                     }
                 `,
         variables: {
@@ -325,13 +371,13 @@ describe('Roadmap CRUD E2E', () => {
         },
       });
 
-    const deleteBody = toGraphQLResponse<{ deleteRoadmap: string }>(
-      deleteResponse.body as unknown,
-    );
+    const deleteBody = toGraphQLResponse<{
+      deleteRoadmap: { id: string; slug: string; title: string };
+    }>(deleteResponse.body as unknown);
 
     expect(deleteResponse.status).toBe(200);
     expect(deleteBody.errors).toBeUndefined();
-    expect(deleteBody.data?.deleteRoadmap).toBe(mockRoadmapId);
+    expect(deleteBody.data?.deleteRoadmap.id).toBe(mockRoadmapId);
 
     // Verify Convex mutation was called with correct ID
     expect(convexService.mutation).toHaveBeenCalledWith('roadmaps:remove', {
@@ -395,7 +441,14 @@ describe('Roadmap CRUD E2E', () => {
     };
 
     // Create roadmap
+    // First mock: findBySlug for duplicate check (should return null)
+    jest.spyOn(convexService, 'query').mockResolvedValueOnce(null);
+    // Second mock: mutation to create roadmap
     jest.spyOn(convexService, 'mutation').mockResolvedValueOnce(mockRoadmapId);
+    // Third mock: findBySlug to fetch created roadmap
+    jest
+      .spyOn(convexService, 'query')
+      .mockResolvedValueOnce(mockCreatedRoadmap);
 
     const createResponse = await request(app.getHttpServer())
       .post('/graphql')
@@ -403,7 +456,16 @@ describe('Roadmap CRUD E2E', () => {
       .send({
         query: `
                     mutation CreateRoadmap($input: CreateRoadmapInput!) {
-                        createRoadmap(input: $input)
+                        createRoadmap(input: $input) {
+                            id
+                            slug
+                            title
+                            description
+                            content
+                            author
+                            tags
+                            isPublished
+                        }
                     }
                 `,
         variables: {
@@ -516,6 +578,14 @@ describe('Roadmap CRUD E2E', () => {
 
     // Update only title and isPublished
     jest.spyOn(convexService, 'mutation').mockResolvedValueOnce(mockRoadmapId);
+    // Mock the findAllForAdmin call that happens in findById after update
+    const updatedRoadmap = {
+      ...originalRoadmap,
+      title: 'Updated Title',
+      isPublished: true,
+      updatedAt: Date.now(),
+    };
+    jest.spyOn(convexService, 'query').mockResolvedValueOnce([updatedRoadmap]);
 
     const updateResponse = await request(app.getHttpServer())
       .post('/graphql')
@@ -523,7 +593,11 @@ describe('Roadmap CRUD E2E', () => {
       .send({
         query: `
                     mutation UpdateRoadmap($input: UpdateRoadmapInput!) {
-                        updateRoadmap(input: $input)
+                        updateRoadmap(input: $input) {
+                            id
+                            title
+                            isPublished
+                        }
                     }
                 `,
         variables: {
@@ -538,13 +612,6 @@ describe('Roadmap CRUD E2E', () => {
     expect(updateResponse.status).toBe(200);
 
     // Query updated state
-    const updatedRoadmap = {
-      ...originalRoadmap,
-      title: 'Updated Title',
-      isPublished: true,
-      updatedAt: Date.now(),
-    };
-
     jest.spyOn(convexService, 'query').mockResolvedValueOnce(updatedRoadmap);
 
     const updatedResponse = await request(app.getHttpServer())
@@ -720,7 +787,11 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation CreateRoadmap($input: CreateRoadmapInput!) {
-                            createRoadmap(input: $input)
+                            createRoadmap(input: $input) {
+                                id
+                                slug
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -735,9 +806,9 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const body = toGraphQLResponse<{ createRoadmap: string }>(
-        response.body as unknown,
-      );
+      const body = toGraphQLResponse<{
+        createRoadmap: { id: string; slug: string; title: string };
+      }>(response.body as unknown);
 
       expect(response.status).toBe(200);
       expect(body.errors).toBeDefined();
@@ -755,7 +826,10 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation UpdateRoadmap($input: UpdateRoadmapInput!) {
-                            updateRoadmap(input: $input)
+                            updateRoadmap(input: $input) {
+                                id
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -766,9 +840,9 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const body = toGraphQLResponse<{ updateRoadmap: string }>(
-        response.body as unknown,
-      );
+      const body = toGraphQLResponse<{
+        updateRoadmap: { id: string; title: string };
+      }>(response.body as unknown);
 
       expect(response.status).toBe(200);
       expect(body.errors).toBeDefined();
@@ -786,7 +860,11 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation DeleteRoadmap($id: String!) {
-                            deleteRoadmap(id: $id)
+                            deleteRoadmap(id: $id) {
+                                id
+                                slug
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -794,9 +872,9 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const body = toGraphQLResponse<{ deleteRoadmap: string }>(
-        response.body as unknown,
-      );
+      const body = toGraphQLResponse<{
+        deleteRoadmap: { id: string; slug: string; title: string };
+      }>(response.body as unknown);
 
       expect(response.status).toBe(200);
       expect(body.errors).toBeDefined();
@@ -858,7 +936,11 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation CreateRoadmap($input: CreateRoadmapInput!) {
-                            createRoadmap(input: $input)
+                            createRoadmap(input: $input) {
+                                id
+                                slug
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -873,9 +955,9 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const body = toGraphQLResponse<{ createRoadmap: string }>(
-        response.body as unknown,
-      );
+      const body = toGraphQLResponse<{
+        createRoadmap: { id: string; slug: string; title: string };
+      }>(response.body as unknown);
 
       expect(response.status).toBe(200);
       expect(body.errors).toBeDefined();
@@ -896,7 +978,10 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation UpdateRoadmap($input: UpdateRoadmapInput!) {
-                            updateRoadmap(input: $input)
+                            updateRoadmap(input: $input) {
+                                id
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -907,9 +992,9 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const body = toGraphQLResponse<{ updateRoadmap: string }>(
-        response.body as unknown,
-      );
+      const body = toGraphQLResponse<{
+        updateRoadmap: { id: string; title: string };
+      }>(response.body as unknown);
 
       expect(response.status).toBe(200);
       expect(body.errors).toBeDefined();
@@ -930,7 +1015,11 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation DeleteRoadmap($id: String!) {
-                            deleteRoadmap(id: $id)
+                            deleteRoadmap(id: $id) {
+                                id
+                                slug
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -938,9 +1027,9 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const body = toGraphQLResponse<{ deleteRoadmap: string }>(
-        response.body as unknown,
-      );
+      const body = toGraphQLResponse<{
+        deleteRoadmap: { id: string; slug: string; title: string };
+      }>(response.body as unknown);
 
       expect(response.status).toBe(200);
       expect(body.errors).toBeDefined();
@@ -971,9 +1060,14 @@ describe('Roadmap CRUD E2E', () => {
 
       // Test CREATE
       mockVerifyToken.mockResolvedValue(adminUser as any);
+      // First mock: findBySlug for duplicate check (should return null)
+      jest.spyOn(convexService, 'query').mockResolvedValueOnce(null);
+      // Second mock: mutation to create roadmap
       jest
         .spyOn(convexService, 'mutation')
         .mockResolvedValueOnce(mockRoadmapId);
+      // Third mock: findBySlug to fetch created roadmap
+      jest.spyOn(convexService, 'query').mockResolvedValueOnce(mockRoadmap);
 
       const createResponse = await request(app.getHttpServer())
         .post('/graphql')
@@ -981,7 +1075,16 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation CreateRoadmap($input: CreateRoadmapInput!) {
-                            createRoadmap(input: $input)
+                            createRoadmap(input: $input) {
+                                id
+                                slug
+                                title
+                                description
+                                content
+                                author
+                                tags
+                                isPublished
+                            }
                         }
                     `,
           variables: {
@@ -996,13 +1099,22 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const createBody = toGraphQLResponse<{ createRoadmap: string }>(
-        createResponse.body as unknown,
-      );
+      const createBody = toGraphQLResponse<{
+        createRoadmap: {
+          id: string;
+          slug: string;
+          title: string;
+          description: string;
+          content: string;
+          author: string;
+          tags: string[];
+          isPublished: boolean;
+        };
+      }>(createResponse.body as unknown);
 
       expect(createResponse.status).toBe(200);
       expect(createBody.errors).toBeUndefined();
-      expect(createBody.data?.createRoadmap).toBe(mockRoadmapId);
+      expect(createBody.data?.createRoadmap.id).toBe(mockRoadmapId);
 
       // Test READ
       jest.spyOn(convexService, 'query').mockResolvedValueOnce(mockRoadmap);
@@ -1041,6 +1153,14 @@ describe('Roadmap CRUD E2E', () => {
       jest
         .spyOn(convexService, 'mutation')
         .mockResolvedValueOnce(mockRoadmapId);
+      // Mock the findAllForAdmin call that happens in findById after update
+      const updatedMockRoadmap = {
+        ...mockRoadmap,
+        title: 'Updated Admin Test',
+      };
+      jest
+        .spyOn(convexService, 'query')
+        .mockResolvedValueOnce([updatedMockRoadmap]);
 
       const updateResponse = await request(app.getHttpServer())
         .post('/graphql')
@@ -1048,7 +1168,10 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation UpdateRoadmap($input: UpdateRoadmapInput!) {
-                            updateRoadmap(input: $input)
+                            updateRoadmap(input: $input) {
+                                id
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -1059,18 +1182,20 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const updateBody = toGraphQLResponse<{ updateRoadmap: string }>(
-        updateResponse.body as unknown,
-      );
+      const updateBody = toGraphQLResponse<{
+        updateRoadmap: { id: string; title: string };
+      }>(updateResponse.body as unknown);
 
       expect(updateResponse.status).toBe(200);
       expect(updateBody.errors).toBeUndefined();
-      expect(updateBody.data?.updateRoadmap).toBe(mockRoadmapId);
+      expect(updateBody.data?.updateRoadmap.id).toBe(mockRoadmapId);
 
       // Test DELETE
       jest
         .spyOn(convexService, 'mutation')
         .mockResolvedValueOnce(mockRoadmapId);
+      // Mock the findAllForAdmin call that happens in findById before delete
+      jest.spyOn(convexService, 'query').mockResolvedValueOnce([mockRoadmap]);
 
       const deleteResponse = await request(app.getHttpServer())
         .post('/graphql')
@@ -1078,7 +1203,11 @@ describe('Roadmap CRUD E2E', () => {
         .send({
           query: `
                         mutation DeleteRoadmap($id: String!) {
-                            deleteRoadmap(id: $id)
+                            deleteRoadmap(id: $id) {
+                                id
+                                slug
+                                title
+                            }
                         }
                     `,
           variables: {
@@ -1086,13 +1215,13 @@ describe('Roadmap CRUD E2E', () => {
           },
         });
 
-      const deleteBody = toGraphQLResponse<{ deleteRoadmap: string }>(
-        deleteResponse.body as unknown,
-      );
+      const deleteBody = toGraphQLResponse<{
+        deleteRoadmap: { id: string; slug: string; title: string };
+      }>(deleteResponse.body as unknown);
 
       expect(deleteResponse.status).toBe(200);
       expect(deleteBody.errors).toBeUndefined();
-      expect(deleteBody.data?.deleteRoadmap).toBe(mockRoadmapId);
+      expect(deleteBody.data?.deleteRoadmap.id).toBe(mockRoadmapId);
     });
   });
 });
