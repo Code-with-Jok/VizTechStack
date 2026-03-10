@@ -591,7 +591,7 @@ describe('RoadmapService', () => {
       );
 
       // Verify query was called to find the roadmap
-      expect(convexService.query).toHaveBeenCalledWith('roadmaps:list');
+      expect(convexService.query).toHaveBeenCalledWith('roadmaps:listAll');
 
       // Verify mutation was NOT called
       expect(convexService.mutation).not.toHaveBeenCalled();

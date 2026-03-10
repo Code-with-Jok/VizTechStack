@@ -11,7 +11,7 @@
 import { render, screen } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import { RoadmapTable } from '../roadmap-table';
-import { GET_ROADMAPS } from '@/features/roadmap/queries';
+import { GET_ROADMAPS_FOR_ADMIN } from '@/features/roadmap/queries';
 import type { Roadmap } from '@/features/roadmap/types';
 
 // Mock Next.js Link component
@@ -61,11 +61,11 @@ const mockRoadmaps: Roadmap[] = [
 
 const successMock = {
     request: {
-        query: GET_ROADMAPS,
+        query: GET_ROADMAPS_FOR_ADMIN,
     },
     result: {
         data: {
-            roadmaps: mockRoadmaps.map(roadmap => ({
+            roadmapsForAdmin: mockRoadmaps.map(roadmap => ({
                 ...roadmap,
                 __typename: 'Roadmap'
             })),
@@ -75,18 +75,18 @@ const successMock = {
 
 const errorMock = {
     request: {
-        query: GET_ROADMAPS,
+        query: GET_ROADMAPS_FOR_ADMIN,
     },
     error: new Error('Failed to fetch roadmaps'),
 };
 
 const emptyMock = {
     request: {
-        query: GET_ROADMAPS,
+        query: GET_ROADMAPS_FOR_ADMIN,
     },
     result: {
         data: {
-            roadmaps: [],
+            roadmapsForAdmin: [],
         },
     },
 };
@@ -141,6 +141,7 @@ describe('RoadmapTable', () => {
         // Check table headers
         expect(screen.getByText('Title')).toBeInTheDocument();
         expect(screen.getByText('Slug')).toBeInTheDocument();
+        expect(screen.getByText('Author')).toBeInTheDocument();
         expect(screen.getByText('Tags')).toBeInTheDocument();
         expect(screen.getByText('Status')).toBeInTheDocument();
         expect(screen.getByText('Updated')).toBeInTheDocument();
@@ -149,6 +150,10 @@ describe('RoadmapTable', () => {
         // Check roadmap data
         expect(screen.getByText('react-roadmap')).toBeInTheDocument();
         expect(screen.getByText('vue-roadmap')).toBeInTheDocument();
+
+        // Check author display (shows last 8 chars of author ID)
+        expect(screen.getByText('User user_123')).toBeInTheDocument();
+        expect(screen.getByText('User user_456')).toBeInTheDocument();
 
         // Check status badges
         expect(screen.getByText('Published')).toBeInTheDocument();

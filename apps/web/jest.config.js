@@ -5,7 +5,7 @@ module.exports = {
     testEnvironment: 'jsdom',
     rootDir: '.',
     testMatch: ['**/__tests__/**/*.spec.ts', '**/__tests__/**/*.spec.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'mjs'],
     transform: {
         '^.+\\.(t|j)sx?$': ['ts-jest', {
             tsconfig: {
@@ -14,7 +14,11 @@ module.exports = {
                 allowSyntheticDefaultImports: true,
             },
         }],
+        '^.+\\.mjs$': 'babel-jest',
     },
+    transformIgnorePatterns: [
+        'node_modules/(?!(@clerk/.*|@apollo/.*)/)',
+    ],
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
     },

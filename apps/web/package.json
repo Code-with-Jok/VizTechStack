@@ -32,6 +32,10 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
@@ -42,6 +46,7 @@
     "@types/react-dom": "^19",
     "@viztechstack/eslint-config": "workspace:*",
     "@viztechstack/typescript-config": "workspace:*",
+    "babel-jest": "^30.0.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

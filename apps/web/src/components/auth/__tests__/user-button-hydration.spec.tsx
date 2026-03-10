@@ -27,9 +27,7 @@ import UserButtonWrapper from "../user-button-wrapper";
 jest.mock("@clerk/nextjs", () => {
   const ReactMock = require("react"); // eslint-disable-line @typescript-eslint/no-require-imports
 
-  const ActualClerk = jest.requireActual("@clerk/nextjs");
   return {
-    ...ActualClerk,
     ClerkProvider: ({ children }: { children: React.ReactNode }) =>
       ReactMock.createElement(
         "div",
