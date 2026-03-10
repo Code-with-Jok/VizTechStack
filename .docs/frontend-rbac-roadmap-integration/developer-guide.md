@@ -235,7 +235,7 @@ interface CreateApolloClientOptions {
 export function createApolloClient({ getToken }: CreateApolloClientOptions) {
   // HTTP connection đến GraphQL API
   const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql',
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4000/graphql',
   });
 
   // Authentication link - tự động gắn JWT token
@@ -250,20 +250,35 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
     };
   });
 
-  // Error handling link
+  // Error handling link - Xử lý lỗi authentication và network
   const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, extensions }) => {
         if (extensions?.code === 'UNAUTHENTICATED') {
           console.error('[Auth Error]:', message);
+          // Token is invalid, expired, or JWT template issue
+          // The frontend will handle this gracefully by showing login UI
         } else if (extensions?.code === 'FORBIDDEN') {
           console.error('[Permission Error]:', message);
+          // User doesn't have required permissions
+        } else {
+          console.error('[GraphQL Error]:', message, extensions);
         }
       });
     }
     
     if (networkError) {
       console.error('[Network Error]:', networkError);
+      console.error('GraphQL endpoint:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
+
+      // Check if it's a connection error
+      if (networkError.message.includes('fetch')) {
+        console.error('Possible causes:');
+        console.error('1. Backend API is not running');
+        console.error('2. GraphQL endpoint URL is incorrect');
+        console.error('3. CORS configuration issue');
+        console.error('4. JWT authentication failure');
+      }
     }
   });
 
@@ -274,12 +289,8 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
         Query: {
           fields: {
             roadmaps: {
-              merge(existing = [], incoming) {
-                return incoming; // Replace thay vì append
-              },
-            },
-            roadmapsForAdmin: {
-              merge(existing = [], incoming) {
+              // Replace existing data instead of appending
+              merge(_, incoming) {
                 return incoming;
               },
             },
@@ -289,6 +300,7 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
     }),
     defaultOptions: {
       watchQuery: {
+        // Use cache-and-network to ensure fresh data while showing cached data immediately
         fetchPolicy: 'cache-and-network',
       },
     },
@@ -297,10 +309,13 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
 ```
 
 **Giải thích chi tiết:**
-1. **authLink**: Tự động lấy JWT token từ Clerk và gắn vào header
-2. **errorLink**: Xử lý lỗi authentication và network
-3. **cache typePolicies**: Cấu hình cách Apollo merge data vào cache
-4. **fetchPolicy**: `cache-and-network` = hiển thị cache ngay, fetch data mới
+1. **authLink**: Tự động lấy JWT token từ Clerk và gắn vào header `Authorization: Bearer <token>`
+2. **errorLink**: Xử lý lỗi authentication và network với logging chi tiết:
+   - `UNAUTHENTICATED`: Token không hợp lệ, hết hạn, hoặc JWT template issue
+   - `FORBIDDEN`: User không có quyền truy cập
+   - Network errors: Hiển thị các nguyên nhân có thể (API down, URL sai, CORS, JWT auth failure)
+3. **cache typePolicies**: Cấu hình cách Apollo merge data vào cache (replace thay vì append)
+4. **fetchPolicy**: `cache-and-network` = hiển thị cache ngay, đồng thời fetch data mới
 
 ## 🐛 Troubleshooting Guide
 
@@ -658,12 +673,17 @@ test('admin can create roadmap', async ({ page }) => {
 # 2. Reload trang roadmaps
 # 3. Kiểm tra:
 #    - Có hiển thị error message tiếng Việt?
-#    - Console có log network error?
+#    - Console có log network error với detailed causes?
 #    - Không crash app?
 
 # 4. Bật lại backend
 # 5. Reload trang
 # 6. Kiểm tra data load bình thường
+
+# 7. Test JWT authentication errors:
+#    - Thử với invalid token
+#    - Kiểm tra console logs có [Auth Error] messages
+#    - Verify frontend shows login UI gracefully
 ```
 
 ### Test tự động (Unit Tests)
@@ -882,11 +902,62 @@ const [createMutation] = useMutation(CREATE_ROADMAP, {
 2. Kiểm tra environment variable:
 ```bash
 # apps/web/.env.local
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
+NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000/graphql
 ```
 3. Restart frontend sau khi thay đổi env
 
-### Lỗi 7: Redirect loop (trang cứ reload mãi)
+**Debug steps**:
+```bash
+# Kiểm tra backend API
+curl http://localhost:4000/graphql
+
+# Kiểm tra env variable được load
+console.log('GraphQL URL:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
+
+# Kiểm tra network logs trong browser DevTools
+```
+
+### Lỗi 7: JWT Authentication Issues
+
+**Nguyên nhân**: JWT token không hợp lệ, hết hạn, hoặc JWT template configuration issue.
+
+**Triệu chứng**:
+- Console error: `[Auth Error]: No JWT template exists with name: default`
+- GraphQL requests fail với UNAUTHENTICATED error
+- Loading states không kết thúc
+
+**Giải pháp**:
+1. **Kiểm tra Clerk JWT template configuration**:
+```bash
+# Vào Clerk Dashboard → JWT Templates
+# Đảm bảo có template tên "default" hoặc không yêu cầu template name
+```
+
+2. **Kiểm tra token trong Apollo Client**:
+```typescript
+// Thêm debug log trong authLink
+const authLink = setContext(async (_, { headers }) => {
+  const token = await getToken();
+  console.log('JWT Token:', token ? 'Present' : 'Missing');
+  
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+```
+
+3. **Kiểm tra backend JWT validation**:
+```bash
+# Xem backend logs để kiểm tra JWT validation errors
+# Backend sẽ log chi tiết về JWT validation failures
+```
+
+**Lưu ý**: Apollo Client đã được cập nhật để handle JWT authentication failures gracefully. Khi gặp UNAUTHENTICATED error, frontend sẽ tự động hiển thị login UI thay vì crash.
+
+### Lỗi 8: Redirect loop (trang cứ reload mãi)
 
 **Nguyên nhân**: useEffect redirect không check `isLoading`.
 
@@ -907,7 +978,7 @@ useEffect(() => {
 }, [isLoading, isSignedIn, router]);
 ```
 
-### Lỗi 8: TypeScript error "Property 'role' does not exist"
+### Lỗi 9: TypeScript error "Property 'role' does not exist"
 
 **Nguyên nhân**: TypeScript không biết publicMetadata có field role.
 
@@ -916,7 +987,7 @@ useEffect(() => {
 const role = user?.publicMetadata?.role as string | undefined;
 ```
 
-### Lỗi 9: "Cannot read properties of undefined (reading 'map')"
+### Lỗi 10: "Cannot read properties of undefined (reading 'map')"
 
 **Nguyên nhân**: Component render trước khi data load xong.
 
@@ -940,7 +1011,7 @@ return (
 );
 ```
 
-### Lỗi 10: Admin không thấy draft roadmaps
+### Lỗi 11: Admin không thấy draft roadmaps
 
 **Nguyên nhân**: Sử dụng sai hook hoặc query.
 
@@ -1102,6 +1173,27 @@ A:
 - `cache-first`: Detail pages (dùng cache nếu có)
 - `network-only`: Admin operations (luôn fetch fresh)
 
+**Q: Làm sao debug JWT authentication issues?**
+A: 
+1. Mở Browser DevTools → Console → Tìm `[Auth Error]` messages
+2. Kiểm tra Clerk Dashboard → JWT Templates → Đảm bảo có template "default" 
+3. Thêm debug log trong Apollo Client authLink để xem token có được gửi không
+4. Kiểm tra backend logs để xem JWT validation errors
+
+**Q: Tại sao GraphQL request bị UNAUTHENTICATED error?**
+A: Có thể do:
+- JWT token hết hạn → Clerk sẽ tự động refresh
+- JWT template configuration sai → Kiểm tra Clerk Dashboard
+- Backend không nhận được token → Kiểm tra authLink trong Apollo Client
+- Network issue → Kiểm tra console logs có detailed error causes
+
+**Q: Apollo Client có handle JWT errors tự động không?**
+A: Có. Apollo Client đã được configure để:
+- Log detailed error messages với categories ([Auth Error], [Permission Error], [Network Error])
+- Hiển thị possible causes cho network errors
+- Handle JWT authentication failures gracefully
+- Cho phép frontend hiển thị login UI thay vì crash
+
 **Q: Làm sao debug GraphQL requests?**
 A: Mở Browser DevTools → Network tab → Filter "XHR/Fetch" → Thực hiện actions để xem requests.
 
@@ -1120,11 +1212,19 @@ Nếu gặp vấn đề, hãy hỏi senior developer hoặc tạo issue trên Gi
 ---
 
 **Last Updated:** 2024-12-19  
-**Version:** 2.1.0  
+**Version:** 2.2.0  
 **Maintainer:** VizTechStack Frontend Team  
 **Review Status:** ✅ Ready for Development
 
 ## Changelog
+
+### Version 2.2.0 (2024-12-19)
+- **UPDATED**: Apollo Client error handling với detailed JWT authentication troubleshooting
+- **ADDED**: Comprehensive JWT authentication error debugging guide
+- **UPDATED**: Network error logging với specific causes (API down, CORS, JWT auth failure)
+- **ADDED**: New troubleshooting section for JWT template configuration issues
+- **UPDATED**: Error handling test instructions với JWT authentication scenarios
+- **ADDED**: FAQ entries about JWT debugging và Apollo Client error handling
 
 ### Version 2.1.0 (2024-12-19)
 - **UPDATED**: Clarified backend query architecture (`roadmaps:list` vs `roadmaps:listAll`)

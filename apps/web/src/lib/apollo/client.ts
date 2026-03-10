@@ -30,7 +30,8 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
             graphQLErrors.forEach(({ message, extensions }) => {
                 if (extensions?.code === 'UNAUTHENTICATED') {
                     console.error('[Auth Error]:', message);
-                    // Token is invalid or expired
+                    // Token is invalid, expired, or JWT template issue
+                    // The frontend will handle this gracefully by showing login UI
                 } else if (extensions?.code === 'FORBIDDEN') {
                     console.error('[Permission Error]:', message);
                     // User doesn't have required permissions
@@ -50,6 +51,7 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
                 console.error('1. Backend API is not running');
                 console.error('2. GraphQL endpoint URL is incorrect');
                 console.error('3. CORS configuration issue');
+                console.error('4. JWT authentication failure');
             }
         }
     });

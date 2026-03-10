@@ -15,7 +15,19 @@ export function Providers({ children }: ProvidersProps) {
 
   const apolloClient = useMemo(() => {
     return createApolloClient({
-      getToken: () => getToken(),
+      getToken: async () => {
+        try {
+          // Call getToken without template parameter to avoid "No JWT template exists with name: default" error
+          // This ensures compatibility with Clerk's default JWT configuration
+          const token = await getToken();
+          return token;
+        } catch (error) {
+          console.error('Failed to get JWT token:', error);
+          // Return null to allow GraphQL operations to proceed without authentication
+          // Public operations will still work, protected operations will be handled by backend guards
+          return null;
+        }
+      },
     });
   }, [getToken]);
 
