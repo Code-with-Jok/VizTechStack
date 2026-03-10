@@ -1,7 +1,7 @@
-const path = require('path');
-const nodeExternals = require('webpack-node-externals');
+const path = require("path");
+const nodeExternals = require("webpack-node-externals");
 
-module.exports = function (options, webpack) {
+module.exports = function (options) {
   return {
     ...options,
     externals: [
@@ -12,13 +12,9 @@ module.exports = function (options, webpack) {
     resolve: {
       ...options.resolve,
       alias: {
-        '@viztechstack/env': path.resolve(__dirname, '../../tooling/env/dist'),
-        '@viztechstack/convex': path.resolve(
-          __dirname,
-          '../../convex/_generated/api',
-        ),
+        "@viztechstack/env": path.resolve(__dirname, "../../tooling/env/dist"),
       },
-      extensions: ['.js', '.json', '.ts'],
+      extensions: [".js", ".json", ".ts"],
     },
   };
 };

@@ -1,255 +1,45 @@
-# ============================================
-# Enums
-# ============================================
-
-enum RoadmapCategory {
-  ROLE
-  SKILL
-  BEST_PRACTICE
-}
-
-enum RoadmapDifficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
-enum RoadmapStatus {
-  PUBLIC
-  DRAFT
-  PRIVATE
-}
-
-enum ProgressStatus {
-  DONE
-  IN_PROGRESS
-  SKIPPED
-}
-
-enum ResourceType {
-  ARTICLE
-  VIDEO
-  COURSE
-}
-
-# ============================================
-# Roadmap Types
-# ============================================
+# Roadmap GraphQL Schema
 
 type Roadmap {
   id: ID!
   slug: String!
   title: String!
   description: String!
-  category: RoadmapCategory!
-  difficulty: RoadmapDifficulty!
-  nodes: [Node!]!
-  edges: [Edge!]!
-  topicCount: Int!
-  status: RoadmapStatus!
-  createdAt: Float!
-}
-
-type Node {
-  id: ID!
-  type: String!
-  position: Position!
-  data: NodeData!
-}
-
-type Position {
-  x: Float!
-  y: Float!
-}
-
-type NodeData {
-  label: String!
-  topicId: String
-  isReusedSkillNode: Boolean
-  originalRoadmapId: String
-}
-
-type Edge {
-  id: ID!
-  source: String!
-  target: String!
-  type: String
-}
-
-type RoadmapPage {
-  items: [Roadmap!]!
-  nextCursor: String
-  isDone: Boolean!
-}
-
-# ============================================
-# Topic Types
-# ============================================
-
-type Topic {
-  id: ID!
-  roadmapId: ID!
-  nodeId: String!
-  title: String!
   content: String!
-  resources: [Resource!]!
+  author: String!
+  tags: [String!]!
+  publishedAt: Float!
+  updatedAt: Float!
+  isPublished: Boolean!
 }
-
-type Resource {
-  title: String!
-  url: String!
-  type: ResourceType!
-}
-
-# ============================================
-# Progress Types
-# ============================================
-
-type Progress {
-  id: ID!
-  userId: ID!
-  roadmapId: ID!
-  nodeId: String!
-  status: ProgressStatus!
-}
-
-# ============================================
-# Bookmark Types
-# ============================================
-
-type Bookmark {
-  id: ID!
-  userId: ID!
-  roadmapId: ID!
-}
-
-# ============================================
-# Input Types
-# ============================================
 
 input CreateRoadmapInput {
   slug: String!
   title: String!
   description: String!
-  category: RoadmapCategory!
-  difficulty: RoadmapDifficulty!
-  nodes: [NodeInput!]!
-  edges: [EdgeInput!]!
-  topicCount: Int!
-  status: RoadmapStatus!
+  content: String!
+  tags: [String!]!
+  isPublished: Boolean!
 }
 
 input UpdateRoadmapInput {
+  id: String!
   slug: String
   title: String
   description: String
-  category: RoadmapCategory
-  difficulty: RoadmapDifficulty
-  nodes: [NodeInput!]
-  edges: [EdgeInput!]
-  topicCount: Int
-  status: RoadmapStatus
+  content: String
+  tags: [String]
+  isPublished: Boolean
 }
-
-input NodeInput {
-  id: ID!
-  type: String!
-  position: PositionInput!
-  data: NodeDataInput!
-}
-
-input PositionInput {
-  x: Float!
-  y: Float!
-}
-
-input NodeDataInput {
-  label: String!
-  topicId: String
-  isReusedSkillNode: Boolean
-  originalRoadmapId: String
-}
-
-input EdgeInput {
-  id: ID!
-  source: String!
-  target: String!
-  type: String
-}
-
-input CreateTopicInput {
-  roadmapId: ID!
-  nodeId: String!
-  title: String!
-  content: String!
-  resources: [ResourceInput!]!
-}
-
-input ResourceInput {
-  title: String!
-  url: String!
-  type: ResourceType!
-}
-
-input UpdateProgressInput {
-  roadmapId: ID!
-  nodeId: String!
-  status: ProgressStatus!
-}
-
-input RoadmapFilters {
-  category: RoadmapCategory
-  status: RoadmapStatus
-}
-
-input PaginationInput {
-  limit: Int
-  cursor: String
-}
-
-input RoadmapPageInput {
-  category: RoadmapCategory
-  limit: Int
-  cursor: String
-}
-
-# ============================================
-# Queries
-# ============================================
 
 type Query {
-  # Roadmap queries
-  getRoadmapBySlug(slug: String!): Roadmap
-  listRoadmaps(input: RoadmapPageInput): RoadmapPage!
-  getSkillNodesForRoleRoadmap: [Node!]!
-  
-  # Topic queries
-  getTopicByNodeId(roadmapId: ID!, nodeId: String!): Topic
-  
-  # Progress queries
-  getProgressForRoadmap(roadmapId: ID!): [Progress!]!
-  
-  # Bookmark queries
-  getUserBookmarks: [Bookmark!]!
+  roadmaps: [Roadmap!]!
+  roadmapsForAdmin: [Roadmap!]!
+  roadmap(slug: String!): Roadmap
 }
 
-# ============================================
-# Mutations
-# ============================================
-
 type Mutation {
-  # Roadmap mutations
   createRoadmap(input: CreateRoadmapInput!): Roadmap!
-  updateRoadmap(id: ID!, input: UpdateRoadmapInput!): Roadmap!
-  deleteRoadmap(id: ID!): Boolean!
-  
-  # Topic mutations
-  createTopic(input: CreateTopicInput!): Topic!
-  
-  # Progress mutations
-  updateProgress(input: UpdateProgressInput!): Progress!
-  
-  # Bookmark mutations
-  addBookmark(roadmapId: ID!): Bookmark!
-  removeBookmark(roadmapId: ID!): Boolean!
+  updateRoadmap(input: UpdateRoadmapInput!): Roadmap!
+  deleteRoadmap(id: String!): Roadmap!
 }

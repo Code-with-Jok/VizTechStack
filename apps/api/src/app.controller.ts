@@ -1,47 +1,14 @@
-import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { ConvexService } from './common/convex/convex.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { api } from '@viztechstack/convex';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly convex: ConvexService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get hello message' })
   getHello(): string {
     return this.appService.getHello();
-  }
-
-  @Get('seed')
-  @ApiOperation({ summary: 'Seed initial data to Convex' })
-  @ApiResponse({ status: 200, description: 'Seed result message' })
-  async seedData() {
-    if (process.env.NODE_ENV !== 'development') {
-      throw new HttpException(
-        'Seed endpoint only allowed in development',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
-    try {
-      const result = await this.convex.client.mutation(api.seed.seed, {});
-      return { success: true, message: result };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      throw new HttpException(
-        {
-          success: false,
-          message: 'Failed to seed data',
-          error: errorMessage,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
   }
 }

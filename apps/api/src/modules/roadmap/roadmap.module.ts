@@ -1,52 +1,33 @@
 import { Module } from '@nestjs/common';
-
-// Application Layer - Services
-import { RoadmapApplicationService } from './application/services/roadmap-application.service';
-
-// Application Layer - Ports (Repository Interfaces)
-import { ROADMAP_REPOSITORY } from './application/ports/roadmap.repository';
-
-// Domain Layer - Policies
-import { RoadmapInputPolicy } from './domain/policies/roadmap-input.policy';
-
-// Infrastructure Layer - Adapters (Repository Implementations)
-import { ConvexRoadmapRepository } from './infrastructure/adapters/convex-roadmap.repository';
-
-// Transport Layer - GraphQL Resolvers
 import { RoadmapResolver } from './transport/graphql/resolvers/roadmap.resolver';
+import { RoadmapDocsController } from './transport/rest/controllers/roadmap-docs.controller';
+import { RoadmapService } from './application/services/roadmap.service';
+import { ConvexService } from '../../common/convex/convex.service';
+import { ClerkService } from '../../common/clerk/clerk.service';
 
 /**
- * RoadmapModule - Core module for roadmap feature
+ * RoadmapModule - NestJS module for roadmap feature
  *
- * This module implements the roadmap feature using hexagonal architecture:
- * - Transport Layer: GraphQL resolvers handle API requests
- * - Application Layer: Services orchestrate use cases
- * - Domain Layer: Entities and policies contain business logic
- * - Infrastructure Layer: Repositories handle data persistence
+ * This module encapsulates all roadmap-related functionality including:
+ * - GraphQL resolver for queries and mutations
+ * - REST controller for Swagger documentation
+ * - Application service for business logic
+ * - Convex service for database operations
  *
- * Dependencies:
- * - ConvexModule (global): Provides database access via ConvexService
- * - ClerkAuthGuard: Applied at resolver level for authentication
- * - RolesGuard: Applied at resolver level for authorization
- * - RoadmapDomainExceptionFilter: Applied at resolver level for error handling
+ * The module exports RoadmapService to allow other modules to use roadmap
+ * functionality if needed in the future.
+ *
+ * Providers:
+ * - RoadmapResolver: Handles GraphQL requests with role-based authorization
+ * - RoadmapDocsController: Provides Swagger documentation for GraphQL operations
+ * - RoadmapService: Implements CRUD operations with validation and error handling
+ * - ConvexService: Provides connection to Convex database
+ *
+ * Requirements: 7.2, 7.3, 7.4, 7.5
  */
 @Module({
-  providers: [
-    // GraphQL Resolvers (Transport Layer)
-    RoadmapResolver,
-
-    // Application Services (Application Layer)
-    RoadmapApplicationService,
-
-    // Domain Policies (Domain Layer)
-    RoadmapInputPolicy,
-
-    // Repository Bindings (Infrastructure Layer)
-    // Bind repository interfaces to Convex implementations using DI tokens
-    {
-      provide: ROADMAP_REPOSITORY,
-      useClass: ConvexRoadmapRepository,
-    },
-  ],
+  controllers: [RoadmapDocsController],
+  providers: [RoadmapResolver, RoadmapService, ConvexService, ClerkService],
+  exports: [RoadmapService],
 })
 export class RoadmapModule {}

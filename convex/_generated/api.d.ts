@@ -9,11 +9,8 @@
  */
 
 import type * as _utils from "../_utils.js";
-import type * as bookmarks from "../bookmarks.js";
-import type * as progress from "../progress.js";
+import type * as migrations_add_author_to_roadmaps from "../migrations/add_author_to_roadmaps.js";
 import type * as roadmaps from "../roadmaps.js";
-import type * as seed from "../seed.js";
-import type * as topics from "../topics.js";
 
 import type {
   ApiFromModules,
@@ -23,11 +20,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   _utils: typeof _utils;
-  bookmarks: typeof bookmarks;
-  progress: typeof progress;
+  "migrations/add_author_to_roadmaps": typeof migrations_add_author_to_roadmaps;
   roadmaps: typeof roadmaps;
-  seed: typeof seed;
-  topics: typeof topics;
 }>;
 
 /**

@@ -9,7 +9,7 @@ export class HealthResolver {
 
   @Query(() => HealthStatus)
   @Public()
-  async health(): Promise<HealthStatus> {
+  health(): HealthStatus {
     return this.healthCheckService.checkHealth();
   }
 }

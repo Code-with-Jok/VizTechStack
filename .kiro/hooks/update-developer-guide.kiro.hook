@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "Cập nhật Developer Guide",
+  "description": "Tự động cập nhật developer guide theo style chi tiết cho intern/fresher khi có thay đổi code trong frontend RBAC roadmap integration",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "apps/web/src/lib/hooks/use-roadmap.ts",
+      "apps/web/src/lib/apollo/client.ts",
+      "apps/web/src/components/admin/*.tsx",
+      "apps/web/src/components/roadmap/*.tsx",
+      "apps/web/src/components/auth/admin-button.tsx",
+      "apps/web/src/app/roadmaps/**/*.tsx",
+      "apps/web/src/app/admin/**/*.tsx",
+      "apps/api/src/modules/roadmap/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "**🔄 Code đã thay đổi - Cần cập nhật Developer Guide!**\n\nCó thay đổi trong code liên quan đến frontend RBAC roadmap integration. Hãy:\n\n1. **Phân tích thay đổi**: Xem file nào đã được sửa và tác động như thế nào\n2. **Cập nhật Developer Guide**: Update file `.docs/frontend-rbac-roadmap-integration/developer-guide.md` theo style viết chi tiết cho intern/fresher:\n   - ✨ Giải thích WHY (tại sao) và HOW (làm thế nào)\n   - 🔧 Code examples với comments tiếng Việt\n   - 📋 Cập nhật troubleshooting nếu có lỗi mới\n   - 🎯 Cập nhật checklist và testing instructions\n   - 💡 Thêm performance tips nếu cần\n\n3. **Đảm bảo consistency**: \n   - Tất cả examples phải match với code thực tế\n   - Error messages bằng tiếng Việt\n   - Troubleshooting section có giải pháp cụ thể\n   - FAQ section trả lời câu hỏi mới nếu có\n\n4. **Kiểm tra completeness**:\n   - Tất cả components/hooks mới đều có documentation\n   - Step-by-step instructions vẫn accurate\n   - File structure tree được update\n   - Dependencies và imports đúng\n\n**Style yêu cầu**: Viết như đang hướng dẫn intern/fresher, giải thích chi tiết, dễ hiểu, có examples cụ thể và troubleshooting đầy đủ."
+  }
+}

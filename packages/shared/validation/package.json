@@ -12,8 +12,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "zod": "^3.25.76",
-    "@viztechstack/graphql-generated": "workspace:*"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@viztechstack/typescript-config": "workspace:*",

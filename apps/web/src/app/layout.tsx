@@ -17,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "VizTechStack",
-  description: "A modern web application for data visualization and analysis.",
+  description:
+    "A clean application shell prepared for the next product redesign.",
 };
 
 export default function RootLayout({
@@ -28,7 +29,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body suppressHydrationWarning
+        <body
+          suppressHydrationWarning
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <Providers>

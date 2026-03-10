@@ -27,14 +27,12 @@ import UserButtonWrapper from "../user-button-wrapper";
 jest.mock("@clerk/nextjs", () => {
   const ReactMock = require("react"); // eslint-disable-line @typescript-eslint/no-require-imports
 
-  const ActualClerk = jest.requireActual("@clerk/nextjs");
   return {
-    ...ActualClerk,
     ClerkProvider: ({ children }: { children: React.ReactNode }) =>
       ReactMock.createElement(
         "div",
         { "data-testid": "clerk-provider" },
-        children
+        children,
       ),
     SignedIn: ({ children }: { children: React.ReactNode }) =>
       ReactMock.createElement("div", { "data-testid": "signed-in" }, children),
@@ -44,7 +42,7 @@ jest.mock("@clerk/nextjs", () => {
       ReactMock.createElement(
         "div",
         { className: "clerk-user-button" },
-        "User Button"
+        "User Button",
       ),
   };
 });
@@ -109,20 +107,20 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
 
       console.log("\n=== COUNTEREXAMPLE FOUND ===");
       console.log(
-        "Bug Condition: UserButton renders on server with ClerkProvider"
+        "Bug Condition: UserButton renders on server with ClerkProvider",
       );
       console.log("In production, this causes hydration mismatch because:");
       console.log("  - Server renders one HTML structure");
       console.log("  - Client renders different HTML structure");
       console.log("  - React detects mismatch and throws hydration error");
       console.log(
-        "\nExpected Fix: Wrap UserButton in client component boundary"
+        "\nExpected Fix: Wrap UserButton in client component boundary",
       );
       console.log(
-        "Current State: UserButton wrapped in UserButtonWrapper (FIXED)"
+        "Current State: UserButton wrapped in UserButtonWrapper (FIXED)",
       );
       console.log(
-        'Error in browser: "Hydration failed because the server rendered'
+        'Error in browser: "Hydration failed because the server rendered',
       );
       console.log("HTML didn't match the client\"");
       console.log("===========================\n");
@@ -133,7 +131,7 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
       expect(canRenderOnServer).toBe(true);
     } else {
       console.log(
-        "\nComponent cannot render on server even with ClerkProvider"
+        "\nComponent cannot render on server even with ClerkProvider",
       );
       expect(serverRenderError).toBeDefined();
     }
@@ -168,7 +166,7 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
     }
 
     console.log(
-      "\n=== REAL-WORLD PATTERN: <SignedIn><UserButtonWrapper /></SignedIn> ==="
+      "\n=== REAL-WORLD PATTERN: <SignedIn><UserButtonWrapper /></SignedIn> ===",
     );
     console.log("Render error:", renderError?.message || "None");
     console.log("HTML length:", serverHTML.length);
@@ -178,13 +176,13 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
       console.log("\n=== FIX VERIFIED: Production Pattern Now Works ===");
       console.log("This exact pattern is used in:");
       console.log("  - apps/web/src/app/page.tsx");
-      console.log("  - apps/web/src/app/admin/roadmap/page.tsx");
-      console.log("  - apps/web/src/app/roadmap/[slug]/page.tsx");
+      console.log("  - apps/web/src/app/page.tsx");
+      console.log("  - apps/web/src/app/layout.tsx");
       console.log(
-        "\nThe pattern now renders correctly without hydration errors"
+        "\nThe pattern now renders correctly without hydration errors",
       );
       console.log(
-        "because UserButtonWrapper establishes a client component boundary"
+        "because UserButtonWrapper establishes a client component boundary",
       );
       console.log("===========================\n");
     }
@@ -220,7 +218,7 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
 
     console.log("\n=== COMPONENT CHARACTERISTICS ===");
     console.log(
-      "Component: UserButtonWrapper wrapping UserButton from @clerk/nextjs"
+      "Component: UserButtonWrapper wrapping UserButton from @clerk/nextjs",
     );
     console.log("Requires ClerkProvider: true");
     console.log("Can render with ClerkProvider: true");
@@ -234,7 +232,7 @@ describe("Bug Condition 2: UserButton Hydration Mismatch", () => {
     console.log("  3. Prevents hydration mismatches in production");
     console.log("  4. Maintains all UserButton functionality");
     console.log(
-      "\nFix Applied: Created apps/web/src/components/auth/user-button-wrapper.tsx"
+      "\nFix Applied: Created apps/web/src/components/auth/user-button-wrapper.tsx",
     );
     console.log('with "use client" directive');
     console.log("===========================\n");
