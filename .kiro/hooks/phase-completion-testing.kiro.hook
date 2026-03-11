@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Phase Completion Testing",
+  "description": "Automatically run tests when a requirement phase is completed, optimizing testing frequency for better workflow efficiency",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A requirement phase has been completed. Please analyze if this marks the end of a development phase (like Foundation, Core Implementation, Integration, etc.) and if so, run the appropriate testing suite (build, typecheck, lint, unit tests) to verify the phase completion before moving to the next phase."
+  },
+  "workspaceFolderName": "VizTechStack",
+  "shortName": "phase-completion-testing"
+}
