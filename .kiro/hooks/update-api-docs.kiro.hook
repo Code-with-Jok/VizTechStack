@@ -13,6 +13,8 @@
   },
   "then": {
     "type": "runCommand",
-    "command": "pnpm codegen && echo \"API documentation updated after resolver/schema changes\""
-  }
+    "command": "pnpm codegen && echo \"API documentation updated after api/resolver/schema changes\""
+  },
+  "workspaceFolderName": "VizTechStack",
+  "shortName": "update-api-docs"
 }

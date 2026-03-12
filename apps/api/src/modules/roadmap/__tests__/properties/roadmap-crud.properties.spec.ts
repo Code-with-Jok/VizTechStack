@@ -13,6 +13,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RoadmapService } from '../../application/services/roadmap.service';
 import { ConvexService } from '../../../../common/convex/convex.service';
 import { BadRequestException } from '@nestjs/common';
+import { NodeCategory } from '../../transport/graphql/schemas/roadmap-input.schema';
 import type { Roadmap } from '../../domain/models/roadmap.model';
 
 describe('Roadmap CRUD Properties', () => {
@@ -61,6 +62,7 @@ describe('Roadmap CRUD Properties', () => {
           title: fc.string({ minLength: 1, maxLength: 100 }),
           description: fc.string({ minLength: 0, maxLength: 500 }),
           content: fc.string({ minLength: 0, maxLength: 5000 }),
+          nodeCategory: fc.constantFrom(NodeCategory.ROLE, NodeCategory.SKILL, NodeCategory.TOPIC, NodeCategory.MILESTONE, NodeCategory.RESOURCE),
           tags: fc.array(fc.string({ minLength: 1, maxLength: 20 }), {
             maxLength: 10,
           }),
@@ -109,6 +111,7 @@ describe('Roadmap CRUD Properties', () => {
           expect(queriedRoadmap!.title).toBe(input.title);
           expect(queriedRoadmap!.description).toBe(input.description);
           expect(queriedRoadmap!.content).toBe(input.content);
+          expect(queriedRoadmap!.nodeCategory).toBe(input.nodeCategory);
           expect(queriedRoadmap!.tags).toEqual(input.tags);
           expect(queriedRoadmap!.isPublished).toBe(input.isPublished);
           expect(queriedRoadmap!.author).toBe(authorId);
@@ -141,6 +144,15 @@ describe('Roadmap CRUD Properties', () => {
           content: fc.option(fc.string({ minLength: 0, maxLength: 5000 }), {
             nil: undefined,
           }),
+          nodeCategory: fc.option(fc.constantFrom(
+            NodeCategory.ROLE,
+            NodeCategory.SKILL,
+            NodeCategory.TOPIC,
+            NodeCategory.MILESTONE,
+            NodeCategory.RESOURCE
+          ), {
+            nil: undefined,
+          }),
           tags: fc.option(
             fc.array(fc.string({ minLength: 1, maxLength: 20 }), {
               maxLength: 10,
@@ -159,6 +171,7 @@ describe('Roadmap CRUD Properties', () => {
             title: updateInput.title || 'Test Title',
             description: updateInput.description || 'Test Description',
             content: updateInput.content || 'Test Content',
+            nodeCategory: updateInput.nodeCategory || NodeCategory.TOPIC,
             author: 'user_123',
             tags: updateInput.tags || ['test'],
             publishedAt: Date.now(),
@@ -230,6 +243,7 @@ describe('Roadmap CRUD Properties', () => {
             title: roadmapData.title,
             description: '',
             content: '',
+            nodeCategory: NodeCategory.TOPIC,
             author: 'test-author',
             tags: [],
             publishedAt: Date.now(),
@@ -288,6 +302,7 @@ describe('Roadmap CRUD Properties', () => {
           title: fc.string({ minLength: 1, maxLength: 100 }),
           description: fc.string({ minLength: 0, maxLength: 500 }),
           content: fc.string({ minLength: 0, maxLength: 5000 }),
+          nodeCategory: fc.constantFrom(NodeCategory.ROLE, NodeCategory.SKILL, NodeCategory.TOPIC, NodeCategory.MILESTONE, NodeCategory.RESOURCE),
           tags: fc.array(fc.string({ minLength: 1, maxLength: 20 }), {
             maxLength: 10,
           }),

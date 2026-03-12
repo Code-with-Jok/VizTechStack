@@ -17,10 +17,12 @@ module.exports = {
         '^.+\\.mjs$': 'babel-jest',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(@clerk/.*|@apollo/.*)/)',
+        'node_modules/(?!(@clerk/.*|@apollo/.*|d3-hierarchy|d3-selection|d3-zoom|d3-drag|d3-scale|d3-array|d3-shape|d3-path|d3-interpolate|d3-color|d3-format|d3-time|d3-time-format)/)',
     ],
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
+        '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+        '^d3-hierarchy$': '<rootDir>/__mocks__/d3-hierarchy.js',
     },
     collectCoverageFrom: [
         'src/**/*.{ts,tsx}',

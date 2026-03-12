@@ -12,6 +12,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoadmapResolver } from '../../transport/graphql/resolvers/roadmap.resolver';
 import { RoadmapService } from '../../application/services/roadmap.service';
+import { NodeCategory } from '../../transport/graphql/schemas/roadmap-input.schema';
 import type { Roadmap } from '../../domain/models/roadmap.model';
 
 describe('RoadmapResolver', () => {
@@ -61,6 +62,7 @@ describe('RoadmapResolver', () => {
           title: 'Frontend Developer Roadmap',
           description: 'Complete guide to frontend development',
           content: 'Detailed content here...',
+          nodeCategory: NodeCategory.TOPIC,
           author: 'user_123',
           tags: ['frontend', 'javascript'],
           publishedAt: 1704067200000,
@@ -73,6 +75,7 @@ describe('RoadmapResolver', () => {
           title: 'Backend Developer Roadmap',
           description: 'Complete guide to backend development',
           content: 'Detailed content here...',
+          nodeCategory: NodeCategory.TOPIC,
           author: 'user_456',
           tags: ['backend', 'nodejs'],
           publishedAt: 1704153600000,
@@ -135,6 +138,7 @@ describe('RoadmapResolver', () => {
         title: 'Test Roadmap',
         description: 'Test Description',
         content: 'Test Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -166,6 +170,7 @@ describe('RoadmapResolver', () => {
         title: 'Full Roadmap',
         description: 'Full Description',
         content: 'Full Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_full',
         tags: ['tag1', 'tag2', 'tag3'],
         publishedAt: 1704067200000,
@@ -213,6 +218,7 @@ describe('RoadmapResolver', () => {
         title: 'Test Roadmap',
         description: 'Test Description',
         content: 'Test Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test', 'example'],
         publishedAt: 1704067200000,
@@ -275,6 +281,7 @@ describe('RoadmapResolver', () => {
         title: 'Transform Test',
         description: 'Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_456',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -309,6 +316,7 @@ describe('RoadmapResolver', () => {
         title: 'Special Roadmap',
         description: 'Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -343,6 +351,7 @@ describe('RoadmapResolver', () => {
         title: 'Complete Roadmap',
         description: 'Complete Description',
         content: 'Complete Content with markdown',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_complete',
         tags: ['complete', 'test', 'example'],
         publishedAt: 1704067200000,
@@ -408,6 +417,7 @@ describe('RoadmapResolver', () => {
         title: 'New Roadmap',
         description: 'New Description',
         content: 'New Content',
+        nodeCategory: NodeCategory.TOPIC,
         tags: ['new', 'test'],
         isPublished: true,
       };
@@ -459,6 +469,7 @@ describe('RoadmapResolver', () => {
         title: 'Author Test',
         description: 'Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         tags: ['test'],
         isPublished: false,
       };
@@ -502,6 +513,7 @@ describe('RoadmapResolver', () => {
         title: 'Complete Input Test',
         description: 'Complete Description',
         content: 'Complete Content with markdown',
+        nodeCategory: NodeCategory.TOPIC,
         tags: ['tag1', 'tag2', 'tag3'],
         isPublished: true,
       };
@@ -562,6 +574,7 @@ describe('RoadmapResolver', () => {
         title: 'Updated Title',
         description: 'Updated Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -606,6 +619,7 @@ describe('RoadmapResolver', () => {
         title: 'Only Title Updated',
         description: 'Original Description',
         content: 'Original Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -647,6 +661,7 @@ describe('RoadmapResolver', () => {
         title: 'Updated Title',
         description: 'Updated Description',
         content: 'Updated Content',
+        nodeCategory: NodeCategory.TOPIC,
         tags: ['updated', 'tags'],
         isPublished: false,
       };
@@ -657,6 +672,7 @@ describe('RoadmapResolver', () => {
         title: 'Updated Title',
         description: 'Updated Description',
         content: 'Updated Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['updated', 'tags'],
         publishedAt: Date.now(),
@@ -705,6 +721,7 @@ describe('RoadmapResolver', () => {
         title: 'Deleted Roadmap',
         description: 'Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -745,6 +762,7 @@ describe('RoadmapResolver', () => {
           title: 'Test Roadmap',
           description: 'Description',
           content: 'Content',
+          nodeCategory: NodeCategory.TOPIC,
           author: 'user_123',
           tags: ['test'],
           publishedAt: Date.now(),
@@ -788,6 +806,7 @@ describe('RoadmapResolver', () => {
         title: 'Test',
         description: 'Test',
         content: 'Test',
+        nodeCategory: NodeCategory.TOPIC,
         tags: ['test'],
         isPublished: true,
       };
@@ -839,6 +858,7 @@ describe('RoadmapResolver', () => {
         title: 'Updated',
         description: 'Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),
@@ -865,6 +885,7 @@ describe('RoadmapResolver', () => {
         title: 'Test',
         description: 'Description',
         content: 'Content',
+        nodeCategory: NodeCategory.TOPIC,
         author: 'user_123',
         tags: ['test'],
         publishedAt: Date.now(),

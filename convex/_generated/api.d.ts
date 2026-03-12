@@ -9,6 +9,7 @@
  */
 
 import type * as _utils from "../_utils.js";
+import type * as migrations_001_add_node_category from "../migrations/001_add_node_category.js";
 import type * as migrations_add_author_to_roadmaps from "../migrations/add_author_to_roadmaps.js";
 import type * as roadmaps from "../roadmaps.js";
 
@@ -20,6 +21,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   _utils: typeof _utils;
+  "migrations/001_add_node_category": typeof migrations_001_add_node_category;
   "migrations/add_author_to_roadmaps": typeof migrations_add_author_to_roadmaps;
   roadmaps: typeof roadmaps;
 }>;

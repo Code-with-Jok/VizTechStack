@@ -23,14 +23,14 @@ export default defineSchema({
     slug: v.string(),
     title: v.string(),
     description: v.string(),
-    content: v.optional(v.string()),
-    author: v.optional(v.string()),
-    // authorName: v.optional(v.string()), // Temporarily disabled
-    tags: v.optional(v.array(v.string())),
-    publishedAt: v.optional(v.number()),
-    updatedAt: v.optional(v.number()),
-    isPublished: v.optional(v.boolean()),
-    // Legacy fields for old roadmap structure
+    content: v.string(),
+    nodeCategory: v.string(), // Now required after migration
+    author: v.string(),
+    tags: v.array(v.string()),
+    publishedAt: v.number(),
+    updatedAt: v.number(),
+    isPublished: v.boolean(),
+    // Legacy fields for old roadmap structure (keep optional for backward compatibility)
     category: v.optional(v.string()),
     status: v.optional(v.string()),
     difficulty: v.optional(v.string()),

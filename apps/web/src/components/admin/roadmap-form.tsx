@@ -11,8 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateRoadmap, useUpdateRoadmap } from '@/lib/hooks/use-roadmap';
-import type { Roadmap, RoadmapFormData, CreateRoadmapInput, UpdateRoadmapInput } from '@/features/roadmap/types';
+import { Roadmap, RoadmapFormData, CreateRoadmapInput, UpdateRoadmapInput, NodeCategory, NODE_CATEGORY_OPTIONS } from '@/features/roadmap/types';
 
 // Zod schema for form validation
 const roadmapFormSchema = z.object({
@@ -20,6 +21,9 @@ const roadmapFormSchema = z.object({
     title: z.string().min(1, 'Title is required'),
     description: z.string().min(1, 'Description is required'),
     content: z.string().min(1, 'Content is required'),
+    nodeCategory: z.enum(['ROLE', 'SKILL', 'TOPIC', 'MILESTONE', 'RESOURCE'], {
+        errorMap: () => ({ message: 'Please select a valid node category' })
+    }),
     tags: z.string().min(1, 'At least one tag is required'),
     isPublished: z.boolean(),
 });
@@ -46,6 +50,7 @@ export function RoadmapForm({ mode, initialData }: RoadmapFormProps) {
             title: '',
             description: '',
             content: '',
+            nodeCategory: 'TOPIC' as NodeCategory,
             tags: '',
             isPublished: false,
         },
@@ -59,6 +64,7 @@ export function RoadmapForm({ mode, initialData }: RoadmapFormProps) {
                 title: initialData.title,
                 description: initialData.description,
                 content: initialData.content,
+                nodeCategory: initialData.nodeCategory,
                 tags: initialData.tags.join(', '),
                 isPublished: initialData.isPublished,
             });
@@ -82,6 +88,7 @@ export function RoadmapForm({ mode, initialData }: RoadmapFormProps) {
                     title: data.title,
                     description: data.description,
                     content: data.content,
+                    nodeCategory: data.nodeCategory,
                     tags: tagsArray,
                     isPublished: data.isPublished,
                 };
@@ -93,6 +100,7 @@ export function RoadmapForm({ mode, initialData }: RoadmapFormProps) {
                     title: data.title,
                     description: data.description,
                     content: data.content,
+                    nodeCategory: data.nodeCategory,
                     tags: tagsArray,
                     isPublished: data.isPublished,
                 };
@@ -185,6 +193,40 @@ export function RoadmapForm({ mode, initialData }: RoadmapFormProps) {
                     {form.formState.errors.content && (
                         <p className="text-sm text-red-600 dark:text-red-400">
                             {form.formState.errors.content.message}
+                        </p>
+                    )}
+                </div>
+
+                {/* Node Category Field */}
+                <div className="space-y-2">
+                    <Label htmlFor="nodeCategory">Node Category *</Label>
+                    <Select
+                        value={form.watch('nodeCategory') || ''}
+                        onValueChange={(value: NodeCategory) => form.setValue('nodeCategory', value)}
+                        disabled={isLoading}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a node category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {NODE_CATEGORY_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium flex">{option.label}</span>
+                                        <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                                            {option.description}
+                                        </span>
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                        Chọn loại node để phân loại roadmap trong visualization
+                    </p>
+                    {form.formState.errors.nodeCategory && (
+                        <p className="text-sm text-red-600 dark:text-red-400">
+                            {form.formState.errors.nodeCategory.message}
                         </p>
                     )}
                 </div>

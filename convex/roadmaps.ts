@@ -58,10 +58,10 @@ export const create = mutation({
     title: v.string(),
     description: v.string(),
     content: v.string(),
-    author: v.string(),
-    // authorName: v.string(), // Temporarily disabled
-    tags: v.array(v.string()),
-    isPublished: v.boolean(),
+    nodeCategory: v.string(), // Required field
+    author: v.string(), // Required field
+    tags: v.array(v.string()), // Required field
+    isPublished: v.boolean(), // Required field
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("roadmaps", {
@@ -84,6 +84,7 @@ export const update = mutation({
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     content: v.optional(v.string()),
+    nodeCategory: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
     isPublished: v.optional(v.boolean()),
   },

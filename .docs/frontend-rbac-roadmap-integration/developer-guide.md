@@ -145,8 +145,19 @@ interface Roadmap {
   id: string;
   title: string;
   description: string;
+  content: string;
+  nodeCategory: NodeCategory;  // ✨ MỚI: Node category cho visualization
   tags: string[];
   isPublished: boolean;
+}
+
+// ✨ MỚI: Enum cho node categories
+enum NodeCategory {
+  ROLE = 'ROLE',
+  SKILL = 'SKILL', 
+  TOPIC = 'TOPIC',
+  MILESTONE = 'MILESTONE',
+  RESOURCE = 'RESOURCE'
 }
 
 // Type - Tương tự interface
@@ -154,6 +165,9 @@ type RoadmapFormData = {
   title: string;
   description: string;
   content: string;
+  nodeCategory: NodeCategory;  // ✨ MỚI: Bắt buộc khi tạo roadmap
+  tags: string[];
+  isPublished: boolean;
 };
 ```
 
@@ -193,11 +207,16 @@ apps/web/src/
 │   ├── roadmap/
 │   │   ├── roadmap-list.tsx    # ✨ MỚI: Danh sách roadmaps
 │   │   ├── roadmap-card.tsx    # ✨ MỚI: Card roadmap
-│   │   └── roadmap-content.tsx # ✨ MỚI: Nội dung roadmap
+│   │   ├── roadmap-content.tsx # ✨ MỚI: Nội dung roadmap
+│   │   └── roadmap-detail.tsx  # 🔄 CẬP NHẬT: Tích hợp ViewToggle
+│   ├── roadmap-visualization/  # ✨ MỚI: Roadmap visualization components
+│   │   └── ViewToggle.tsx      # ✨ MỚI: Toggle giữa content và visualization
 │   └── admin/
 │       ├── roadmap-table.tsx   # ✨ MỚI: Bảng quản lý roadmaps
 │       ├── roadmap-form.tsx    # ✨ MỚI: Form tạo/sửa roadmap
 │       └── delete-roadmap-dialog.tsx # ✨ MỚI: Dialog xóa roadmap
+├── hooks/
+│   └── use-view-toggle.ts      # ✨ MỚI: Hook quản lý view state
 ├── lib/
 │   ├── apollo/
 │   │   └── client.ts           # ✨ MỚI: Apollo Client setup
@@ -316,6 +335,604 @@ export function createApolloClient({ getToken }: CreateApolloClientOptions) {
    - Network errors: Hiển thị các nguyên nhân có thể (API down, URL sai, CORS, JWT auth failure)
 3. **cache typePolicies**: Cấu hình cách Apollo merge data vào cache (replace thay vì append)
 4. **fetchPolicy**: `cache-and-network` = hiển thị cache ngay, đồng thời fetch data mới
+
+### Bước 2: Tích hợp ViewToggle cho Roadmap Detail
+
+**Mục đích**: Cho phép user chuyển đổi giữa content view (markdown) và visualization view (sơ đồ tương tác) trong trang chi tiết roadmap.
+
+#### 2.1: Tạo ViewToggle Component
+
+**File**: `apps/web/src/components/roadmap-visualization/ViewToggle.tsx`
+
+```typescript
+'use client';
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+export type ViewMode = 'content' | 'visualization';
+
+interface ViewToggleProps {
+    /** Current active view mode */
+    currentView: ViewMode;
+    /** Callback when view changes */
+    onViewChange: (view: ViewMode) => void;
+    /** Loading state for visualization */
+    isLoading?: boolean;
+    /** Disabled state */
+    disabled?: boolean;
+    /** Additional CSS classes */
+    className?: string;
+}
+
+/**
+ * Toggle button component for switching between content and visualization views
+ * Implements modern design with primary colors and smooth transitions
+ */
+export function ViewToggle({
+    currentView,
+    onViewChange,
+    isLoading = false,
+    disabled = false,
+    className = '',
+}: ViewToggleProps) {
+    return (
+        <div className={cn("flex justify-center", className)}>
+            <div className="inline-flex rounded-xl border border-neutral-200 bg-white p-1 shadow-soft">
+                {/* Content View Button */}
+                <button
+                    onClick={() => onViewChange('content')}
+                    disabled={disabled}
+                    aria-label="Switch to content view"
+                    aria-pressed={currentView === 'content'}
+                    className={cn(
+                        "px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300",
+                        "flex items-center gap-2",
+                        currentView === 'content'
+                            ? "bg-primary-500 text-white shadow-soft transform scale-105"
+                            : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50"
+                    )}
+                >
+                    <span className="text-base" role="img" aria-label="Content icon">📄</span>
+                    <span>Nội dung</span>
+                </button>
+
+                {/* Visualization View Button */}
+                <button
+                    onClick={() => onViewChange('visualization')}
+                    disabled={disabled || isLoading}
+                    aria-label="Switch to visualization view"
+                    aria-pressed={currentView === 'visualization'}
+                    className={cn(
+                        "px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300",
+                        "flex items-center gap-2",
+                        currentView === 'visualization'
+                            ? "bg-primary-500 text-white shadow-soft transform scale-105"
+                            : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50",
+                        (disabled || isLoading) && "opacity-50 cursor-not-allowed"
+                    )}
+                >
+                    {/* Loading spinner khi đang load visualization */}
+                    {isLoading ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                        <span className="text-base" role="img" aria-label="Visualization icon">🗺️</span>
+                    )}
+                    <span>Sơ đồ roadmap</span>
+                </button>
+            </div>
+        </div>
+    );
+}
+```
+
+**Đặc điểm thiết kế:**
+- **Modern UI**: Rounded-xl styling với shadow-soft
+- **Primary Colors**: Sử dụng primary-500 cho active state
+- **Icons**: 📄 cho content, 🗺️ cho visualization
+- **Loading State**: Spinner animation khi đang load visualization
+- **Accessibility**: ARIA labels và keyboard navigation
+- **Smooth Transitions**: 300ms duration với scale transform
+
+#### 2.2: Tạo useViewToggle Hook
+
+**File**: `apps/web/src/hooks/use-view-toggle.ts`
+
+```typescript
+'use client';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { ViewMode } from '@/components/roadmap-visualization/ViewToggle';
+
+interface UseViewToggleOptions {
+    /** Default view mode */
+    defaultView?: ViewMode;
+    /** Whether to persist state in localStorage */
+    persist?: boolean;
+    /** Whether to sync with URL parameters */
+    syncWithUrl?: boolean;
+    /** Storage key for localStorage */
+    storageKey?: string;
+    /** URL parameter name */
+    urlParam?: string;
+}
+
+interface UseViewToggleReturn {
+    /** Current view mode */
+    currentView: ViewMode;
+    /** Function to change view mode */
+    setView: (view: ViewMode) => void;
+    /** Loading state for view transitions */
+    isLoading: boolean;
+    /** Function to set loading state */
+    setIsLoading: (loading: boolean) => void;
+    /** Toggle between views */
+    toggleView: () => void;
+}
+
+/**
+ * Hook for managing view toggle state with persistence and URL sync
+ * 
+ * Features:
+ * - State persistence trong localStorage
+ * - URL parameter synchronization cho deep linking
+ * - Loading state management
+ * - Type-safe view mode handling
+ */
+export function useViewToggle(options: UseViewToggleOptions = {}): UseViewToggleReturn {
+    const {
+        defaultView = 'content',
+        persist = true,
+        syncWithUrl = true,
+        storageKey = 'roadmap-view-mode',
+        urlParam = 'view',
+    } = options;
+
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Calculate initial view từ URL hoặc localStorage
+    const initialView = useMemo(() => {
+        let view: ViewMode = defaultView;
+
+        // Check URL parameter trước
+        if (syncWithUrl) {
+            const urlView = searchParams.get(urlParam) as ViewMode;
+            if (urlView === 'content' || urlView === 'visualization') {
+                view = urlView;
+            }
+        }
+
+        // Fallback to localStorage nếu không có URL parameter
+        if (view === defaultView && persist && typeof window !== 'undefined') {
+            try {
+                const stored = localStorage.getItem(storageKey);
+                if (stored === 'content' || stored === 'visualization') {
+                    view = stored;
+                }
+            } catch (error) {
+                console.warn('Failed to read view mode from localStorage:', error);
+            }
+        }
+
+        return view;
+    }, [defaultView, persist, syncWithUrl, storageKey, urlParam, searchParams]);
+
+    // Initialize state với calculated initial view
+    const [currentView, setCurrentView] = useState<ViewMode>(initialView);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Update state khi initial view changes (e.g., URL changes)
+    useEffect(() => {
+        if (initialView !== currentView) {
+            setCurrentView(initialView);
+        }
+    }, [initialView, currentView]);
+
+    // Function để change view mode
+    const setView = useCallback((view: ViewMode) => {
+        setCurrentView(view);
+
+        // Persist to localStorage
+        if (persist && typeof window !== 'undefined') {
+            try {
+                localStorage.setItem(storageKey, view);
+            } catch (error) {
+                console.warn('Failed to save view mode to localStorage:', error);
+            }
+        }
+
+        // Update URL parameter
+        if (syncWithUrl) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set(urlParam, view);
+
+            // Use replace để tránh adding to browser history
+            router.replace(`?${params.toString()}`, { scroll: false });
+        }
+    }, [persist, syncWithUrl, storageKey, urlParam, searchParams, router]);
+
+    // Toggle between views
+    const toggleView = useCallback(() => {
+        const newView = currentView === 'content' ? 'visualization' : 'content';
+        setView(newView);
+    }, [currentView, setView]);
+
+    return {
+        currentView,
+        setView,
+        isLoading,
+        setIsLoading,
+        toggleView,
+    };
+}
+```
+
+**Tính năng chính:**
+1. **State Persistence**: Lưu user preference trong localStorage với key `roadmap-view-mode`
+2. **URL Sync**: Sync với URL parameter `view` cho deep linking và bookmarking
+3. **Loading Management**: Quản lý loading state khi switching to visualization
+4. **Error Handling**: Graceful fallback nếu localStorage fails
+5. **Type Safety**: Full TypeScript support với proper typing
+
+#### 2.3: Cập nhật RoadmapDetail Component
+
+**File**: `apps/web/src/components/roadmap/roadmap-detail.tsx` (đã được cập nhật)
+
+**Những thay đổi chính:**
+1. **Import mới**: ViewToggle component và useViewToggle hook
+2. **State management**: Setup view toggle với persistence và URL sync
+3. **Loading handling**: Simulate loading khi switch to visualization
+4. **Conditional rendering**: Hiển thị content hoặc visualization dựa trên currentView
+5. **Smooth transitions**: CSS transitions cho smooth view switching
+6. **Placeholder**: Temporary placeholder cho visualization view
+
+```typescript
+// ✨ MỚI: Import ViewToggle components
+import { ViewToggle } from '@/components/roadmap-visualization/ViewToggle';
+import { useViewToggle } from '@/hooks/use-view-toggle';
+import { Suspense } from 'react';
+
+export function RoadmapDetail({ slug }: RoadmapDetailProps) {
+    const { roadmap, loading, error } = useRoadmapBySlug(slug);
+    
+    // ✨ MỚI: Setup view toggle với persistence và URL sync
+    const { currentView, setView, isLoading, setIsLoading } = useViewToggle({
+        defaultView: 'content',
+        persist: true,
+        syncWithUrl: true,
+    });
+
+    // ✨ MỚI: Handle view change với loading state
+    const handleViewChange = async (view: typeof currentView) => {
+        if (view === 'visualization') {
+            setIsLoading(true);
+            // Simulate loading time for visualization
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+        }
+        setView(view);
+    };
+
+    return (
+        <article className="space-y-6">
+            {/* Existing header content */}
+            
+            {/* ✨ MỚI: View Toggle */}
+            <div className="py-4">
+                <ViewToggle
+                    currentView={currentView}
+                    onViewChange={handleViewChange}
+                    isLoading={isLoading}
+                    className="mb-8"
+                />
+            </div>
+
+            {/* ✨ MỚI: Content Area với smooth transitions */}
+            <div className="transition-all duration-500 ease-in-out">
+                {currentView === 'content' ? (
+                    <div className="animate-fade-in">
+                        <RoadmapContent content={roadmap.content} />
+                    </div>
+                ) : (
+                    <div className="animate-fade-in">
+                        <Suspense fallback={
+                            <div className="h-[calc(100vh-280px)] bg-neutral-100 rounded-2xl animate-pulse flex items-center justify-center">
+                                <div className="text-neutral-500">Loading visualization...</div>
+                            </div>
+                        }>
+                            <RoadmapVisualizationPlaceholder />
+                        </Suspense>
+                    </div>
+                )}
+            </div>
+        </article>
+    );
+}
+```
+
+#### 2.4: Tạo CSS Animations (Optional)
+
+**File**: `apps/web/src/app/globals.css` (thêm vào cuối file)
+
+```css
+/* ✨ MỚI: Animations cho view transitions */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Shadow utilities */
+.shadow-soft {
+  box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+```
+
+### Bước 3: Testing ViewToggle Integration
+
+#### 3.1: Test thủ công (Manual Testing)
+
+**Checklist test cho ViewToggle:**
+
+1. ✅ **Basic Functionality**
+   - Mở trang roadmap detail: `/roadmaps/[slug]`
+   - Thấy ViewToggle component với 2 buttons? ✓
+   - Button "Nội dung" active by default? ✓
+   - Button "Sơ đồ roadmap" inactive? ✓
+
+2. ✅ **View Switching**
+   - Click "Sơ đồ roadmap" → Loading spinner hiện? ✓
+   - Sau 1 giây → Visualization placeholder hiện? ✓
+   - Button "Sơ đồ roadmap" active? ✓
+   - Click "Nội dung" → Content view hiện ngay? ✓
+
+3. ✅ **State Persistence**
+   - Switch to visualization view
+   - Refresh trang → Vẫn ở visualization view? ✓
+   - Mở tab mới với cùng URL → Vẫn ở visualization view? ✓
+
+4. ✅ **URL Synchronization**
+   - Switch to visualization → URL có `?view=visualization`? ✓
+   - Switch to content → URL có `?view=content`? ✓
+   - Copy URL và mở tab mới → View đúng? ✓
+   - Browser back/forward → View sync đúng? ✓
+
+5. ✅ **Responsive Design**
+   - Test trên mobile → ViewToggle responsive? ✓
+   - Test trên tablet → Layout đẹp? ✓
+   - Test trên desktop → Full functionality? ✓
+
+6. ✅ **Accessibility**
+   - Tab navigation → Focus đúng thứ tự? ✓
+   - Enter/Space → Activate button? ✓
+   - Screen reader → Announce đúng state? ✓
+   - ARIA attributes → aria-pressed đúng? ✓
+
+**Debug ViewToggle:**
+```bash
+# Mở DevTools → Console
+# Kiểm tra localStorage
+localStorage.getItem('roadmap-view-mode')
+
+# Kiểm tra URL parameters
+new URLSearchParams(window.location.search).get('view')
+
+# Kiểm tra component state
+# (Sử dụng React DevTools extension)
+```
+
+#### 3.2: Test tự động (Unit Tests)
+
+**Test ViewToggle Component:**
+```typescript
+// apps/web/src/components/roadmap-visualization/__tests__/ViewToggle.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ViewToggle } from '../ViewToggle';
+
+describe('ViewToggle', () => {
+    const mockOnViewChange = jest.fn();
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('renders both content and visualization buttons', () => {
+        render(
+            <ViewToggle
+                currentView="content"
+                onViewChange={mockOnViewChange}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: /switch to content view/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /switch to visualization view/i })).toBeInTheDocument();
+    });
+
+    it('shows correct active state for content view', () => {
+        render(
+            <ViewToggle
+                currentView="content"
+                onViewChange={mockOnViewChange}
+            />
+        );
+
+        const contentButton = screen.getByRole('button', { name: /switch to content view/i });
+        const visualizationButton = screen.getByRole('button', { name: /switch to visualization view/i });
+
+        expect(contentButton).toHaveAttribute('aria-pressed', 'true');
+        expect(visualizationButton).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('calls onViewChange when visualization button is clicked', () => {
+        render(
+            <ViewToggle
+                currentView="content"
+                onViewChange={mockOnViewChange}
+            />
+        );
+
+        const visualizationButton = screen.getByRole('button', { name: /switch to visualization view/i });
+        fireEvent.click(visualizationButton);
+
+        expect(mockOnViewChange).toHaveBeenCalledWith('visualization');
+    });
+
+    it('shows loading spinner when isLoading is true', () => {
+        render(
+            <ViewToggle
+                currentView="content"
+                onViewChange={mockOnViewChange}
+                isLoading={true}
+            />
+        );
+
+        const visualizationButton = screen.getByRole('button', { name: /switch to visualization view/i });
+        const spinner = visualizationButton.querySelector('.animate-spin');
+
+        expect(spinner).toBeInTheDocument();
+        expect(visualizationButton).toBeDisabled();
+    });
+
+    it('applies custom className', () => {
+        const { container } = render(
+            <ViewToggle
+                currentView="content"
+                onViewChange={mockOnViewChange}
+                className="custom-class"
+            />
+        );
+
+        expect(container.firstChild).toHaveClass('custom-class');
+    });
+});
+```
+
+**Test useViewToggle Hook:**
+```typescript
+// apps/web/src/hooks/__tests__/use-view-toggle.test.ts
+import { renderHook, act } from '@testing-library/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useViewToggle } from '../use-view-toggle';
+
+// Mock Next.js navigation hooks
+jest.mock('next/navigation', () => ({
+    useRouter: jest.fn(),
+    useSearchParams: jest.fn(),
+}));
+
+// Mock localStorage
+const mockLocalStorage = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+};
+
+Object.defineProperty(window, 'localStorage', {
+    value: mockLocalStorage,
+});
+
+describe('useViewToggle', () => {
+    const mockReplace = jest.fn();
+    const mockSearchParams = {
+        get: jest.fn(),
+        toString: jest.fn(() => ''),
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        (useRouter as jest.Mock).mockReturnValue({
+            replace: mockReplace,
+        });
+        (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
+        mockLocalStorage.getItem.mockReturnValue(null);
+        mockSearchParams.get.mockReturnValue(null);
+    });
+
+    it('initializes with default view mode', () => {
+        const { result } = renderHook(() => useViewToggle());
+
+        expect(result.current.currentView).toBe('content');
+        expect(result.current.isLoading).toBe(false);
+    });
+
+    it('saves view mode to localStorage when persist is enabled', () => {
+        const { result } = renderHook(() =>
+            useViewToggle({ persist: true, storageKey: 'test-key' })
+        );
+
+        act(() => {
+            result.current.setView('visualization');
+        });
+
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith('test-key', 'visualization');
+    });
+
+    it('updates URL when view changes and syncWithUrl is enabled', () => {
+        const { result } = renderHook(() =>
+            useViewToggle({ syncWithUrl: true, urlParam: 'view' })
+        );
+
+        act(() => {
+            result.current.setView('visualization');
+        });
+
+        expect(mockReplace).toHaveBeenCalledWith('?view=visualization', { scroll: false });
+    });
+
+    it('loads initial view from URL parameter', () => {
+        mockSearchParams.get.mockReturnValue('visualization');
+
+        const { result } = renderHook(() =>
+            useViewToggle({ syncWithUrl: true, urlParam: 'view' })
+        );
+
+        expect(result.current.currentView).toBe('visualization');
+    });
+
+    it('toggles between views correctly', () => {
+        const { result } = renderHook(() => useViewToggle());
+
+        act(() => {
+            result.current.toggleView();
+        });
+        expect(result.current.currentView).toBe('visualization');
+
+        act(() => {
+            result.current.toggleView();
+        });
+        expect(result.current.currentView).toBe('content');
+    });
+});
+```
+
+**Chạy tests:**
+```bash
+# Chạy ViewToggle tests
+pnpm test ViewToggle
+
+# Chạy useViewToggle tests  
+pnpm test use-view-toggle
+
+# Chạy tất cả tests với coverage
+pnpm test --coverage
+```
 
 ## 🐛 Troubleshooting Guide
 
@@ -579,9 +1196,28 @@ test('admin can create roadmap', async ({ page }) => {
 ---
 
 **Last Updated:** 2024-12-19  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Maintainer:** VizTechStack Frontend Team  
 **Review Status:** ✅ Ready for Development
+
+## 🆕 Recent Updates (v1.1.0)
+
+### NodeCategory Field Added to Roadmap Schema
+
+**Thay đổi**: Thêm field `nodeCategory` vào roadmap input schema để hỗ trợ roadmap visualization.
+
+**Chi tiết**:
+- **Field mới**: `nodeCategory` (type: `NodeCategory` enum)
+- **Mục đích**: Phân loại roadmaps theo node types cho visualization (role, skill, topic, milestone, resource)
+- **Required**: Bắt buộc khi tạo/cập nhật roadmap
+- **Enum values**: `ROLE`, `SKILL`, `TOPIC`, `MILESTONE`, `RESOURCE`
+
+**Impact lên Frontend**:
+1. **RoadmapForm**: Cần thêm dropdown select cho nodeCategory
+2. **GraphQL Mutations**: Cập nhật CREATE_ROADMAP và UPDATE_ROADMAP mutations
+3. **TypeScript Types**: Cập nhật Roadmap interface
+4. **Validation**: Thêm validation cho nodeCategory field
+5. **Visualization**: Sử dụng nodeCategory để render different node types
 
 ## Testing
 
@@ -1035,6 +1671,281 @@ function AdminDashboard() {
 2. Verify user có role admin
 3. Check backend logs xem query nào được execute
 
+### Lỗi 12: ViewToggle không hiển thị hoặc không hoạt động
+
+**Nguyên nhân**: Import sai, component không được render, hoặc state management issue.
+
+**Triệu chứng**:
+- ViewToggle component không hiển thị
+- Buttons không respond khi click
+- View không switch
+- Loading state không hoạt động
+
+**Giải pháp**:
+
+1. **Kiểm tra imports**:
+```typescript
+// ✅ ĐÚNG - Import đúng path
+import { ViewToggle } from '@/components/roadmap-visualization/ViewToggle';
+import { useViewToggle } from '@/hooks/use-view-toggle';
+
+// ❌ SAI - Import sai path
+import { ViewToggle } from '@/components/ViewToggle'; // Sai folder
+```
+
+2. **Kiểm tra component setup**:
+```typescript
+// ✅ ĐÚNG - Setup đầy đủ
+const { currentView, setView, isLoading, setIsLoading } = useViewToggle({
+    defaultView: 'content',
+    persist: true,
+    syncWithUrl: true,
+});
+
+const handleViewChange = async (view: typeof currentView) => {
+    if (view === 'visualization') {
+        setIsLoading(true);
+        setTimeout(() => setIsLoading(false), 1000);
+    }
+    setView(view);
+};
+
+<ViewToggle
+    currentView={currentView}
+    onViewChange={handleViewChange}
+    isLoading={isLoading}
+/>
+```
+
+3. **Debug ViewToggle state**:
+```typescript
+// Thêm debug logs
+console.log('ViewToggle state:', {
+    currentView,
+    isLoading,
+    localStorage: localStorage.getItem('roadmap-view-mode'),
+    urlParam: new URLSearchParams(window.location.search).get('view')
+});
+```
+
+### Lỗi 13: ViewToggle state không persist
+
+**Nguyên nhân**: localStorage disabled, URL sync không hoạt động, hoặc configuration sai.
+
+**Triệu chứng**:
+- Refresh trang → View reset về default
+- URL không có `?view=` parameter
+- localStorage không lưu preference
+
+**Giải pháp**:
+
+1. **Kiểm tra localStorage**:
+```typescript
+// Test localStorage hoạt động
+try {
+    localStorage.setItem('test', 'value');
+    localStorage.removeItem('test');
+    console.log('localStorage works');
+} catch (error) {
+    console.error('localStorage disabled:', error);
+    // Có thể do private browsing mode
+}
+```
+
+2. **Kiểm tra useViewToggle configuration**:
+```typescript
+// ✅ ĐÚNG - Enable persistence
+const { currentView, setView } = useViewToggle({
+    persist: true,        // Enable localStorage
+    syncWithUrl: true,    // Enable URL sync
+    storageKey: 'roadmap-view-mode',
+    urlParam: 'view',
+});
+
+// ❌ SAI - Disable persistence
+const { currentView, setView } = useViewToggle({
+    persist: false,       // Disabled
+    syncWithUrl: false,   // Disabled
+});
+```
+
+3. **Debug persistence**:
+```typescript
+// Check localStorage value
+console.log('Stored view:', localStorage.getItem('roadmap-view-mode'));
+
+// Check URL parameter
+console.log('URL view:', new URLSearchParams(window.location.search).get('view'));
+
+// Check if Next.js router is working
+const router = useRouter();
+console.log('Router available:', !!router);
+```
+
+### Lỗi 14: ViewToggle loading state không clear
+
+**Nguyên nhân**: setIsLoading(false) không được gọi hoặc async operation issue.
+
+**Triệu chứng**:
+- Loading spinner hiển thị mãi mãi
+- Visualization button bị disabled
+- View không switch sau loading
+
+**Giải pháp**:
+
+1. **Kiểm tra loading logic**:
+```typescript
+// ✅ ĐÚNG - Clear loading trong all paths
+const handleViewChange = async (view: typeof currentView) => {
+    if (view === 'visualization') {
+        setIsLoading(true);
+        try {
+            // Simulate loading hoặc actual data fetching
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } finally {
+            setIsLoading(false); // Always clear loading
+        }
+    }
+    setView(view);
+};
+
+// ❌ SAI - Không clear loading nếu có error
+const handleViewChange = async (view: typeof currentView) => {
+    if (view === 'visualization') {
+        setIsLoading(true);
+        setTimeout(() => setIsLoading(false), 1000); // Có thể fail
+    }
+    setView(view);
+};
+```
+
+2. **Add error handling**:
+```typescript
+const handleViewChange = async (view: typeof currentView) => {
+    if (view === 'visualization') {
+        setIsLoading(true);
+        try {
+            // Load visualization data
+            await loadVisualizationData();
+        } catch (error) {
+            console.error('Failed to load visualization:', error);
+            // Fallback to content view
+            setView('content');
+        } finally {
+            setIsLoading(false);
+        }
+    } else {
+        setView(view);
+    }
+};
+```
+
+### Lỗi 15: ViewToggle CSS styling không đúng
+
+**Nguyên nhân**: Tailwind classes không load, CSS conflicts, hoặc design system issue.
+
+**Triệu chứng**:
+- Buttons không có styling đúng
+- Active state không hiển thị
+- Transitions không smooth
+- Shadow effects không có
+
+**Giải pháp**:
+
+1. **Kiểm tra Tailwind CSS**:
+```bash
+# Verify Tailwind classes được generate
+# Mở DevTools → Elements → Check computed styles
+
+# Kiểm tra primary-500 color có được define
+# Trong tailwind.config.js hoặc CSS variables
+```
+
+2. **Kiểm tra custom CSS**:
+```css
+/* Thêm vào globals.css nếu chưa có */
+.shadow-soft {
+  box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+3. **Debug styling**:
+```typescript
+// Thêm debug classes
+<ViewToggle
+    currentView={currentView}
+    onViewChange={handleViewChange}
+    className="border-2 border-red-500" // Debug border
+/>
+```
+
+### Lỗi 16: ViewToggle accessibility issues
+
+**Nguyên nhân**: ARIA attributes sai, keyboard navigation không hoạt động, hoặc screen reader support thiếu.
+
+**Triệu chứng**:
+- Screen reader không announce đúng
+- Tab navigation không hoạt động
+- ARIA warnings trong console
+- Accessibility audit fails
+
+**Giải pháp**:
+
+1. **Kiểm tra ARIA attributes**:
+```typescript
+// ✅ ĐÚNG - Proper ARIA attributes
+<button
+    aria-label="Switch to content view"
+    aria-pressed={currentView === 'content'}
+    role="button"
+>
+    Content
+</button>
+
+// ❌ SAI - Missing ARIA attributes
+<button onClick={handleClick}>
+    Content
+</button>
+```
+
+2. **Test keyboard navigation**:
+```bash
+# Manual test:
+# 1. Tab to ViewToggle
+# 2. Arrow keys để navigate giữa buttons
+# 3. Enter/Space để activate
+# 4. Focus indicators visible
+```
+
+3. **Test screen reader**:
+```bash
+# Sử dụng screen reader (NVDA, JAWS, VoiceOver)
+# Verify announcements:
+# - "Switch to content view, button, pressed"
+# - "Switch to visualization view, button, not pressed"
+```
+
+**Debug accessibility**:
+```bash
+# Sử dụng axe-core hoặc Lighthouse accessibility audit
+# Mở DevTools → Lighthouse → Accessibility
+```
+
 ## Checklist trước khi commit
 
 - [ ] Code chạy được: `pnpm dev`
@@ -1043,6 +1954,9 @@ function AdminDashboard() {
 - [ ] Tests pass: `pnpm test`
 - [ ] Đã test thủ công với 3 loại user (Guest, User, Admin)
 - [ ] GraphQL operations hoạt động đúng
+- [ ] **MỚI**: ViewToggle hoạt động đúng (switch views, persistence, URL sync)
+- [ ] **MỚI**: ViewToggle responsive trên mobile/tablet/desktop
+- [ ] **MỚI**: ViewToggle accessibility (keyboard navigation, screen reader)
 - [ ] Error messages đều bằng tiếng Việt
 - [ ] Cache updates sau mutations
 - [ ] Loading states hiển thị đúng
@@ -1203,6 +2117,58 @@ A: Có thể đang dùng sai hook. Admin phải dùng `useRoadmapsForAdmin()` th
 **Q: Làm sao biết query nào đang được gọi?**
 A: Mở DevTools → Network → Tìm GraphQL request → Xem trong payload có `operationName` là gì (`roadmaps` hay `roadmapsForAdmin`).
 
+**Q: ViewToggle không hiển thị, làm sao fix?**
+A: Kiểm tra:
+1. Import đúng path: `@/components/roadmap-visualization/ViewToggle`
+2. Component được render trong RoadmapDetail
+3. useViewToggle hook được setup đúng
+4. Không có TypeScript errors
+
+**Q: ViewToggle state không persist sau refresh, tại sao?**
+A: Có thể do:
+- localStorage disabled (private browsing mode)
+- useViewToggle config `persist: false`
+- Browser security settings block localStorage
+- Component re-mount issue
+
+**Q: ViewToggle loading state không clear, làm sao fix?**
+A: Đảm bảo `setIsLoading(false)` được gọi trong tất cả code paths:
+```typescript
+const handleViewChange = async (view) => {
+  if (view === 'visualization') {
+    setIsLoading(true);
+    try {
+      await loadData();
+    } finally {
+      setIsLoading(false); // Always clear
+    }
+  }
+  setView(view);
+};
+```
+
+**Q: URL parameter không sync với ViewToggle state?**
+A: Kiểm tra:
+1. useViewToggle config `syncWithUrl: true`
+2. Next.js router hoạt động đúng
+3. URL parameter name đúng (default: 'view')
+4. Browser history API available
+
+**Q: ViewToggle accessibility không hoạt động?**
+A: Verify:
+1. ARIA attributes: `aria-label`, `aria-pressed`
+2. Keyboard navigation: Tab, Enter, Space
+3. Screen reader announcements
+4. Focus indicators visible
+5. Role attributes đúng
+
+**Q: ViewToggle styling không đúng, làm sao fix?**
+A: Kiểm tra:
+1. Tailwind CSS classes được load
+2. Custom CSS (shadow-soft, animate-fade-in) có trong globals.css
+3. Primary color variables được define
+4. No CSS conflicts với existing styles
+
 ---
 
 **Chúc bạn code vui vẻ! 🚀**
@@ -1212,11 +2178,25 @@ Nếu gặp vấn đề, hãy hỏi senior developer hoặc tạo issue trên Gi
 ---
 
 **Last Updated:** 2024-12-19  
-**Version:** 2.2.0  
+**Version:** 2.3.0  
 **Maintainer:** VizTechStack Frontend Team  
 **Review Status:** ✅ Ready for Development
 
 ## Changelog
+
+### Version 2.3.0 (2024-12-19)
+- **MAJOR**: Added comprehensive ViewToggle integration documentation
+- **ADDED**: Step-by-step guide for ViewToggle component implementation
+- **ADDED**: useViewToggle hook documentation with state persistence and URL sync
+- **ADDED**: RoadmapDetail component integration with ViewToggle
+- **ADDED**: ViewToggle testing strategies (manual and automated)
+- **ADDED**: ViewToggle-specific troubleshooting (6 new error scenarios)
+- **ADDED**: ViewToggle FAQ entries (7 new questions)
+- **UPDATED**: Project structure to include roadmap-visualization components
+- **UPDATED**: Testing checklist to include ViewToggle validation
+- **ADDED**: CSS animations and styling guide for ViewToggle
+- **ADDED**: Accessibility testing instructions for ViewToggle
+- **ADDED**: Performance considerations for view switching
 
 ### Version 2.2.0 (2024-12-19)
 - **UPDATED**: Apollo Client error handling với detailed JWT authentication troubleshooting

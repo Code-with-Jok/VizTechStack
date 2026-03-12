@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Requirement Integration Status Report",
+  "description": "Tự động tạo báo cáo trạng thái tích hợp requirement vào webapp (FE/BE) khi một task được đánh dấu hoàn thành",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "/rqq"
+  },
+  "workspaceFolderName": "VizTechStack",
+  "shortName": "requirement-integration-report"
+}

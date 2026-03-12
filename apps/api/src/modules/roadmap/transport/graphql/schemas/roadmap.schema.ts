@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { NodeCategory } from './roadmap-input.schema';
 
 /**
  * GraphQL object type for Roadmap entity
@@ -46,6 +47,13 @@ export class RoadmapSchema {
    */
   @Field()
   content!: string;
+
+  /**
+   * Node category of the roadmap for visualization
+   * Used for organizing roadmaps into node types (role, skill, topic, milestone, resource)
+   */
+  @Field(() => NodeCategory)
+  nodeCategory!: NodeCategory;
 
   /**
    * Clerk user ID of the roadmap creator

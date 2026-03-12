@@ -5,6 +5,8 @@
  * They represent the business entities and their data transfer objects (DTOs).
  */
 
+import { NodeCategory } from '../../transport/graphql/schemas/roadmap-input.schema';
+
 /**
  * Roadmap entity representing a technology roadmap
  *
@@ -26,6 +28,9 @@ export interface Roadmap {
 
   /** Full markdown content of the roadmap */
   content: string;
+
+  /** Node category of the roadmap for visualization */
+  nodeCategory: NodeCategory;
 
   /** Clerk user ID of the roadmap creator */
   author: string;
@@ -63,6 +68,9 @@ export interface CreateRoadmapInput {
   /** Full markdown content of the roadmap */
   content: string;
 
+  /** Node category of the roadmap for visualization */
+  nodeCategory: NodeCategory;
+
   /** Category tags for organizing roadmaps */
   tags: string[];
 
@@ -92,6 +100,9 @@ export interface UpdateRoadmapInput {
 
   /** Full markdown content of the roadmap */
   content?: string;
+
+  /** Node category of the roadmap for visualization */
+  nodeCategory?: NodeCategory;
 
   /** Category tags for organizing roadmaps */
   tags?: string[];

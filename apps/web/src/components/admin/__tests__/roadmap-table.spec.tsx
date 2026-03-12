@@ -39,6 +39,7 @@ const mockRoadmaps: Roadmap[] = [
         title: 'React Development Roadmap',
         description: 'Complete guide to React development',
         content: '# React Roadmap\n\nLearn React step by step...',
+        nodeCategory: 'TOPIC',
         author: 'user_123',
         tags: ['react', 'javascript', 'frontend', 'web'],
         publishedAt: Date.now() - 86400000, // 1 day ago
@@ -51,6 +52,7 @@ const mockRoadmaps: Roadmap[] = [
         title: 'Vue.js Learning Path',
         description: 'Master Vue.js framework',
         content: '# Vue.js Roadmap\n\nStart with Vue basics...',
+        nodeCategory: 'TOPIC',
         author: 'user_456',
         tags: ['vue', 'javascript'],
         publishedAt: Date.now() - 172800000, // 2 days ago

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { RoadmapCard } from '../roadmap-card';
-import type { Roadmap } from '@/features/roadmap/types';
+import type { Roadmap, NodeCategory } from '@/features/roadmap/types';
 
 // Mock Next.js Link component
 jest.mock('next/link', () => {
@@ -15,6 +15,7 @@ const mockRoadmap: Roadmap = {
     title: 'React Fundamentals: A Complete Guide to Modern React Development',
     description: 'Learn React from the ground up with this comprehensive guide covering hooks, components, state management, and modern React patterns. Perfect for beginners and intermediate developers.',
     content: '# React Fundamentals\n\nThis is a comprehensive guide...',
+    nodeCategory: 'TOPIC',
     author: 'user_789',
     tags: ['React', 'JavaScript', 'Frontend', 'Web Development', 'Hooks'],
     publishedAt: 1640995200000, // January 1, 2022
