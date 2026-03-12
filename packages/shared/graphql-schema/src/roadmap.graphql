@@ -1,5 +1,13 @@
 # Roadmap GraphQL Schema
 
+enum NodeCategory {
+  ROLE
+  SKILL
+  TOPIC
+  MILESTONE
+  RESOURCE
+}
+
 type Roadmap {
   id: ID!
   slug: String!
@@ -7,6 +15,7 @@ type Roadmap {
   description: String!
   content: String!
   author: String!
+  nodeCategory: NodeCategory!
   tags: [String!]!
   publishedAt: Float!
   updatedAt: Float!
@@ -18,6 +27,7 @@ input CreateRoadmapInput {
   title: String!
   description: String!
   content: String!
+  nodeCategory: NodeCategory!
   tags: [String!]!
   isPublished: Boolean!
 }
@@ -28,6 +38,7 @@ input UpdateRoadmapInput {
   title: String
   description: String
   content: String
+  nodeCategory: NodeCategory
   tags: [String]
   isPublished: Boolean
 }

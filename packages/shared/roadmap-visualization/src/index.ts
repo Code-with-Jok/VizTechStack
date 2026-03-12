@@ -77,6 +77,54 @@ export {
     createContentParser,
 } from './parser';
 
+// Export markdown parser
+export {
+    MarkdownParser,
+    type MarkdownParseOptions,
+    type MarkdownParseResult,
+    type MarkdownHeader,
+    type MarkdownValidationResult,
+} from './parsers';
+
+// Export extractors
+export {
+    NodeExtractor,
+    createNodeExtractor,
+    extractNodesFromMarkdown,
+    extractRoadmapNodesFromMarkdown,
+    type GraphNode,
+    type ExtractedNodes,
+    type NodeExtractionOptions,
+} from './extractors/node-extractor';
+
+export {
+    RelationshipAnalyzer,
+    createRelationshipAnalyzer,
+    analyzeRelationships,
+    type Relationship,
+    type AnalyzedRelationships,
+    type RelationshipAnalysisOptions,
+} from './extractors/relationship-analyzer';
+
+export {
+    EdgeGenerator,
+    createEdgeGenerator,
+    generateEdges,
+    generateAndValidateEdges,
+    type EdgeGenerationOptions,
+    type GeneratedEdges,
+} from './extractors/edge-generator';
+
+export {
+    HierarchyProcessor,
+    createHierarchyProcessor,
+    processNodeHierarchy,
+    validateHierarchyStructure,
+    type HierarchyRelationship,
+    type ProcessedHierarchy,
+    type HierarchyProcessingOptions,
+} from './extractors/hierarchy-processor';
+
 // Export utilities
 export {
     generateId,
@@ -93,14 +141,45 @@ export {
 
 // Export layouts
 export {
+    HierarchicalLayout,
+    createHierarchicalLayout,
     applyHierarchicalLayout,
+    applyProgressionOptimizedLayout,
+    getOptimalHierarchicalOptions,
+    ForceDirectedLayout,
+    createForceDirectedLayout,
     applyForceDirectedLayout,
+    applyRelationshipOptimizedLayout,
+    getOptimalForceDirectedOptions,
+    applyClusteredForceLayout,
     applyCircularLayout,
+    GridLayout,
+    createGridLayout,
     applyGridLayout,
+    applyContentOptimizedGridLayout,
+    getOptimalGridOptions,
+    applyAutoSizedGridLayout,
     applyLayoutAlgorithm,
+    LayoutManager,
+    createLayoutManager,
+    switchLayoutWithTransition,
+    applyLayoutDirect,
+    getOptimalTransitionOptions,
 } from './layouts';
 
-export type { LayoutOptions } from './layouts';
+export type {
+    LayoutOptions,
+    HierarchicalLayoutOptions,
+    HierarchicalLayoutResult,
+    ForceDirectedLayoutOptions,
+    ForceDirectedLayoutResult,
+    GridLayoutOptions,
+    GridLayoutResult,
+    LayoutManagerOptions,
+    LayoutTransition,
+    LayoutManagerState,
+    LayoutManagerResult
+} from './layouts';
 
 // Export navigation (Giai đoạn 3)
 export type { NavigationResult, ArticleMetadata } from './navigation';

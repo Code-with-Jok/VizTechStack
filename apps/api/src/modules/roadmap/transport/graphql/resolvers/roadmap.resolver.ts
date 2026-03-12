@@ -39,7 +39,7 @@ import type { CurrentUserData } from '../../../../../common/decorators/current-u
 @Resolver(() => RoadmapSchema)
 @UseGuards(ClerkAuthGuard, RolesGuard)
 export class RoadmapResolver {
-  constructor(private readonly roadmapService: RoadmapService) {}
+  constructor(private readonly roadmapService: RoadmapService) { }
 
   /**
    * Query all published roadmaps
@@ -64,6 +64,7 @@ export class RoadmapResolver {
       ...roadmap,
       id: roadmap._id,
       content: roadmap.content || '',
+      nodeCategory: roadmap.nodeCategory,
       author: roadmap.author || '',
       title: roadmap.title || '',
       description: roadmap.description || '',
@@ -101,6 +102,7 @@ export class RoadmapResolver {
       ...roadmap,
       id: roadmap._id,
       content: roadmap.content || '',
+      nodeCategory: roadmap.nodeCategory,
       author: roadmap.author || '',
       title: roadmap.title || '',
       description: roadmap.description || '',
@@ -133,6 +135,7 @@ export class RoadmapResolver {
       ...roadmap,
       id: roadmap._id,
       content: roadmap.content || '',
+      nodeCategory: roadmap.nodeCategory,
       author: roadmap.author || '',
       title: roadmap.title || '',
       description: roadmap.description || '',
@@ -173,6 +176,7 @@ export class RoadmapResolver {
       ...roadmap,
       id: roadmap._id,
       content: roadmap.content || '',
+      nodeCategory: roadmap.nodeCategory,
       author: roadmap.author || '',
       title: roadmap.title || '',
       description: roadmap.description || '',
@@ -212,6 +216,7 @@ export class RoadmapResolver {
       ...roadmap,
       id: roadmap._id,
       content: roadmap.content || '',
+      nodeCategory: roadmap.nodeCategory,
       author: roadmap.author || '',
       title: roadmap.title || '',
       description: roadmap.description || '',
@@ -247,6 +252,7 @@ export class RoadmapResolver {
       ...roadmap,
       id: roadmap._id,
       content: roadmap.content || '',
+      nodeCategory: roadmap.nodeCategory,
       author: roadmap.author || '',
       title: roadmap.title || '',
       description: roadmap.description || '',

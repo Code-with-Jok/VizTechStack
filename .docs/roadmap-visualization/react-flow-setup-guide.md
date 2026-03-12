@@ -586,20 +586,55 @@ useEffect(() => {
   - ✅ Difficulty indicators và category badges
   - ✅ Comprehensive test coverage
 
-### Sắp Tới (Task 1.3.2)
+### Hoàn Thành (Task 3.1.1) ✅
 
-- [ ] **CustomEdge Component Implementation**
-  - Tạo custom edge component cho relationships
-  - Style edges theo relationship types
-  - Add edge labels và tooltips
+- [x] **HierarchicalLayout Algorithm Implementation**
+  - ✅ Implement HierarchicalLayout class sử dụng dagre library
+  - ✅ Position nodes theo topic progression levels với optimized spacing
+  - ✅ Smart alignment và hierarchy validation
+  - ✅ Performance optimization cho large graphs
+  - ✅ Comprehensive error handling và cycle detection
+  - ✅ TypeScript strict mode compliance
+
+### Hoàn Thành (Task 3.1.2) ✅
+
+- [x] **Hierarchical Layout Controls Implementation**
+  - ✅ Add direction controls (top-down, left-right) với visual icons
+  - ✅ Implement level spacing adjustments với real-time sliders
+  - ✅ Add hierarchy collapse/expand functionality cho individual levels
+  - ✅ Tích hợp với VisualizationControls component
+  - ✅ Tabbed interface với Direction, Spacing, Hierarchy tabs
+  - ✅ useHierarchicalLayout hook cho state management
+  - ✅ TypeScript strict mode compliance
+
+### Hoàn Thành (Task 3.2.1) ✅
+
+- [x] **ForceDirectedLayout Algorithm Implementation**
+  - ✅ Implement ForceDirectedLayout class sử dụng d3-force library
+  - ✅ Configure attraction/repulsion forces với relationship-type-specific strengths
+  - ✅ Implement collision detection với type-based collision radii
+  - ✅ Level-aware positioning cho topic progression
+  - ✅ Relationship optimization với automatic parameter calculation
+  - ✅ Clustering support và dynamic adjustment capabilities
+  - ✅ TypeScript strict mode compliance
+
+### Sắp Tới (Task 3.2.2)
+
+- [ ] **Force Layout Controls Implementation**
+  - Add force strength adjustments
+  - Implement simulation speed controls
+  - Add manual node positioning override
 
 ### Roadmap
 
-- [x] **Phase 1.3.1**: CustomNode Component ✅
-- [ ] **Phase 1.3.2**: CustomEdge Component
-- [ ] **Phase 1.4**: Navigation Controls  
-- [ ] **Phase 1.5**: Node Interaction System
-- [ ] **Phase 2.x**: Content Parser và Layout Algorithms
+- [x] **Phase 1**: Interactive Visual Diagram ✅
+- [x] **Phase 2**: Automatic Structure Extraction ✅
+- [x] **Phase 3.1.1**: HierarchicalLayout Algorithm ✅
+- [ ] **Phase 3.1.2**: Hierarchical Layout Controls
+- [ ] **Phase 3.2**: Force-Directed Layout
+- [ ] **Phase 3.3**: Circular Layout
+- [ ] **Phase 3.4**: Grid Layout
+- [ ] **Phase 3.5**: Layout Switching System
 
 ## Resources
 

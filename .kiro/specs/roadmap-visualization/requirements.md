@@ -4,6 +4,26 @@
 
 Tính năng trực quan hóa roadmap chuyển đổi các roadmap markdown tĩnh thành sơ đồ tương tác trực quan để nâng cao khả năng hiểu của người dùng về lộ trình học tập, phụ thuộc và tiến trình qua các chủ đề công nghệ. Tính năng này tích hợp với hệ thống roadmap VizTechStack hiện có để cung cấp góc nhìn thay thế giúp các lộ trình học tập phức tạp trở nên dễ tiếp cận và hấp dẫn hơn.
 
+**Ràng Buộc Quan Trọng về Implementation**: 
+
+🚫 **NGHIÊM CẤM CHẠY LỆNH PNPM TRONG QUÁ TRÌNH IMPLEMENTATION**
+
+Trong suốt quá trình thực hiện các tasks của spec này, TUYỆT ĐỐI KHÔNG được chạy bất kỳ lệnh pnpm nào bao gồm:
+- `pnpm build`
+- `pnpm lint` 
+- `pnpm test`
+- `pnpm dev`
+- `pnpm typecheck`
+- Bất kỳ lệnh CI/CD nào
+
+**Quy tắc thực thi:**
+1. Tạm thời vô hiệu hóa hoặc bỏ qua tất cả agent hooks tự động có thể trigger các lệnh này
+2. Chỉ thực hiện pure code implementation và file creation/modification
+3. Các lệnh verification chỉ được phép chạy SAU KHI tất cả implementation tasks đã hoàn tất 100%
+4. Khi tất cả tasks hoàn thành, sẽ có thông báo rõ ràng cho phép chạy verification commands
+
+**Lý do:** Đảm bảo quá trình implementation liên tục không bị gián đoạn bởi build errors hoặc test failures trong khi code đang được phát triển.
+
 ## Thuật Ngữ
 
 - **Hệ_Thống_Roadmap**: Chức năng CRUD roadmap hiện có của VizTechStack
@@ -14,6 +34,7 @@ Tính năng trực quan hóa roadmap chuyển đổi các roadmap markdown tĩnh
 - **Node_Tương_Tác**: Phần tử có thể click trong visualization đại diện cho chủ đề roadmap
 - **Cạnh_Quan_Hệ**: Kết nối giữa các nodes hiển thị phụ thuộc hoặc tiến trình
 - **Giao_Diện_Người_Dùng**: Giao diện web để xem và tương tác với visualizations
+- **Hệ_Thống_Phát_Triển**: Môi trường và quy trình phát triển bao gồm build tools, test runners và automation hooks
 
 ## Yêu Cầu
 
@@ -136,3 +157,15 @@ Tính năng trực quan hóa roadmap chuyển đổi các roadmap markdown tĩnh
 3. Giao_Diện_Người_Dùng SẼ triển khai Content Security Policy headers cho các components React Flow
 4. Công_Cụ_Trực_Quan SẼ duy trì audit logs cho việc sử dụng tính năng và các metrics hiệu suất
 5. Hệ thống SẼ đảm bảo không có thêm việc tiết lộ dữ liệu nhạy cảm thông qua giao diện visualization
+
+### Yêu Cầu 11
+
+**User Story:** Là một developer, tôi muốn quá trình implementation được thực hiện mà không có sự gián đoạn từ các lệnh build và test, để tôi có thể hoàn thành tất cả các tasks trước khi chạy verification.
+
+#### Tiêu Chí Chấp Nhận
+
+1. TRONG SUỐT quá trình implementation, Hệ_Thống_Phát_Triển SẼ KHÔNG chạy bất kỳ lệnh pnpm nào (build, lint, test, dev)
+2. KHI có agent hooks được cấu hình, Hệ_Thống_Phát_Triển SẼ tạm thời vô hiệu hóa hoặc bỏ qua các hooks tự động
+3. KHI tất cả implementation tasks hoàn thành, Hệ_Thống_Phát_Triển SẼ cho phép chạy các lệnh verification
+4. Hệ_Thống_Phát_Triển SẼ thông báo rõ ràng khi nào có thể bắt đầu chạy các lệnh build và test
+5. KHI cần thiết, Hệ_Thống_Phát_Triển SẼ cung cấp hướng dẫn để người dùng tự chạy các lệnh verification sau khi hoàn thành

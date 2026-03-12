@@ -145,8 +145,19 @@ interface Roadmap {
   id: string;
   title: string;
   description: string;
+  content: string;
+  nodeCategory: NodeCategory;  // ✨ MỚI: Node category cho visualization
   tags: string[];
   isPublished: boolean;
+}
+
+// ✨ MỚI: Enum cho node categories
+enum NodeCategory {
+  ROLE = 'ROLE',
+  SKILL = 'SKILL', 
+  TOPIC = 'TOPIC',
+  MILESTONE = 'MILESTONE',
+  RESOURCE = 'RESOURCE'
 }
 
 // Type - Tương tự interface
@@ -154,6 +165,9 @@ type RoadmapFormData = {
   title: string;
   description: string;
   content: string;
+  nodeCategory: NodeCategory;  // ✨ MỚI: Bắt buộc khi tạo roadmap
+  tags: string[];
+  isPublished: boolean;
 };
 ```
 
@@ -1182,9 +1196,28 @@ test('admin can create roadmap', async ({ page }) => {
 ---
 
 **Last Updated:** 2024-12-19  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Maintainer:** VizTechStack Frontend Team  
 **Review Status:** ✅ Ready for Development
+
+## 🆕 Recent Updates (v1.1.0)
+
+### NodeCategory Field Added to Roadmap Schema
+
+**Thay đổi**: Thêm field `nodeCategory` vào roadmap input schema để hỗ trợ roadmap visualization.
+
+**Chi tiết**:
+- **Field mới**: `nodeCategory` (type: `NodeCategory` enum)
+- **Mục đích**: Phân loại roadmaps theo node types cho visualization (role, skill, topic, milestone, resource)
+- **Required**: Bắt buộc khi tạo/cập nhật roadmap
+- **Enum values**: `ROLE`, `SKILL`, `TOPIC`, `MILESTONE`, `RESOURCE`
+
+**Impact lên Frontend**:
+1. **RoadmapForm**: Cần thêm dropdown select cho nodeCategory
+2. **GraphQL Mutations**: Cập nhật CREATE_ROADMAP và UPDATE_ROADMAP mutations
+3. **TypeScript Types**: Cập nhật Roadmap interface
+4. **Validation**: Thêm validation cho nodeCategory field
+5. **Visualization**: Sử dụng nodeCategory để render different node types
 
 ## Testing
 

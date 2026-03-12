@@ -44,6 +44,10 @@ import { CustomRoadmapNode } from './CustomRoadmapNode';
 import { CustomRoadmapEdge } from './CustomRoadmapEdge';
 import { VisualizationControls } from './VisualizationControls';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
+import { EdgeDetailsPanel } from './EdgeDetailsPanel';
+import { SelectionToolbar } from './SelectionToolbar';
+import { SelectionIndicator } from './SelectionIndicator';
+import { useSelectionManager } from '@/hooks/useSelectionManager';
 
 interface RoadmapVisualizationProps {
     graphData: GraphData;
@@ -90,10 +94,53 @@ export function RoadmapVisualization({
     const [navigationError, setNavigationError] = useState<string | null>(null);
     const [zoomLevel, setZoomLevel] = useState(1);
 
-    // Node selection state management
-    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-    const [highlightedNodes, setHighlightedNodes] = useState<Set<string>>(new Set());
-    const [highlightedEdges, setHighlightedEdges] = useState<Set<string>>(new Set());
+    // Selection management system
+    const selectionManager = useSelectionManager({
+        nodes: graphData.nodes,
+        edges: graphData.edges,
+        config: {
+            enableMultiSelection: true,
+            enableRangeSelection: true,
+            enableKeyboardNavigation: true,
+            enableConnectedHighlighting: true,
+            clearOnBackgroundClick: true,
+            selectConnectedOnDoubleClick: true,
+            highlightOnHover: true,
+            announceSelections: true,
+        },
+        onNodeSelect: (nodeId, selected) => {
+            if (onNodeClick && selected) {
+                onNodeClick(nodeId);
+            }
+        },
+        onEdgeSelect: (edgeId, selected) => {
+            if (onEdgeClick && selected) {
+                onEdgeClick(edgeId);
+            }
+        },
+        onSelectionChange: (state) => {
+            // Update React Flow nodes and edges with selection state
+            const updatedNodes = convertToReactFlowNodes(graphData.nodes);
+            const updatedEdges = convertToReactFlowEdges(graphData.edges);
+            setNodes(updatedNodes);
+            setEdges(updatedEdges);
+        },
+        onHighlightChange: (highlightedNodes, highlightedEdges) => {
+            // Update React Flow nodes and edges with highlight state
+            const updatedNodes = convertToReactFlowNodes(graphData.nodes);
+            const updatedEdges = convertToReactFlowEdges(graphData.edges);
+            setNodes(updatedNodes);
+            setEdges(updatedEdges);
+        },
+    });
+
+    // Legacy state for backward compatibility
+    const selectedNodeId = selectionManager.primarySelectedNode;
+    const highlightedNodes = selectionManager.selectionState.highlightedNodes;
+    const highlightedEdges = selectionManager.selectionState.highlightedEdges;
+
+    // Edge interaction state management
+    const edgeInteraction = selectionManager.edgeInteraction;
 
     // Helper function to find next node in keyboard navigation direction
     const findNextNodeInDirection = useCallback((currentNode: Node, direction: string, allNodes: Node[]): Node | null => {
@@ -134,7 +181,7 @@ export function RoadmapVisualization({
         return bestNode;
     }, []);
 
-    // Find connected nodes and edges for highlighting
+    // Find connected nodes and edges for highlighting (legacy support)
     const findConnectedElements = useCallback((nodeId: string) => {
         const connectedNodes = new Set<string>([nodeId]); // Include the selected node itself
         const connectedEdges = new Set<string>();
@@ -152,19 +199,14 @@ export function RoadmapVisualization({
         return { connectedNodes, connectedEdges };
     }, [graphData]);
 
-    // Handle node selection and highlighting
+    // Handle node selection and highlighting (legacy support)
     const handleNodeSelection = useCallback((nodeId: string | null) => {
-        setSelectedNodeId(nodeId);
-
         if (nodeId) {
-            const { connectedNodes, connectedEdges } = findConnectedElements(nodeId);
-            setHighlightedNodes(connectedNodes);
-            setHighlightedEdges(connectedEdges);
+            selectionManager.handleNodeClick(nodeId);
         } else {
-            setHighlightedNodes(new Set());
-            setHighlightedEdges(new Set());
+            selectionManager.clearSelection();
         }
-    }, [findConnectedElements]);
+    }, [selectionManager]);
 
     // Convert RoadmapNode to React Flow Node format
     const convertToReactFlowNodes = useCallback(
@@ -175,22 +217,23 @@ export function RoadmapVisualization({
                 position: node.position,
                 data: {
                     ...node.data,
-                    selected: selectedNodeId === node.id,
-                    highlighted: highlightedNodes.has(node.id),
-                    dimmed: selectedNodeId !== null && !highlightedNodes.has(node.id),
+                    selected: selectionManager.isNodeSelected(node.id),
+                    highlighted: selectionManager.isNodeHighlighted(node.id),
+                    dimmed: selectionManager.selectedCount.total > 0 && !selectionManager.isNodeHighlighted(node.id) && !selectionManager.isNodeSelected(node.id),
                 },
                 style: node.style,
             }));
         },
-        [selectedNodeId, highlightedNodes]
+        [selectionManager]
     );
 
-    // Convert RoadmapEdge to React Flow Edge format
+    // Convert RoadmapEdge to React Flow Edge format với edge interaction support
     const convertToReactFlowEdges = useCallback(
         (roadmapEdges: RoadmapEdge[]): Edge[] => {
             return roadmapEdges.map((edge) => {
-                const isHighlighted = highlightedEdges.has(edge.id);
-                const isDimmed = selectedNodeId !== null && !isHighlighted;
+                const isHighlighted = selectionManager.isEdgeHighlighted(edge.id) || edgeInteraction.isEdgeSelected(edge.id);
+                const isDimmed = (selectionManager.selectedCount.total > 0 && !selectionManager.isEdgeHighlighted(edge.id) && !selectionManager.isEdgeSelected(edge.id)) ||
+                    (edgeInteraction.selectedEdgeId !== null && !edgeInteraction.isEdgeSelected(edge.id));
 
                 return {
                     id: edge.id,
@@ -217,7 +260,7 @@ export function RoadmapVisualization({
                 };
             });
         },
-        [selectedNodeId, highlightedEdges]
+        [selectionManager, edgeInteraction]
     );
 
     // Apply layout and update nodes
@@ -247,26 +290,37 @@ export function RoadmapVisualization({
     }, [
         graphData,
         layout,
-        convertToReactFlowNodes,
-        convertToReactFlowEdges,
-        setNodes,
-        setEdges,
         reactFlowInstance,
+    ]);
+
+    // Handle selection and highlight changes separately
+    useEffect(() => {
+        if (!graphData || graphData.nodes.length === 0) return;
+
+        // Update nodes and edges with current selection/highlight state
+        const updatedNodes = convertToReactFlowNodes(graphData.nodes);
+        const updatedEdges = convertToReactFlowEdges(graphData.edges);
+
+        setNodes(updatedNodes);
+        setEdges(updatedEdges);
+    }, [
+        selectionManager.selectionState,
+        selectionManager.primarySelectedNode,
+        selectionManager.primarySelectedEdge,
+        edgeInteraction.selectedEdgeId,
     ]);
 
     // Handle node click with navigation logic and selection
     const handleNodeClick = useCallback(
-        async (_event: React.MouseEvent, node: Node) => {
+        async (event: React.MouseEvent, node: Node) => {
             const nodeData = node.data as NodeData;
 
-            // Handle node selection
-            const newSelectedId = selectedNodeId === node.id ? null : node.id;
-            handleNodeSelection(newSelectedId);
-
-            // Call custom handler if provided
-            if (onNodeClick) {
-                onNodeClick(node.id);
-            }
+            // Handle selection with modifiers
+            selectionManager.handleNodeClick(node.id, {
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+                altKey: event.altKey,
+            });
 
             // Handle navigation based on node category
             if (canNavigate(nodeData)) {
@@ -303,17 +357,20 @@ export function RoadmapVisualization({
                 }
             }
         },
-        [selectedNodeId, handleNodeSelection, onNodeClick, router]
+        [selectionManager, router]
     );
 
-    // Handle edge click
+    // Handle edge click với enhanced interaction
     const handleEdgeClick = useCallback(
-        (_event: React.MouseEvent, edge: Edge) => {
-            if (onEdgeClick) {
-                onEdgeClick(edge.id);
-            }
+        (event: React.MouseEvent, edge: Edge) => {
+            // Handle selection with modifiers
+            selectionManager.handleEdgeClick(edge.id, {
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+                altKey: event.altKey,
+            });
         },
-        [onEdgeClick]
+        [selectionManager]
     );
 
     // Zoom controls with level tracking
@@ -348,9 +405,13 @@ export function RoadmapVisualization({
         setZoomLevel(viewport.zoom);
     }, []);
 
-    // Keyboard shortcuts for zoom, pan controls, and node selection
+    // Keyboard shortcuts for zoom, pan controls, and selection management
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
+            // Let selection manager handle keyboard events first
+            const handled = selectionManager.handleKeyDown(event);
+            if (handled) return;
+
             // Check if Ctrl (or Cmd on Mac) is pressed
             const isCtrlPressed = event.ctrlKey || event.metaKey;
 
@@ -377,42 +438,6 @@ export function RoadmapVisualization({
                     default:
                         break;
                 }
-            } else {
-                // Handle node selection navigation
-                switch (event.key) {
-                    case 'Escape':
-                        event.preventDefault();
-                        handleNodeSelection(null);
-                        break;
-                    case 'ArrowUp':
-                    case 'ArrowDown':
-                    case 'ArrowLeft':
-                    case 'ArrowRight':
-                        if (selectedNodeId) {
-                            event.preventDefault();
-                            // Find next node in the direction
-                            const currentNode = nodes.find(n => n.id === selectedNodeId);
-                            if (currentNode) {
-                                const nextNode = findNextNodeInDirection(currentNode, event.key, nodes);
-                                if (nextNode) {
-                                    handleNodeSelection(nextNode.id);
-                                }
-                            }
-                        }
-                        break;
-                    case 'Enter':
-                    case ' ':
-                        if (selectedNodeId) {
-                            event.preventDefault();
-                            const selectedNode = nodes.find(n => n.id === selectedNodeId);
-                            if (selectedNode) {
-                                handleNodeClick({} as React.MouseEvent, selectedNode);
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
             }
         };
 
@@ -423,7 +448,7 @@ export function RoadmapVisualization({
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [handleZoomIn, handleZoomOut, handleFitView, handlePanReset, selectedNodeId, nodes, handleNodeSelection, handleNodeClick, findNextNodeInDirection]);
+    }, [handleZoomIn, handleZoomOut, handleFitView, handlePanReset, selectionManager]);
 
     // Layout change handler
     const handleLayoutChange = useCallback((newLayout: LayoutType) => {
@@ -521,6 +546,35 @@ export function RoadmapVisualization({
                 </div>
             </div>
 
+            {/* Selection Toolbar */}
+            <SelectionToolbar
+                selectedCount={selectionManager.selectedCount}
+                selectionMode={selectionManager.selectionMode}
+                onSelectAll={selectionManager.selectAll}
+                onClearSelection={selectionManager.clearSelection}
+                onInvertSelection={selectionManager.invertSelection}
+                onSetSelectionMode={selectionManager.setSelectionMode}
+                enableMultiSelection={true}
+                enableRangeSelection={true}
+                position="top"
+                className="animate-slide-down"
+            />
+
+            {/* Selection Visual Indicators */}
+            <SelectionIndicator
+                selectedNodes={selectionManager.selectionState.selectedNodes}
+                selectedEdges={selectionManager.selectionState.selectedEdges}
+                highlightedNodes={selectionManager.selectionState.highlightedNodes}
+                highlightedEdges={selectionManager.selectionState.highlightedEdges}
+                primarySelectedNode={selectionManager.primarySelectedNode}
+                primarySelectedEdge={selectionManager.primarySelectedEdge}
+                nodes={graphData.nodes}
+                edges={graphData.edges}
+                showConnections={true}
+                showLabels={false}
+                animateSelection={true}
+            />
+
             {/* Enhanced Node Details Panel */}
             {selectedNodeId && selectedNodeData && (
                 <div className="absolute top-6 right-6 w-96 z-30">
@@ -551,6 +605,22 @@ export function RoadmapVisualization({
                             completedNodes: new Set(graphData.nodes.filter(n => n.data.completed).map(n => n.id)),
                             totalNodes: graphData.nodes.length,
                             progressPercentage: (graphData.nodes.filter(n => n.data.completed).length / graphData.nodes.length) * 100
+                        }}
+                        className="animate-slide-down"
+                    />
+                </div>
+            )}
+
+            {/* Enhanced Edge Details Panel */}
+            {edgeInteraction.relationshipDetails && (
+                <div className="absolute top-6 right-6 w-96 z-30">
+                    <EdgeDetailsPanel
+                        relationshipDetails={edgeInteraction.relationshipDetails}
+                        onClose={() => edgeInteraction.clearSelection()}
+                        onNavigateToNode={(nodeId) => {
+                            // Clear edge selection and select the target node
+                            edgeInteraction.clearSelection();
+                            handleNodeSelection(nodeId);
                         }}
                         className="animate-slide-down"
                     />

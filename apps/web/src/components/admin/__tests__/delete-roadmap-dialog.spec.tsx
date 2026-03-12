@@ -7,7 +7,7 @@ jest.mock('@/lib/hooks/use-roadmap');
 // Import after mocking
 import { DeleteRoadmapDialog } from '../delete-roadmap-dialog';
 import { useDeleteRoadmap } from '@/lib/hooks/use-roadmap';
-import type { Roadmap } from '@/features/roadmap/types';
+import type { Roadmap, NodeCategory } from '@/features/roadmap/types';
 
 const mockUseDeleteRoadmap = useDeleteRoadmap as jest.MockedFunction<typeof useDeleteRoadmap>;
 
@@ -18,6 +18,7 @@ const mockRoadmap: Roadmap = {
     title: 'React Development Roadmap',
     description: 'Complete guide to learning React',
     content: '# React Roadmap\n\nLearn React step by step...',
+    nodeCategory: 'TOPIC',
     author: 'user_123',
     tags: ['react', 'javascript', 'frontend'],
     publishedAt: Date.now(),

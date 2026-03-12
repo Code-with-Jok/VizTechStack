@@ -499,7 +499,56 @@ describe('validateNodeCategory', () => {
 - **Cause**: Estimated time không đúng format
 - **Solution**: Sử dụng format `{number}(-{number})? {unit}` (e.g., "2-4 weeks")
 
-## 6. Edge Validation
+## 6. Graph Validation với GraphValidator
+
+### Tổng Quan GraphValidator
+
+GraphValidator là service chính để validate toàn bộ graph structure integrity. Nó cung cấp comprehensive validation bao gồm:
+
+- **Edge Reference Validation**: Kiểm tra tất cả edges reference existing nodes
+- **Orphaned Node Detection**: Phát hiện nodes không có connections
+- **Circular Dependency Detection**: Phát hiện cycles trong graph
+- **Graph Structure Integrity**: Validate tổng thể structure
+
+### GraphValidator API
+
+#### `GraphValidator.validateGraph(graphData: GraphData): GraphValidationResult`
+
+Validate toàn bộ graph data structure.
+
+**Returns:**
+```typescript
+interface GraphValidationResult {
+  isValid: boolean;
+  edgeValidation: ValidationResult;
+  orphanedNodeValidation: OrphanedNodeResult;
+  circularDependencyValidation: CircularDependencyResult;
+  summary: {
+    totalErrors: number;
+    totalWarnings: number;
+    criticalIssues: string[];
+  };
+}
+```
+
+**Example:**
+```typescript
+import { GraphValidator } from '@viztechstack/roadmap-visualization';
+
+const validator = new GraphValidator({
+  allowOrphanedNodes: false,
+  allowCircularDependencies: false,
+  strictEdgeValidation: true,
+});
+
+const result = validator.validateGraph(graphData);
+if (!result.isValid) {
+  console.error('Graph validation failed:');
+  console.error('Errors:', result.summary.totalErrors);
+  console.error('Warnings:', result.summary.totalWarnings);
+  console.error('Critical issues:', result.summary.criticalIssues);
+}
+```
 
 ### Edge Structure Validation
 
@@ -549,14 +598,65 @@ const invalidEdge2 = {
 };
 ```
 
+### Orphaned Node Detection
+
+GraphValidator tự động phát hiện orphaned nodes (nodes không có connections).
+
+**Types of Orphaned Nodes:**
+- **Isolated**: Không có incoming hoặc outgoing edges
+- **No Incoming**: Chỉ có outgoing edges (có thể là root node)
+- **No Outgoing**: Chỉ có incoming edges (có thể là leaf node)
+
+**Smart Detection:**
+- Tự động nhận diện root nodes (level thấp, milestone type, keywords như "introduction")
+- Tự động nhận diện leaf nodes (level cao, resource type, keywords như "advanced")
+
+**Example:**
+```typescript
+const validator = new GraphValidator();
+const result = validator.validateGraph(graphData);
+
+if (result.orphanedNodeValidation.hasOrphanedNodes) {
+  result.orphanedNodeValidation.details.forEach(detail => {
+    console.log(`Orphaned node: ${detail.nodeTitle}`);
+    console.log(`Reason: ${detail.reason}`);
+    console.log(`Severity: ${detail.severity}`);
+  });
+}
+```
+
 ### Circular Dependency Detection
 
-**Rules:**
-- Hierarchical layouts không được có circular dependencies
-- Circular dependencies được phát hiện bằng DFS algorithm
-- System sẽ báo cáo tất cả cycles tìm thấy
+**Advanced Cycle Detection:**
+- Sử dụng DFS algorithm với path tracking
+- Phát hiện cả direct và indirect cycles
+- Tính cycle strength dựa trên edge strengths
+- Filter cycles theo length và strength
 
-**Error Code:** `CIRCULAR_DEPENDENCY`
+**Cycle Types:**
+- **Direct**: A → B → A (length = 2)
+- **Indirect**: A → B → C → A (length > 2)
+
+**Configuration Options:**
+```typescript
+const validator = new GraphValidator({
+  maxCycleLength: 10,           // Ignore cycles dài hơn 10 nodes
+  ignoreWeakCycles: true,       // Ignore cycles có strength thấp
+  minimumCycleStrength: 0.3,    // Minimum strength để consider cycle
+});
+```
+
+**Example:**
+```typescript
+const result = validator.detectCircularDependencies(nodes, edges);
+if (result.hasCircularDependencies) {
+  result.cycles.forEach(cycle => {
+    console.log(`Cycle found: ${cycle.path.join(' → ')}`);
+    console.log(`Length: ${cycle.length}, Strength: ${cycle.strength}`);
+    console.log(`Type: ${cycle.type}`);
+  });
+}
+```
 
 **Example:**
 ```typescript
@@ -629,7 +729,162 @@ const weakEdge = {
 };
 ```
 
-## API Reference - Edge Validation
+## API Reference - GraphValidator
+
+### Utility Functions
+
+#### `validateGraphData(graphData: GraphData, options?: GraphValidationOptions): GraphValidationResult`
+
+Utility function để validate graph data với options.
+
+**Example:**
+```typescript
+import { validateGraphData } from '@viztechstack/roadmap-visualization';
+
+const result = validateGraphData(graphData, {
+  allowOrphanedNodes: true,
+  strictEdgeValidation: false,
+});
+```
+
+#### `validateEdgeReferences(edges: RoadmapEdge[], nodes: RoadmapNode[]): ValidationResult`
+
+Utility function để validate edge references.
+
+**Example:**
+```typescript
+import { validateEdgeReferences } from '@viztechstack/roadmap-visualization';
+
+const result = validateEdgeReferences(edges, nodes);
+if (!result.isValid) {
+  console.error('Edge validation errors:', result.errors);
+}
+```
+
+#### `checkOrphanedNodes(nodes: RoadmapNode[], edges: RoadmapEdge[]): OrphanedNodeResult`
+
+Utility function để check orphaned nodes.
+
+**Example:**
+```typescript
+import { checkOrphanedNodes } from '@viztechstack/roadmap-visualization';
+
+const result = checkOrphanedNodes(nodes, edges);
+if (result.hasOrphanedNodes) {
+  console.log('Orphaned nodes found:', result.orphanedNodes);
+}
+```
+
+#### `detectCircularDependencies(nodes: RoadmapNode[], edges: RoadmapEdge[]): CircularDependencyResult`
+
+Utility function để detect circular dependencies.
+
+**Example:**
+```typescript
+import { detectCircularDependencies } from '@viztechstack/roadmap-visualization';
+
+const result = detectCircularDependencies(nodes, edges);
+if (result.hasCircularDependencies) {
+  console.log('Cycles found:', result.cycles);
+}
+```
+
+### Validation Error Handling
+
+#### `ValidationErrorHandler.processValidationResults(result: GraphValidationResult): ValidationErrorSummary`
+
+Process validation results và generate comprehensive error report với suggestions.
+
+**Returns:**
+```typescript
+interface ValidationErrorSummary {
+  totalErrors: number;
+  totalWarnings: number;
+  criticalIssues: number;
+  reports: ValidationErrorReport[];
+  canProceed: boolean;
+  recommendedActions: string[];
+}
+```
+
+**Example:**
+```typescript
+import { ValidationErrorHandler } from '@viztechstack/roadmap-visualization';
+
+const errorHandler = new ValidationErrorHandler({
+  generateSuggestions: true,
+  includeDebugInfo: false,
+  strictMode: false,
+});
+
+const validator = new GraphValidator();
+const validationResult = validator.validateGraph(graphData);
+const errorSummary = errorHandler.processValidationResults(validationResult);
+
+if (!errorSummary.canProceed) {
+  console.error('Cannot proceed with validation:');
+  errorSummary.reports.forEach(report => {
+    console.error(`${report.title}: ${report.description}`);
+    report.suggestions.forEach(suggestion => {
+      console.log(`  💡 ${suggestion.message}`);
+    });
+  });
+}
+```
+
+#### Error Report Structure
+
+Mỗi validation error được báo cáo với structure chi tiết:
+
+```typescript
+interface ValidationErrorReport {
+  errorId: string;                    // Unique identifier
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  category: 'structure' | 'content' | 'performance' | 'accessibility';
+  title: string;                      // User-friendly title
+  description: string;                // Detailed description
+  affectedElements: string[];         // IDs of affected nodes/edges
+  suggestions: ValidationErrorSuggestion[];  // Fix suggestions
+  debugInfo?: Record<string, any>;    // Debug information
+}
+```
+
+#### Auto-fix Capabilities
+
+ValidationErrorHandler có thể suggest và thực hiện auto-fixes cho một số issues:
+
+```typescript
+const errorHandler = new ValidationErrorHandler({ autoFixEnabled: true });
+const summary = errorHandler.processValidationResults(result);
+
+if (errorHandler.canAutoFix(summary)) {
+  console.log('Some issues can be auto-fixed');
+  const suggestions = errorHandler.suggestFixes(summary);
+  
+  suggestions.forEach(suggestion => {
+    if (suggestion.autoFixable) {
+      console.log(`🔧 Auto-fixable: ${suggestion.message}`);
+    }
+  });
+}
+```
+
+#### Health Score
+
+ValidationErrorHandler cung cấp health score (0-100) cho graph:
+
+```typescript
+const healthScore = errorHandler.getHealthScore(summary);
+console.log(`Graph health score: ${healthScore}/100`);
+
+if (healthScore >= 80) {
+  console.log('✅ Excellent graph quality');
+} else if (healthScore >= 60) {
+  console.log('⚠️ Good graph quality, some improvements possible');
+} else {
+  console.log('❌ Poor graph quality, needs attention');
+}
+```
 
 ### Edge Validation Functions
 
@@ -779,101 +1034,168 @@ if (!result.valid) {
 }
 ```
 
-## Usage Examples - Edge Validation
+## Usage Examples - Comprehensive Validation
 
-### Complete Graph Validation Workflow
+### Complete Validation Workflow với Error Handling
 
 ```typescript
 import {
-  validateGraphStructure,
-  detectCircularDependencies,
-  calculateAllRelationshipStrengths,
+  GraphValidator,
+  ValidationErrorHandler,
+  processValidationResults,
 } from '@viztechstack/roadmap-visualization';
 
-function validateAndEnhanceGraph(graphData: GraphData): GraphData {
-  // 1. Validate graph structure
-  const validationResult = validateGraphStructure(graphData);
-  if (!validationResult.valid) {
-    throw new Error(`Invalid graph: ${validationResult.errors.join(', ')}`);
-  }
+function validateGraphWithErrorHandling(graphData: GraphData): boolean {
+  // 1. Create validator và error handler
+  const validator = new GraphValidator({
+    allowOrphanedNodes: false,
+    allowCircularDependencies: false,
+    strictEdgeValidation: true,
+  });
 
-  // 2. Check for circular dependencies (for hierarchical layouts)
-  if (graphData.metadata.layoutType === 'hierarchical') {
-    const circularCheck = detectCircularDependencies(
-      graphData.nodes,
-      graphData.edges
-    );
-    if (circularCheck.hasCircularDependency) {
-      console.warn('Circular dependencies detected:', circularCheck.cycles);
-      throw new Error('Hierarchical layout requires acyclic graph');
+  const errorHandler = new ValidationErrorHandler({
+    generateSuggestions: true,
+    includeDebugInfo: true,
+    strictMode: false,
+  });
+
+  // 2. Validate graph
+  const validationResult = validator.validateGraph(graphData);
+  
+  // 3. Process errors
+  const errorSummary = errorHandler.processValidationResults(validationResult);
+
+  // 4. Display results
+  if (errorSummary.canProceed) {
+    if (errorSummary.totalWarnings > 0) {
+      console.warn(`⚠️ ${errorSummary.totalWarnings} warnings found`);
+      console.log(errorHandler.generateUserFriendlyMessage(errorSummary));
+    } else {
+      console.log('✅ Graph validation passed successfully!');
     }
+    return true;
+  } else {
+    console.error('❌ Graph validation failed:');
+    console.error(errorHandler.generateDetailedErrorMessage(errorSummary));
+    
+    // Show recommended actions
+    console.log('\nRecommended actions:');
+    errorSummary.recommendedActions.forEach(action => {
+      console.log(`  - ${action}`);
+    });
+    
+    return false;
   }
-
-  // 3. Calculate relationship strengths
-  const enhancedGraph = calculateAllRelationshipStrengths(graphData);
-
-  return enhancedGraph;
 }
 ```
 
-### Validating Before Rendering
+### Error Recovery và Fallback
 
 ```typescript
-import { validateGraphStructure } from '@viztechstack/roadmap-visualization';
+import { 
+  validateGraphData,
+  processValidationResults,
+  canProceedWithValidation 
+} from '@viztechstack/roadmap-visualization';
 
-function RoadmapVisualization({ graphData }: Props) {
-  // Validate before rendering
-  const validationResult = validateGraphStructure(graphData);
-  
-  if (!validationResult.valid) {
-    return (
-      <ErrorBoundary>
-        <div className="error-message">
-          <h3>Không thể hiển thị roadmap visualization</h3>
+function renderVisualizationWithFallback(graphData: GraphData) {
+  // Quick validation check
+  if (!canProceedWithValidation(graphData)) {
+    console.warn('Graph validation failed, falling back to content view');
+    return renderContentView(graphData);
+  }
+
+  try {
+    // Attempt to render visualization
+    return renderVisualization(graphData);
+  } catch (error) {
+    console.error('Visualization rendering failed:', error);
+    
+    // Generate detailed error report
+    const validationResult = validateGraphData(graphData);
+    const errorSummary = processValidationResults(validationResult);
+    
+    // Log detailed information for debugging
+    console.error('Validation report:', errorSummary);
+    
+    // Fallback to content view
+    return renderContentViewWithError(graphData, errorSummary);
+  }
+}
+```
+
+### User-friendly Error Display
+
+```typescript
+function ValidationErrorDisplay({ graphData }: Props) {
+  const [validationSummary, setValidationSummary] = useState<ValidationErrorSummary | null>(null);
+
+  useEffect(() => {
+    const validator = new GraphValidator();
+    const errorHandler = new ValidationErrorHandler();
+    
+    const result = validator.validateGraph(graphData);
+    const summary = errorHandler.processValidationResults(result);
+    
+    setValidationSummary(summary);
+  }, [graphData]);
+
+  if (!validationSummary) return <LoadingSpinner />;
+
+  if (validationSummary.canProceed && validationSummary.totalWarnings === 0) {
+    return <SuccessMessage>Graph validation passed! ✅</SuccessMessage>;
+  }
+
+  return (
+    <div className="validation-results">
+      <div className="summary">
+        <h3>Validation Results</h3>
+        <div className="stats">
+          <span className="errors">Errors: {validationSummary.totalErrors}</span>
+          <span className="warnings">Warnings: {validationSummary.totalWarnings}</span>
+          <span className="critical">Critical: {validationSummary.criticalIssues}</span>
+        </div>
+      </div>
+
+      {validationSummary.reports.map(report => (
+        <div key={report.errorId} className={`report ${report.severity}`}>
+          <h4>{report.title}</h4>
+          <p>{report.description}</p>
+          
+          {report.affectedElements.length > 0 && (
+            <div className="affected">
+              <strong>Affected elements:</strong> {report.affectedElements.join(', ')}
+            </div>
+          )}
+
+          {report.suggestions.length > 0 && (
+            <div className="suggestions">
+              <strong>Suggestions:</strong>
+              <ul>
+                {report.suggestions.map((suggestion, i) => (
+                  <li key={i} className={suggestion.type}>
+                    {suggestion.autoFixable && <span className="auto-fix">🔧</span>}
+                    {suggestion.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {validationSummary.recommendedActions.length > 0 && (
+        <div className="recommended-actions">
+          <h4>Recommended Actions:</h4>
           <ul>
-            {validationResult.errors.map((error, i) => (
-              <li key={i}>{error}</li>
+            {validationSummary.recommendedActions.map((action, i) => (
+              <li key={i}>{action}</li>
             ))}
           </ul>
-          <button onClick={() => switchToContentView()}>
-            Xem dạng nội dung
-          </button>
         </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // Render visualization
-  return <ReactFlow nodes={nodes} edges={edges} />;
-}
-```
-
-### Custom Edge Validation
-
-```typescript
-import { validateEdge } from '@viztechstack/roadmap-visualization';
-
-function validateCustomEdge(edge: RoadmapEdge, nodes: RoadmapNode[]): ValidationResult {
-  // Basic validation
-  const basicResult = validateEdge(edge, nodes);
-  if (!basicResult.valid) {
-    return basicResult;
-  }
-
-  // Custom validation rules
-  const errors: string[] = [];
-  
-  // Example: Dependency edges phải có strength >= 0.5
-  if (edge.type === 'dependency' && edge.data?.strength) {
-    if (edge.data.strength < 0.5) {
-      errors.push('Dependency edges must have strength >= 0.5');
-    }
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors: [...basicResult.errors, ...errors],
-  };
+      )}
+    </div>
+  );
 }
 ```
 
@@ -1007,6 +1329,6 @@ const clampedStrength = Math.max(0, Math.min(1, strength));
 
 ---
 
-**Cập nhật lần cuối:** 2026-03-11  
-**Phiên bản:** 1.1.0  
-**Giai đoạn:** 3.1 - Core Node System (Tasks 3.1.3, 3.1.5 completed)
+**Cập nhật lần cuối:** 2026-03-12  
+**Phiên bản:** 1.3.0  
+**Giai đoạn:** 2.5 - Graph Validation (HOÀN THÀNH - Tasks 2.5.1, 2.5.2 completed)

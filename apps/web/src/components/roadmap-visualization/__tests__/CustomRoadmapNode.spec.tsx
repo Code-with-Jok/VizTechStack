@@ -24,15 +24,15 @@ jest.mock('@xyflow/react', () => ({
 jest.mock('@viztechstack/roadmap-visualization', () => ({
     getCategoryIcon: (category?: string) => {
         switch (category) {
-            case 'role': return '👤';
-            case 'skill': return '🎯';
+            case 'ROLE': return '👤';
+            case 'SKILL': return '🎯';
             default: return '📌';
         }
     },
     getCategoryDisplayName: (category?: string) => {
         switch (category) {
-            case 'role': return 'Vai trò';
-            case 'skill': return 'Kỹ năng';
+            case 'ROLE': return 'Vai trò';
+            case 'SKILL': return 'Kỹ năng';
             default: return 'Chủ đề';
         }
     },
@@ -101,7 +101,7 @@ describe('CustomRoadmapNode', () => {
     it('should show category badge cho role nodes', () => {
         const roleProps = {
             ...mockProps,
-            data: { ...mockNodeData, category: 'role' as const },
+            data: { ...mockNodeData, category: 'ROLE' as const },
         };
 
         render(<CustomRoadmapNode {...roleProps} />);
@@ -113,7 +113,7 @@ describe('CustomRoadmapNode', () => {
     it('should show category badge cho skill nodes', () => {
         const skillProps = {
             ...mockProps,
-            data: { ...mockNodeData, category: 'skill' as const },
+            data: { ...mockNodeData, category: 'SKILL' as const },
         };
 
         render(<CustomRoadmapNode {...skillProps} />);

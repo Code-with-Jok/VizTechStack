@@ -6,7 +6,7 @@
  * Tích hợp với VizTechStack design system và warm color palette
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { NodeData } from '@viztechstack/roadmap-visualization';
 import {
@@ -15,6 +15,7 @@ import {
     getArticlePreview,
 } from '@viztechstack/roadmap-visualization';
 import { ArticlePreviewTooltip } from './ArticlePreviewTooltip';
+import { NodeTooltip } from './NodeTooltip';
 
 /**
  * Lấy CSS classes theo độ khó cho styling node
@@ -35,13 +36,13 @@ function getDifficultyStyle(difficulty?: string): string {
 
 /**
  * Lấy CSS classes theo category cho styling node
- * Hỗ trợ role và skill categories với warm colors
+ * Hỗ trợ ROLE và SKILL categories với warm colors
  */
 function getCategoryStyle(category?: string): string {
     switch (category) {
-        case 'role':
+        case 'ROLE':
             return 'bg-gradient-to-br from-primary-50 to-primary-100 border-primary-300 text-primary-900 dark:from-primary-900/30 dark:to-primary-800/30 dark:border-primary-700 dark:text-primary-200';
-        case 'skill':
+        case 'SKILL':
             return 'bg-gradient-to-br from-secondary-50 to-secondary-100 border-secondary-300 text-secondary-900 dark:from-secondary-900/30 dark:to-secondary-800/30 dark:border-secondary-700 dark:text-secondary-200';
         default:
             return '';
@@ -63,6 +64,35 @@ export function CustomRoadmapNode({ data }: NodeProps) {
     // State cho tooltip visibility
     const [showTooltip, setShowTooltip] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const nodeRef = useRef<HTMLDivElement>(null);
+
+    // Handle mouse events for tooltip
+    const handleMouseEnter = useCallback((event: React.MouseEvent) => {
+        if (!nodeData.dimmed) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            setMousePosition({
+                x: event.clientX,
+                y: event.clientY
+            });
+            setShowTooltip(true);
+            setIsHovered(true);
+        }
+    }, [nodeData.dimmed]);
+
+    const handleMouseMove = useCallback((event: React.MouseEvent) => {
+        if (showTooltip) {
+            setMousePosition({
+                x: event.clientX,
+                y: event.clientY
+            });
+        }
+    }, [showTooltip]);
+
+    const handleMouseLeave = useCallback(() => {
+        setShowTooltip(false);
+        setIsHovered(false);
+    }, []);
 
     // Lấy styling dựa trên category (priority) hoặc difficulty
     const categoryStyle = getCategoryStyle(nodeData.category);
@@ -83,6 +113,7 @@ export function CustomRoadmapNode({ data }: NodeProps) {
 
     return (
         <div
+            ref={nodeRef}
             className={`
                 px-4 py-3 rounded-xl min-w-[200px] max-w-[280px] transition-all duration-300 ease-out
                 ${difficultyStyle}
@@ -96,16 +127,9 @@ export function CustomRoadmapNode({ data }: NodeProps) {
                 relative group
                 backdrop-blur-sm
             `}
-            onMouseEnter={() => {
-                if (!nodeData.dimmed) {
-                    setShowTooltip(true);
-                    setIsHovered(true);
-                }
-            }}
-            onMouseLeave={() => {
-                setShowTooltip(false);
-                setIsHovered(false);
-            }}
+            onMouseEnter={handleMouseEnter}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
             style={{
                 willChange: 'transform, box-shadow',
             }}
@@ -196,38 +220,14 @@ export function CustomRoadmapNode({ data }: NodeProps) {
                 )}
             </div>
 
-            {/* Enhanced tooltips */}
-            {showTooltip && articlePreview && (
-                <div className="animate-fade-in">
-                    <ArticlePreviewTooltip metadata={articlePreview} />
-                </div>
-            )}
-
-            {/* Enhanced basic tooltip cho non-skill nodes */}
-            {showTooltip && !articlePreview && nodeData.description && (
-                <div className="absolute z-50 p-4 bg-neutral-900/95 dark:bg-neutral-800/95 text-white text-sm rounded-xl shadow-large max-w-xs -bottom-2 left-0 transform translate-y-full pointer-events-none backdrop-blur-md animate-slide-up">
-                    <div className="space-y-2">
-                        <p className="leading-relaxed">{nodeData.description}</p>
-                        {nodeData.resources && nodeData.resources.length > 0 && (
-                            <div className="pt-2 border-t border-white/20">
-                                <p className="text-xs opacity-75 mb-1">Tài nguyên:</p>
-                                <div className="space-y-1">
-                                    {nodeData.resources.slice(0, 2).map((resource, index) => (
-                                        <div key={index} className="flex items-center gap-2 text-xs">
-                                            <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
-                                            <span className="truncate">{resource.title}</span>
-                                        </div>
-                                    ))}
-                                    {nodeData.resources.length > 2 && (
-                                        <p className="text-xs opacity-60">+{nodeData.resources.length - 2} tài nguyên khác</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    {/* Tooltip arrow */}
-                    <div className="absolute -top-2 left-6 w-4 h-4 bg-neutral-900/95 dark:bg-neutral-800/95 transform rotate-45" />
-                </div>
+            {/* Enhanced NodeTooltip for all node types */}
+            {showTooltip && (
+                <NodeTooltip
+                    nodeData={nodeData}
+                    isVisible={showTooltip}
+                    mousePosition={mousePosition}
+                    onClose={() => setShowTooltip(false)}
+                />
             )}
 
             <Handle

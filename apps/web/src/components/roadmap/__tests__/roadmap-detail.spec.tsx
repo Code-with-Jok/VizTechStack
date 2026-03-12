@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { ApolloError } from '@apollo/client';
 import { RoadmapDetail } from '../roadmap-detail';
 import { useRoadmapBySlug } from '@/lib/hooks/use-roadmap';
-import type { Roadmap } from '@/features/roadmap/types';
+import type { Roadmap, NodeCategory } from '@/features/roadmap/types';
 
 // Mock the useRoadmapBySlug hook
 jest.mock('@/lib/hooks/use-roadmap', () => ({
@@ -15,6 +15,29 @@ jest.mock('next/link', () => {
         return <a href={href}>{children}</a>;
     };
 });
+
+// Mock Next.js navigation hooks
+jest.mock('next/navigation', () => ({
+    useRouter: jest.fn(() => ({
+        push: jest.fn(),
+        replace: jest.fn(),
+        back: jest.fn(),
+        forward: jest.fn(),
+        refresh: jest.fn(),
+        prefetch: jest.fn(),
+    })),
+    useSearchParams: jest.fn(() => ({
+        get: jest.fn(() => null),
+        has: jest.fn(() => false),
+        getAll: jest.fn(() => []),
+        keys: jest.fn(() => []),
+        values: jest.fn(() => []),
+        entries: jest.fn(() => []),
+        forEach: jest.fn(),
+        toString: jest.fn(() => ''),
+    })),
+    usePathname: jest.fn(() => '/roadmap/test-slug'),
+}));
 
 // Mock RoadmapContent component
 jest.mock('../roadmap-content', () => ({
@@ -31,6 +54,7 @@ const mockRoadmap: Roadmap = {
     title: 'React Fundamentals: A Complete Guide to Modern React Development',
     description: 'Learn React from the ground up with this comprehensive guide covering hooks, components, state management, and modern React patterns. Perfect for beginners and intermediate developers.',
     content: '# React Fundamentals\n\nThis is a comprehensive guide to learning React...',
+    nodeCategory: 'TOPIC',
     author: 'user_789',
     tags: ['React', 'JavaScript', 'Frontend', 'Web Development', 'Hooks'],
     publishedAt: 1640995200000, // January 1, 2022

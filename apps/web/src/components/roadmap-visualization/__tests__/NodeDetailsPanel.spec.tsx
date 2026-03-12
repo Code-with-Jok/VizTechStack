@@ -13,9 +13,9 @@ import type { NodeData } from '@viztechstack/roadmap-visualization';
 jest.mock('@viztechstack/roadmap-visualization', () => ({
     getCategoryIcon: jest.fn((category?: string) => {
         switch (category) {
-            case 'role':
+            case 'ROLE':
                 return '👤';
-            case 'skill':
+            case 'SKILL':
                 return '🛠️';
             default:
                 return '📄';
@@ -23,9 +23,9 @@ jest.mock('@viztechstack/roadmap-visualization', () => ({
     }),
     getCategoryDisplayName: jest.fn((category?: string) => {
         switch (category) {
-            case 'role':
+            case 'ROLE':
                 return 'Vai trò';
-            case 'skill':
+            case 'SKILL':
                 return 'Kỹ năng';
             default:
                 return 'Chủ đề';
@@ -49,7 +49,25 @@ describe('NodeDetailsPanel', () => {
         estimatedTime: '2 hours',
         difficulty: 'intermediate',
         completed: false,
-        category: 'skill',
+        category: 'SKILL',
+        learningObjectives: [
+            'Understand the basics of testing',
+            'Learn how to write effective test cases'
+        ],
+        learningOutcomes: [
+            'Ability to create comprehensive test suites',
+            'Understanding of testing best practices'
+        ],
+        keyTopics: [
+            'Unit Testing',
+            'Integration Testing',
+            'Test-Driven Development'
+        ],
+        skillsGained: [
+            'Jest Testing Framework',
+            'Test Case Design',
+            'Debugging Skills'
+        ],
         resources: [
             {
                 title: 'Test Article',
@@ -158,6 +176,51 @@ describe('NodeDetailsPanel', () => {
             expect(screen.getByText('Tài nguyên (2)')).toBeInTheDocument();
             expect(screen.getByText('Test Article')).toBeInTheDocument();
             expect(screen.getByText('Test Video')).toBeInTheDocument();
+        });
+
+        it('should render learning objectives section', () => {
+            render(<NodeDetailsPanel {...defaultProps} />);
+
+            expect(screen.getByText('🎯 Mục tiêu học tập (2)')).toBeInTheDocument();
+            expect(screen.getByText('Understand the basics of testing')).toBeInTheDocument();
+            expect(screen.getByText('Learn how to write effective test cases')).toBeInTheDocument();
+        });
+
+        it('should render learning outcomes section', () => {
+            render(<NodeDetailsPanel {...defaultProps} />);
+
+            expect(screen.getByText('✅ Kết quả học tập (2)')).toBeInTheDocument();
+            expect(screen.getByText('Ability to create comprehensive test suites')).toBeInTheDocument();
+            expect(screen.getByText('Understanding of testing best practices')).toBeInTheDocument();
+        });
+
+        it('should render key topics section', () => {
+            render(<NodeDetailsPanel {...defaultProps} />);
+
+            expect(screen.getByText('📚 Chủ đề chính (3)')).toBeInTheDocument();
+            expect(screen.getByText('Unit Testing')).toBeInTheDocument();
+            expect(screen.getByText('Integration Testing')).toBeInTheDocument();
+            expect(screen.getByText('Test-Driven Development')).toBeInTheDocument();
+        });
+
+        it('should render skills gained section', () => {
+            render(<NodeDetailsPanel {...defaultProps} />);
+
+            expect(screen.getByText('🛠️ Kỹ năng đạt được (3)')).toBeInTheDocument();
+            expect(screen.getByText('Jest Testing Framework')).toBeInTheDocument();
+            expect(screen.getByText('Test Case Design')).toBeInTheDocument();
+            expect(screen.getByText('Debugging Skills')).toBeInTheDocument();
+        });
+
+        it('should render comprehensive information summary', () => {
+            render(<NodeDetailsPanel {...defaultProps} />);
+
+            // Check the summary statistics
+            expect(screen.getByText('2')).toBeInTheDocument(); // Learning objectives count
+            expect(screen.getByText('Mục tiêu')).toBeInTheDocument();
+            expect(screen.getByText('Kết quả')).toBeInTheDocument();
+            expect(screen.getByText('Kỹ năng')).toBeInTheDocument();
+            expect(screen.getByText('Tài nguyên')).toBeInTheDocument();
         });
 
         it('should render prerequisites section', () => {
@@ -380,10 +443,30 @@ describe('NodeDetailsPanel', () => {
             expect(screen.queryByText('Yêu cầu trước')).not.toBeInTheDocument();
         });
 
+        it('should not render learning sections when data is not available', () => {
+            const minimalNodeData: NodeData = {
+                label: 'Minimal Node',
+                level: 1,
+                section: 'Test Section',
+            };
+
+            render(
+                <NodeDetailsPanel
+                    {...defaultProps}
+                    nodeData={minimalNodeData}
+                />
+            );
+
+            expect(screen.queryByText(/Mục tiêu học tập/)).not.toBeInTheDocument();
+            expect(screen.queryByText(/Kết quả học tập/)).not.toBeInTheDocument();
+            expect(screen.queryByText(/Chủ đề chính/)).not.toBeInTheDocument();
+            expect(screen.queryByText(/Kỹ năng đạt được/)).not.toBeInTheDocument();
+        });
+
         it('should not render navigation button when navigation is not available', () => {
             const nodeDataWithoutNavigation = {
                 ...mockNodeData,
-                category: undefined,
+                nodeCategory: undefined,
                 targetArticleId: undefined,
                 targetRoadmapId: undefined,
             };

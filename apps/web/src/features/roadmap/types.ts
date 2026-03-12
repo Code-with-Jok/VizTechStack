@@ -6,6 +6,48 @@
  */
 
 /**
+ * Node categories for roadmap visualization
+ * Based on the metadata guide for roadmap visualization
+ * Must match the GraphQL NodeCategory enum values (UPPERCASE)
+ */
+export type NodeCategory = 'ROLE' | 'SKILL' | 'TOPIC' | 'MILESTONE' | 'RESOURCE';
+
+/**
+ * Node category options with display labels and descriptions
+ */
+export const NODE_CATEGORY_OPTIONS: Array<{
+    value: NodeCategory;
+    label: string;
+    description: string;
+}> = [
+        {
+            value: 'ROLE',
+            label: 'Role',
+            description: 'Vai trò nghề nghiệp hoặc vị trí công việc'
+        },
+        {
+            value: 'SKILL',
+            label: 'Skill',
+            description: 'Kỹ năng cụ thể cần học và phát triển'
+        },
+        {
+            value: 'TOPIC',
+            label: 'Topic',
+            description: 'Chủ đề hoặc lĩnh vực kiến thức'
+        },
+        {
+            value: 'MILESTONE',
+            label: 'Milestone',
+            description: 'Cột mốc quan trọng trong quá trình học'
+        },
+        {
+            value: 'RESOURCE',
+            label: 'Resource',
+            description: 'Tài nguyên học tập (khóa học, sách, công cụ)'
+        }
+    ];
+
+/**
  * Main Roadmap interface matching the GraphQL Roadmap type
  */
 export interface Roadmap {
@@ -19,6 +61,8 @@ export interface Roadmap {
     description: string;
     /** Full markdown content of the roadmap */
     content: string;
+    /** Node category of the roadmap for visualization */
+    nodeCategory: NodeCategory;
     /** Author of the roadmap (Clerk user ID) */
     author: string;
     /** Array of tags associated with the roadmap */
@@ -44,6 +88,8 @@ export interface CreateRoadmapInput {
     description: string;
     /** Full markdown content of the roadmap */
     content: string;
+    /** Node category of the roadmap for visualization */
+    nodeCategory: NodeCategory;
     /** Array of tags associated with the roadmap */
     tags: string[];
     /** Whether the roadmap should be published immediately */
@@ -66,6 +112,8 @@ export interface UpdateRoadmapInput {
     description?: string;
     /** Full markdown content of the roadmap */
     content?: string;
+    /** Node category of the roadmap for visualization */
+    nodeCategory?: NodeCategory;
     /** Array of tags associated with the roadmap */
     tags?: string[];
     /** Whether the roadmap is published and visible to public */
@@ -86,6 +134,8 @@ export interface RoadmapFormData {
     description: string;
     /** Full markdown content of the roadmap */
     content: string;
+    /** Node category of the roadmap for visualization */
+    nodeCategory: NodeCategory;
     /** Comma-separated string of tags (converted to/from string[] for GraphQL) */
     tags: string;
     /** Whether the roadmap should be published */

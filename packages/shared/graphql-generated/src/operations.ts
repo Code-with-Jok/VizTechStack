@@ -18,6 +18,7 @@ export type CreateRoadmapInput = {
   content: Scalars['String']['input'];
   description: Scalars['String']['input'];
   isPublished: Scalars['Boolean']['input'];
+  nodeCategory: NodeCategory;
   slug: Scalars['String']['input'];
   tags: Array<Scalars['String']['input']>;
   title: Scalars['String']['input'];
@@ -45,6 +46,14 @@ export type MutationUpdateRoadmapArgs = {
   input: UpdateRoadmapInput;
 };
 
+export enum NodeCategory {
+  Milestone = 'MILESTONE',
+  Resource = 'RESOURCE',
+  Role = 'ROLE',
+  Skill = 'SKILL',
+  Topic = 'TOPIC'
+}
+
 export type Query = {
   __typename?: 'Query';
   roadmap?: Maybe<Roadmap>;
@@ -64,6 +73,7 @@ export type Roadmap = {
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   isPublished: Scalars['Boolean']['output'];
+  nodeCategory: NodeCategory;
   publishedAt: Scalars['Float']['output'];
   slug: Scalars['String']['output'];
   tags: Array<Scalars['String']['output']>;
@@ -76,6 +86,7 @@ export type UpdateRoadmapInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
   isPublished?: InputMaybe<Scalars['Boolean']['input']>;
+  nodeCategory?: InputMaybe<NodeCategory>;
   slug?: InputMaybe<Scalars['String']['input']>;
   tags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   title?: InputMaybe<Scalars['String']['input']>;

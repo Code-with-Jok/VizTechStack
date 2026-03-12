@@ -11,47 +11,56 @@ import { applyCircularLayout } from './circular-layout';
 import { applyGridLayout } from './grid-layout';
 
 /**
- * Apply the specified layout algorithm to nodes
+ * Apply the specified layout algorithm to graph data
  * 
- * @param nodes - Array of roadmap nodes
- * @param edges - Array of roadmap edges
+ * @param graphData - Graph data containing nodes and edges
  * @param layoutType - Type of layout to apply
  * @param options - Layout configuration options
- * @returns Array of nodes with calculated positions
+ * @returns Layout result with positioned nodes
  */
 export function applyLayoutAlgorithm(
-    nodes: RoadmapNode[],
-    edges: RoadmapEdge[],
+    graphData: { nodes: RoadmapNode[]; edges: RoadmapEdge[] },
     layoutType: LayoutType,
     options: LayoutOptions = {}
 ): RoadmapNode[] {
     // Validate inputs
-    if (!nodes || nodes.length === 0) {
+    if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
         return [];
     }
 
     try {
         switch (layoutType) {
             case 'hierarchical':
-                return applyHierarchicalLayout(nodes, edges, options);
+                const hierarchicalResult = applyHierarchicalLayout(graphData, options);
+                return hierarchicalResult.nodes;
 
             case 'force':
-                return applyForceDirectedLayout(nodes, edges, options);
+                const forceResult = applyForceDirectedLayout(graphData, options);
+                return forceResult.nodes;
 
             case 'circular':
-                return applyCircularLayout(nodes, edges, options);
+                const circularResult = applyCircularLayout(graphData, options);
+                return circularResult.nodes;
 
             case 'grid':
-                return applyGridLayout(nodes, edges, options);
+                const gridResult = applyGridLayout(graphData, options);
+                return gridResult.nodes;
 
             default:
                 // Fallback to hierarchical layout
                 console.warn(`Unknown layout type: ${layoutType}. Falling back to hierarchical.`);
-                return applyHierarchicalLayout(nodes, edges, options);
+                const fallbackResult = applyHierarchicalLayout(graphData, options);
+                return fallbackResult.nodes;
         }
     } catch (error) {
         console.error(`Error applying ${layoutType} layout:`, error);
         // Fallback to simple grid layout on error
-        return applyGridLayout(nodes, edges, options);
+        try {
+            const fallbackResult = applyGridLayout(graphData, options);
+            return fallbackResult.nodes;
+        } catch (fallbackError) {
+            console.error('Fallback grid layout also failed:', fallbackError);
+            return graphData.nodes; // Return original nodes as last resort
+        }
     }
 }

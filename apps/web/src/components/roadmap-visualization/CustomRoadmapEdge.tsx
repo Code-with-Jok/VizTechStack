@@ -119,6 +119,7 @@ function getStrengthIndicator(strength?: number): string {
 /**
  * Custom roadmap edge component với enhanced type safety và VizTechStack design
  * Hỗ trợ different relationship types, hover states và interactive tooltips
+ * Tích hợp với edge click handlers và selection state
  */
 export function CustomRoadmapEdge({
     id,
@@ -135,9 +136,13 @@ export function CustomRoadmapEdge({
     // Type assertion cho custom edge data
     const edgeData = data as EdgeData | undefined;
 
-    // State cho tooltip visibility
+    // State cho tooltip visibility và interaction
     const [showTooltip, setShowTooltip] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+
+    // Check if edge is highlighted (from external state)
+    const isHighlighted = edgeData?.highlighted || false;
+    const isDimmed = edgeData?.dimmed || false;
 
     // Lấy styling dựa trên relationship type
     const relationshipStyle = getRelationshipStyle(edgeData?.relationship);
@@ -155,7 +160,7 @@ export function CustomRoadmapEdge({
         targetPosition,
     });
 
-    // Merge styles
+    // Merge styles với enhanced selection và highlighting
     const finalStyle = {
         ...relationshipStyle,
         ...style,
@@ -163,6 +168,15 @@ export function CustomRoadmapEdge({
             stroke: '#f59e0b', // warning-500 cho selected state
             strokeWidth: (relationshipStyle.strokeWidth || 2) + 1,
             filter: 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.4))',
+        }),
+        ...(isHighlighted && !selected && {
+            stroke: '#ed7c47', // primary-500 cho highlighted state
+            strokeWidth: (relationshipStyle.strokeWidth || 2) + 0.5,
+            filter: 'drop-shadow(0 0 6px rgba(237, 124, 71, 0.3))',
+        }),
+        ...(isDimmed && !selected && !isHighlighted && {
+            opacity: 0.3,
+            strokeWidth: Math.max((relationshipStyle.strokeWidth || 2) - 0.5, 1),
         }),
         ...(isHovered && {
             strokeWidth: (relationshipStyle.strokeWidth || 2) + 0.5,
@@ -270,11 +284,16 @@ export function CustomRoadmapEdge({
                 </marker>
             </defs>
 
-            {/* Main Edge Path */}
+            {/* Main Edge Path với enhanced interactivity */}
             <BaseEdge
                 path={edgePath}
                 style={finalStyle}
-                className={`${relationshipStyle.className} cursor-pointer transition-all duration-200`}
+                className={`
+                    ${relationshipStyle.className} 
+                    cursor-pointer transition-all duration-200
+                    ${selected ? 'animate-pulse' : ''}
+                    ${isHighlighted ? 'animate-pulse' : ''}
+                `}
                 onMouseEnter={() => {
                     setShowTooltip(true);
                     setIsHovered(true);
@@ -304,7 +323,7 @@ export function CustomRoadmapEdge({
                             setIsHovered(false);
                         }}
                     >
-                        {/* Label Badge */}
+                        {/* Enhanced Label Badge với selection state */}
                         <div
                             className={`
                                 px-3 py-1.5 rounded-full text-xs font-medium
@@ -312,12 +331,14 @@ export function CustomRoadmapEdge({
                                 border border-neutral-200 dark:border-neutral-700
                                 shadow-soft hover:shadow-medium
                                 transition-all duration-200
-                                ${selected ? 'ring-2 ring-warning-400 ring-offset-1' : ''}
+                                ${selected ? 'ring-2 ring-warning-400 ring-offset-1 bg-warning-50 dark:bg-warning-950' : ''}
+                                ${isHighlighted ? 'ring-2 ring-primary-400 ring-offset-1 bg-primary-50 dark:bg-primary-950' : ''}
                                 ${isHovered ? 'scale-105 -translate-y-0.5' : ''}
+                                ${isDimmed ? 'opacity-50' : ''}
                                 cursor-pointer
                             `}
                             style={{
-                                color: relationshipStyle.stroke,
+                                color: selected ? '#f59e0b' : isHighlighted ? '#ed7c47' : relationshipStyle.stroke,
                             }}
                         >
                             <span className="flex items-center gap-1.5">

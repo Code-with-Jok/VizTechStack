@@ -68,6 +68,12 @@ export interface NodeData {
     resources?: Resource[];
     completed?: boolean;
 
+    // Learning information (Task 4.2.1)
+    learningObjectives?: string[]; // What learners will achieve
+    learningOutcomes?: string[]; // Expected results after completion
+    keyTopics?: string[]; // Main topics covered
+    skillsGained?: string[]; // Skills acquired after completion
+
     // Navigation properties (Giai đoạn 3)
     category?: NodeCategory;
     targetRoadmapId?: string; // For role nodes

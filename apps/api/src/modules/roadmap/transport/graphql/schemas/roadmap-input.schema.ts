@@ -1,4 +1,22 @@
 import { InputType, Field } from '@nestjs/graphql';
+import { registerEnumType } from '@nestjs/graphql';
+
+/**
+ * Node categories for roadmap visualization
+ */
+export enum NodeCategory {
+  ROLE = 'ROLE',
+  SKILL = 'SKILL',
+  TOPIC = 'TOPIC',
+  MILESTONE = 'MILESTONE',
+  RESOURCE = 'RESOURCE'
+}
+
+// Register enum for GraphQL
+registerEnumType(NodeCategory, {
+  name: 'NodeCategory',
+  description: 'Categories for organizing roadmaps in visualization',
+});
 
 /**
  * GraphQL input type for creating a new roadmap
@@ -38,6 +56,13 @@ export class CreateRoadmapInput {
    */
   @Field()
   content!: string;
+
+  /**
+   * Node category of the roadmap for visualization
+   * Used for organizing roadmaps into node types (role, skill, topic, milestone, resource)
+   */
+  @Field(() => NodeCategory)
+  nodeCategory!: NodeCategory;
 
   /**
    * Category tags for organizing roadmaps
@@ -99,6 +124,13 @@ export class UpdateRoadmapInput {
    */
   @Field({ nullable: true })
   content?: string;
+
+  /**
+   * Node category of the roadmap for visualization
+   * Optional - only update if provided
+   */
+  @Field(() => NodeCategory, { nullable: true })
+  nodeCategory?: NodeCategory;
 
   /**
    * Category tags for organizing roadmaps

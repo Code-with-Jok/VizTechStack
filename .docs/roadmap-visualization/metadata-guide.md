@@ -6,10 +6,739 @@ Tài liệu này mô tả hệ thống metadata được sử dụng trong roadm
 
 ## Trạng Thái Triển Khai
 
-**🚧 ĐANG PHÁT TRIỂN** - Sẽ được triển khai trong các phases tiếp theo
+**🚧 ĐANG PHÁT TRIỂN** - Đang triển khai các components cốt lõi
 
-**Giai đoạn hiện tại:** Phase 1.2 - React Flow Canvas Setup  
-**Metadata system:** Sẽ được implement trong Phase 2.1 - Content Parser
+**Giai đoạn hiện tại:** Phase 4.4 - Node Selection và Highlighting Implementation  
+**Đã hoàn thành:** 
+- MarkdownParser class (Task 2.1.1) ✅  
+- NodeExtractor service (Task 2.1.2) ✅  
+- RelationshipAnalyzer service (Task 2.2.1) ✅  
+- EdgeGenerator service (Task 2.2.2) ✅  
+- HierarchyProcessor service (Task 2.3.1) ✅  
+- Hierarchy validation (Task 2.3.2) ✅  
+- ResourceExtractor service (Task 2.4.1) ✅  
+- Resource categorization (Task 2.4.2) ✅  
+- HierarchicalLayout algorithm (Task 3.1.1) ✅  
+- Hierarchical layout controls (Task 3.1.2) ✅  
+- ForceDirectedLayout algorithm (Task 3.2.1) ✅  
+- Force layout controls (Task 3.2.2) ✅  
+- CircularLayout algorithm (Task 3.3.1) ✅  
+- Circular layout controls (Task 3.3.2) ✅  
+- GridLayout algorithm (Task 3.4.1) ✅  
+- Grid layout controls (Task 3.4.2) ✅  
+- LayoutManager service (Task 3.5.1) ✅  
+- LayoutControls component (Task 3.5.2) ✅  
+- NodeTooltip component (Task 4.1.1) ✅  
+- Tooltip positioning system (Task 4.1.2) ✅  
+- Enhanced NodeDetailsPanel (Task 4.2.1) ✅  
+- Panel responsive design (Task 4.2.2) ✅  
+- Edge click handlers (Task 4.3.1) ✅  
+- EdgeDetailsPanel component (Task 4.3.2) ✅  
+**Tiếp theo:** Selection state management (Task 4.4.1)  
+**Metadata system:** Đã tích hợp với hierarchy processing, validation, resource extraction, advanced categorization, layout system, node interaction tooltips, advanced positioning system, enhanced node details panel, responsive design system, edge interaction system và comprehensive edge details panel
+
+## Hierarchy Validation Metadata
+
+### 1. Validation Result Structure
+
+```typescript
+interface HierarchyValidationResult {
+  isValid: boolean;
+  criticalErrors: string[];
+  warnings: string[];
+  malformedStructures: MalformedStructure[];
+  suggestedFixes: HierarchyFix[];
+}
+
+interface MalformedStructure {
+  type: 'orphaned_node' | 'level_gap' | 'circular_dependency' | 'invalid_progression' | 'missing_parent';
+  nodeIds: string[];
+  description: string;
+  severity: 'critical' | 'warning' | 'info';
+}
+
+interface HierarchyFix {
+  type: 'insert_intermediate_level' | 'adjust_level' | 'create_parent' | 'remove_node' | 'merge_nodes';
+  targetNodeIds: string[];
+  description: string;
+  autoApplicable: boolean;
+}
+```
+
+### 2. Hierarchy Processing Options
+
+```typescript
+interface HierarchyProcessingOptions {
+  maxDepth?: number; // Default: 10
+  includeImplicitHierarchy?: boolean; // Default: true
+  strengthByDepth?: boolean; // Default: true
+  validateHierarchy?: boolean; // Default: true
+  fallbackOptions?: HierarchyFallbackOptions;
+}
+
+interface HierarchyFallbackOptions {
+  createMissingParents: boolean;
+  adjustLevelGaps: boolean;
+  removeOrphanedNodes: boolean;
+  flattenDeepHierarchy: boolean;
+  maxFallbackDepth: number;
+}
+```
+
+### 3. Hierarchy Statistics
+
+```typescript
+interface HierarchyStatistics {
+  averageDepth: number;
+  hierarchyBalance: number; // 0-1, higher means more balanced
+  branchingFactor: number; // Average children per parent
+  totalRelationships: number;
+  maxDepth: number;
+  nodesByDepth: Record<number, number>;
+  rootNodes: string[]; // Nodes with no parents
+  leafNodes: string[]; // Nodes with no children
+}
+```
+
+### 5. Advanced Positioning System Metadata
+
+Enhanced tooltip positioning system với collision detection và performance optimization:
+
+```typescript
+interface AdvancedPositioningMetadata {
+  // Position calculation results
+  calculatedPosition: {
+    x: number;
+    y: number;
+    placement: 'top' | 'bottom' | 'left' | 'right';
+    adjustedX?: number;
+    adjustedY?: number;
+  };
+  
+  // Collision detection information
+  collisionDetection: {
+    hasCollisions: boolean;
+    collisionElements: CollisionRect[];
+    avoidedCollisions: number;
+    fallbackUsed: boolean;
+  };
+  
+  // Performance metrics
+  performanceMetrics: {
+    positionCalculationTime: number;  // ms
+    collisionDetectionTime: number;   // ms
+    cacheHitRate: number;            // 0-1
+    totalCalculations: number;
+  };
+  
+  // Viewport information
+  viewportInfo: {
+    width: number;
+    height: number;
+    scrollX: number;
+    scrollY: number;
+  };
+  
+  // Positioning options used
+  positioningOptions: {
+    offset: number;
+    padding: number;
+    preferredPlacement: string;
+    allowFlip: boolean;
+    avoidCollisions: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
+  };
+}
+```
+
+### 6. Multi-Tooltip Management Metadata
+
+System quản lý multiple tooltips với priority và collision resolution:
+
+```typescript
+interface MultiTooltipMetadata {
+  // Active tooltip instances
+  activeTooltips: Map<string, TooltipInstance>;
+  
+  // Collision management
+  collisionMatrix: {
+    tooltipId: string;
+    collidingWith: string[];
+    resolutionStrategy: 'priority' | 'timestamp' | 'position';
+  }[];
+  
+  // Performance tracking
+  systemPerformance: {
+    totalTooltips: number;
+    maxConcurrentTooltips: number;
+    averageLifetime: number;        // ms
+    memoryUsage: number;            // bytes
+    cacheEfficiency: number;        // 0-1
+  };
+  
+  // Resource management
+  resourceUsage: {
+    domObservers: number;
+    eventListeners: number;
+    timeouts: number;
+    animationFrames: number;
+  };
+}
+
+interface TooltipInstance {
+  id: string;
+  position: TooltipPosition;
+  dimensions: TooltipDimensions;
+  mousePosition: { x: number; y: number };
+  priority: number;
+  timestamp: number;
+  nodeData: NodeData;
+  isVisible: boolean;
+}
+```
+
+## Node Tooltip Metadata
+
+### 1. Tooltip Display Metadata
+
+NodeTooltip component sử dụng comprehensive metadata để hiển thị thông tin chi tiết về nodes trong roadmap visualization:
+
+```typescript
+interface TooltipDisplayMetadata {
+  // Core information
+  label: string;                    // Node title
+  description?: string;             // Detailed description
+  level: number;                    // Learning level (0-10)
+  section: string;                  // Section/category name
+  
+  // Status indicators
+  completed?: boolean;              // Completion status
+  progress?: number;                // Progress percentage (0-100)
+  
+  // Learning metadata
+  estimatedTime?: string;           // Time estimate (e.g., "2 hours")
+  difficulty?: DifficultyLevel;     // beginner | intermediate | advanced
+  
+  // Navigation metadata (for categorized nodes)
+  category?: NodeCategory;          // role | skill
+  targetRoadmapId?: string;         // For role nodes
+  targetArticleId?: string;         // For skill nodes
+  
+  // Resources metadata
+  resources?: Resource[];           // Learning resources
+  prerequisites?: string[];        // Prerequisite node IDs
+}
+```
+
+### 2. Tooltip Positioning Metadata
+
+Smart positioning system sử dụng viewport và mouse position metadata:
+
+```typescript
+interface TooltipPositionMetadata {
+  // Mouse position
+  mousePosition: { x: number; y: number };
+  
+  // Viewport information
+  viewportWidth: number;
+  viewportHeight: number;
+  
+  // Tooltip dimensions
+  tooltipWidth: number;
+  tooltipHeight: number;
+  
+  // Calculated position
+  finalPosition: { x: number; y: number };
+  placement: 'top' | 'bottom' | 'left' | 'right';
+  
+  // Edge detection
+  edgeDetection: {
+    rightEdge: boolean;
+    bottomEdge: boolean;
+    leftEdge: boolean;
+    topEdge: boolean;
+  };
+}
+```
+
+### 3. Tooltip Performance Metadata
+
+Performance optimization tracking cho tooltip interactions:
+
+```typescript
+interface TooltipPerformanceMetadata {
+  // Timing information
+  showDelay: number;                // Delay before showing (ms)
+  hideDelay: number;                // Delay before hiding (ms)
+  renderTime: number;               // Time to render tooltip (ms)
+  
+  // Interaction tracking
+  hoverCount: number;               // Number of hovers in session
+  averageHoverDuration: number;     // Average hover time (ms)
+  
+  // Performance metrics
+  positionCalculationTime: number;  // Time to calculate position (ms)
+  animationFrameRate: number;       // Animation FPS
+  
+  // Memory usage
+  tooltipInstanceCount: number;     // Active tooltip instances
+  memoryUsage: number;              // Memory footprint (bytes)
+}
+```
+
+### 4. Tooltip Content Metadata
+
+Rich content display với category-specific information:
+
+```typescript
+interface TooltipContentMetadata {
+  // Basic content
+  title: string;
+  description: string;
+  
+  // Visual indicators
+  difficultyBadge: {
+    level: DifficultyLevel;
+    color: string;
+    icon: string;
+    description: string;
+  };
+  
+  // Status indicators
+  completionStatus: {
+    completed: boolean;
+    progress: number;
+    icon: string;
+    color: string;
+  };
+  
+  // Time information
+  timeEstimate: {
+    value: string;
+    icon: string;
+    formatted: string;
+  };
+  
+  // Category-specific content
+  categoryInfo: {
+    type: NodeCategory;
+    icon: string;
+    displayName: string;
+    navigationHint: string;
+  };
+  
+  // Resources preview
+  resourcesPreview: {
+    totalCount: number;
+    displayedCount: number;
+    resources: Array<{
+      title: string;
+      type: string;
+      icon: string;
+      typeLabel: string;
+    }>;
+  };
+  
+  // Learning level
+  levelInfo: {
+    current: number;
+    maximum: number;
+    percentage: number;
+    progressBar: {
+      width: string;
+      color: string;
+    };
+  };
+}
+```
+
+### 7. Responsive Design Metadata (Task 4.2.2)
+
+Enhanced NodeDetailsPanel với responsive design system và performance optimization:
+
+```typescript
+interface ResponsiveDesignMetadata {
+  // Breakpoint information
+  breakpointInfo: {
+    current: BreakpointSize;           // 'mobile' | 'tablet' | 'desktop'
+    screenWidth: number;
+    screenHeight: number;
+    isMobile: boolean;
+    isTablet: boolean;
+    isDesktop: boolean;
+  };
+  
+  // Panel state management
+  panelState: {
+    current: PanelState;               // 'collapsed' | 'expanded' | 'minimized'
+    previousState: PanelState;
+    autoResizeEnabled: boolean;
+    persistenceKey: string;
+    stateHistory: PanelStateChange[];
+  };
+  
+  // Responsive layout calculations
+  layoutCalculations: {
+    panelWidth: string;                // CSS class for width
+    maxPanelHeight: number;            // Calculated max height in pixels
+    shouldShowFullContent: boolean;
+    shouldUseCompactLayout: boolean;
+    adaptiveSpacing: ResponsiveSpacing;
+  };
+  
+  // Performance optimization metadata
+  performanceOptimization: {
+    virtualizationEnabled: boolean;
+    virtualizationThreshold: number;   // Number of items to trigger virtualization
+    memoryOptimizationEnabled: boolean;
+    cacheSize: number;
+    cacheHitRate: number;             // 0-1
+    renderTime: number;               // ms
+    memoryUsage: number;              // bytes
+  };
+  
+  // Touch and interaction metadata
+  touchInteraction: {
+    touchFriendlyControls: boolean;
+    minimumTouchTargetSize: number;   // 44px minimum
+    swipeGesturesEnabled: boolean;
+    clickOutsideToClose: boolean;     // Mobile only
+  };
+  
+  // Content adaptation
+  contentAdaptation: {
+    compactMode: boolean;
+    iconOnlyTabs: boolean;
+    limitedRelatedNodes: number;      // Max nodes shown on mobile
+    abbreviatedLabels: boolean;
+    responsiveGrid: ResponsiveGridConfig;
+  };
+}
+
+interface ResponsiveSpacing {
+  padding: {
+    mobile: string;    // 'p-4'
+    tablet: string;    // 'p-4 sm:p-6'
+    desktop: string;   // 'p-6'
+  };
+  gap: {
+    mobile: string;    // 'gap-3'
+    tablet: string;    // 'gap-3 sm:gap-4'
+    desktop: string;   // 'gap-4'
+  };
+  typography: {
+    mobile: string;    // 'text-xs'
+    tablet: string;    // 'text-xs sm:text-sm'
+    desktop: string;   // 'text-sm'
+  };
+}
+
+interface ResponsiveGridConfig {
+  mobile: {
+    columns: number;   // 2
+    maxItems: number;  // 3
+    showMore: boolean; // true
+  };
+  tablet: {
+    columns: number;   // 2-3
+    maxItems: number;  // 6
+    showMore: boolean; // false
+  };
+  desktop: {
+    columns: number;   // 3-4
+    maxItems: number;  // unlimited
+    showMore: boolean; // false
+  };
+}
+
+interface PanelStateChange {
+  from: PanelState;
+  to: PanelState;
+  timestamp: number;
+  trigger: 'user' | 'auto' | 'breakpoint';
+  reason: string;
+}
+```
+
+#### Responsive Behavior Patterns
+
+1. **Mobile-First Approach**: Panel tự động minimize trên mobile để tiết kiệm không gian
+2. **Progressive Enhancement**: Thêm features khi screen size tăng
+3. **Touch Optimization**: Controls được tối ưu cho touch interactions
+4. **Content Prioritization**: Hiển thị thông tin quan trọng nhất trước trên mobile
+5. **Performance Scaling**: Virtualization và optimization tự động kích hoạt khi cần
+
+#### Accessibility Integration
+
+```typescript
+interface ResponsiveAccessibilityMetadata {
+  // Keyboard navigation
+  keyboardNavigation: {
+    focusManagement: boolean;
+    tabOrder: string[];
+    shortcuts: KeyboardShortcut[];
+  };
+  
+  // Screen reader support
+  screenReader: {
+    ariaLabels: Record<string, string>;
+    liveRegions: string[];
+    roleDefinitions: Record<string, string>;
+  };
+  
+  // High contrast support
+  highContrast: {
+    enabled: boolean;
+    alternativeIndicators: boolean;
+    contrastRatios: Record<string, number>;
+  };
+}
+
+interface KeyboardShortcut {
+  key: string;
+  modifiers: string[];
+  action: string;
+  description: string;
+  context: 'global' | 'panel' | 'tab';
+}
+```
+
+### 8. Edge Interaction Metadata (Task 4.3.1)
+
+Comprehensive edge interaction system với click handlers, relationship highlighting và detailed information panel:
+
+```typescript
+interface EdgeInteractionMetadata {
+  // Edge selection state
+  selectionState: {
+    selectedEdgeId: string | null;
+    highlightedPath: string[];           // Node IDs in highlighted path
+    relationshipDetails: EdgeRelationshipDetails | null;
+    hoveredEdgeId: string | null;
+  };
+  
+  // Relationship analysis
+  relationshipDetails: {
+    edgeId: string;
+    sourceNode: RoadmapNode;
+    targetNode: RoadmapNode;
+    relationship: RelationshipType;      // 'prerequisite' | 'leads-to' | 'related-to' | 'part-of'
+    strength?: number;                   // 0-1 connection strength
+    bidirectional?: boolean;
+    description: string;                 // Auto-generated description
+    reasoning: string;                   // Auto-generated reasoning
+  };
+  
+  // Visual feedback states
+  visualStates: {
+    selected: EdgeVisualState;           // Warning colors với glow effect
+    highlighted: EdgeVisualState;        // Primary colors với enhanced stroke
+    dimmed: EdgeVisualState;            // Reduced opacity và stroke width
+    hovered: EdgeVisualState;           // Subtle scale và shadow effects
+  };
+  
+  // Path highlighting logic
+  pathHighlighting: {
+    primaryPath: string[];              // Direct source-target connection
+    relatedPaths: string[];             // Bidirectional và related connections
+    highlightingStrategy: 'direct' | 'extended' | 'network';
+    pathDepth: number;                  // Levels of connection to highlight
+  };
+  
+  // Interaction performance
+  interactionPerformance: {
+    clickResponseTime: number;          // ms
+    highlightUpdateTime: number;        // ms
+    panelRenderTime: number;           // ms
+    pathCalculationTime: number;        // ms
+  };
+}
+
+interface EdgeVisualState {
+  stroke: string;                       // Color value
+  strokeWidth: number;                  // Line thickness
+  opacity: number;                      // 0-1 transparency
+  filter?: string;                      // CSS filter effects
+  animation?: EdgeAnimation;            // Animation properties
+}
+
+interface EdgeAnimation {
+  type: 'glow' | 'pulse' | 'flow' | 'none';
+  duration: number;                     // ms
+  easing: string;                       // CSS easing function
+  iterations: number | 'infinite';
+}
+
+interface RelationshipType {
+  prerequisite: {
+    icon: '🔒';
+    color: '#dc2626';                   // error-600
+    description: 'Điều kiện tiên quyết';
+    directionality: 'unidirectional';
+    importance: 'critical';
+  };
+  'leads-to': {
+    icon: '➡️';
+    color: '#ed7c47';                   // primary-500
+    description: 'Dẫn đến';
+    directionality: 'unidirectional';
+    importance: 'high';
+  };
+  'related-to': {
+    icon: '🔗';
+    color: '#0ea5e9';                   // secondary-500
+    description: 'Liên quan';
+    directionality: 'bidirectional';
+    importance: 'medium';
+  };
+  'part-of': {
+    icon: '📦';
+    color: '#22c55e';                   // success-500
+    description: 'Thuộc về';
+    directionality: 'hierarchical';
+    importance: 'structural';
+  };
+}
+```
+
+#### Edge Interaction Flow
+
+1. **User clicks edge** → Edge selection event triggered
+2. **Hook processes click** → `useEdgeInteraction.handleEdgeClick`
+3. **State updates** → selectedEdgeId, relationshipDetails, highlightedPath
+4. **Visual feedback** → Edge styling changes, path highlighting
+5. **Panel renders** → EdgeDetailsPanel với comprehensive information
+6. **Navigation ready** → Quick navigation đến connected nodes
+
+#### Relationship Analysis Engine
+
+```typescript
+interface RelationshipAnalysisEngine {
+  // Description generation
+  descriptionGenerator: {
+    templateEngine: 'rule-based' | 'ai-powered';
+    templates: Record<RelationshipType, string[]>;
+    contextualFactors: string[];        // difficulty, level, section
+    personalization: boolean;
+  };
+  
+  // Reasoning generation
+  reasoningGenerator: {
+    analysisFactors: [
+      'difficulty_progression',         // beginner → intermediate → advanced
+      'level_hierarchy',               // level 1 → level 2 → level 3
+      'section_grouping',              // same section relationships
+      'content_similarity',            // topic overlap analysis
+      'learning_path_optimization'     // optimal learning sequence
+    ];
+    confidenceScore: number;           // 0-1 confidence in reasoning
+    fallbackReasoning: string;         // default reasoning when analysis fails
+  };
+  
+  // Strength calculation
+  strengthCalculation: {
+    factors: {
+      difficultyGap: number;          // Weight: 0.3
+      levelDistance: number;          // Weight: 0.2
+      sectionAlignment: number;       // Weight: 0.2
+      contentOverlap: number;         // Weight: 0.2
+      userBehavior: number;           // Weight: 0.1
+    };
+    algorithm: 'weighted_sum' | 'neural_network' | 'rule_based';
+    normalization: 'min_max' | 'z_score' | 'sigmoid';
+  };
+}
+```
+
+#### Visual Design System
+
+```typescript
+interface EdgeVisualDesignSystem {
+  // Color palette cho relationship types
+  relationshipColors: {
+    prerequisite: {
+      primary: '#dc2626';             // error-600
+      light: '#fecaca';               // error-200
+      dark: '#991b1b';                // error-800
+      background: '#fef2f2';          // error-50
+    };
+    'leads-to': {
+      primary: '#ed7c47';             // primary-500
+      light: '#fed7aa';               // primary-200
+      dark: '#c2410c';                // primary-800
+      background: '#fff7ed';          // primary-50
+    };
+    // ... other relationship types
+  };
+  
+  // Visual states
+  stateStyles: {
+    default: { strokeWidth: 2, opacity: 1 };
+    selected: { strokeWidth: 3, opacity: 1, glow: true };
+    highlighted: { strokeWidth: 2.5, opacity: 1 };
+    dimmed: { strokeWidth: 1.5, opacity: 0.3 };
+    hovered: { strokeWidth: 2.5, opacity: 1, shadow: true };
+  };
+  
+  // Animation system
+  animations: {
+    selection: {
+      duration: 200,
+      easing: 'ease-out',
+      properties: ['stroke-width', 'filter']
+    };
+    highlighting: {
+      duration: 150,
+      easing: 'ease-in-out',
+      properties: ['stroke', 'stroke-width']
+    };
+    flow: {
+      duration: 2000,
+      easing: 'linear',
+      iterations: 'infinite',
+      properties: ['stroke-dashoffset']
+    };
+  };
+}
+```
+
+#### Accessibility Integration
+
+```typescript
+interface EdgeAccessibilityMetadata {
+  // Keyboard navigation
+  keyboardSupport: {
+    tabNavigation: boolean;           // Tab through edges
+    arrowKeyNavigation: boolean;      // Navigate connected edges
+    enterActivation: boolean;         // Enter to select edge
+    escapeDeselection: boolean;       // Escape to clear selection
+  };
+  
+  // Screen reader support
+  screenReaderSupport: {
+    ariaLabels: Record<string, string>;
+    roleDefinitions: Record<string, string>;
+    liveRegions: string[];            // Dynamic content announcements
+    relationshipDescriptions: Record<RelationshipType, string>;
+  };
+  
+  // Visual accessibility
+  visualAccessibility: {
+    highContrastSupport: boolean;
+    colorIndependentIndicators: boolean;  // Icons và patterns supplement colors
+    focusIndicators: boolean;
+    scalableElements: boolean;        // Responsive sizing
+  };
+  
+  // Alternative interaction methods
+  alternativeInteractions: {
+    voiceCommands: string[];          // "select edge", "show relationship"
+    gestureSupport: boolean;          // Touch gestures on mobile
+    contextMenus: boolean;            // Right-click menus
+  };
+}
+```
 
 ## Node Metadata Structure
 
@@ -256,9 +985,14 @@ interface LayoutConfig {
   };
   
   circular: {
-    radius: number;
+    innerRadius: number;
+    outerRadius: number;
     startAngle: number;
     endAngle: number;
+    levelSpacing: number;
+    angularSpacing: number;
+    preventOverlaps: boolean;
+    sortByLevel: boolean;
     clockwise: boolean;
   };
   
@@ -267,8 +1001,157 @@ interface LayoutConfig {
     rows: number;
     cellWidth: number;
     cellHeight: number;
+    padding: number;
+    autoSize: boolean;
+    aspectRatio: number;
+    sortBy: 'level' | 'section' | 'difficulty' | 'none';
+    groupBy: 'section' | 'level' | 'none';
   };
 }
+```
+
+### 3. Circular Layout Metadata
+
+CircularLayout algorithm sử dụng d3-hierarchy để tạo concentric circles với metadata đặc biệt:
+
+```typescript
+interface CircularLayoutResult {
+  nodes: RoadmapNode[];
+  edges: RoadmapEdge[];
+  bounds: LayoutBounds;
+  metadata: CircularLayoutMetadata;
+}
+
+interface CircularLayoutMetadata {
+  layoutTime: number;
+  nodeCount: number;
+  levels: number;
+  rings: number;
+  averageRadius: number;
+  angularSpacing: number;
+  overlapsPrevented: number;
+  hierarchyDepth: number;
+}
+
+interface CircularLayoutOptions {
+  width?: number;
+  height?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  startAngle?: number;
+  endAngle?: number;
+  levelSpacing?: number;
+  angularSpacing?: number;
+  preventOverlaps?: boolean;
+  sortByLevel?: boolean;
+}
+```
+
+#### Circular Layout Features
+
+1. **Concentric Positioning**: Nodes được đặt trong các vòng tròn đồng tâm dựa trên hierarchy level
+2. **Angular Optimization**: Tự động tối ưu hóa khoảng cách góc để tránh overlap
+3. **Hierarchy Preservation**: Duy trì cấu trúc phân cấp trong circular arrangement
+4. **Section Grouping**: Hỗ trợ nhóm nodes theo section trong cùng một ring
+5. **Progressive Layout**: Tối ưu hóa cho topic progression và learning paths
+
+#### Circular Layout Strategies
+
+```typescript
+// Basic circular layout
+const basicResult = applyCircularLayout(graphData);
+
+// Progression-optimized layout
+const progressionResult = applyProgressionOptimizedCircularLayout(graphData);
+
+// Section-optimized layout
+const sectionResult = applySectionOptimizedCircularLayout(graphData);
+
+// Custom options layout
+const customLayout = createCircularLayout({
+  innerRadius: 100,
+  outerRadius: 400,
+  startAngle: 0,
+  endAngle: 2 * Math.PI,
+  preventOverlaps: true
+});
+```
+
+### 4. Grid Layout Metadata
+
+GridLayout algorithm tạo structured grid arrangement với metadata tối ưu hóa:
+
+```typescript
+interface GridLayoutResult {
+  nodes: RoadmapNode[];
+  edges: RoadmapEdge[];
+  bounds: LayoutBounds;
+  metadata: GridLayoutMetadata;
+}
+
+interface GridLayoutMetadata {
+  layoutTime: number;
+  nodeCount: number;
+  gridDimensions: {
+    columns: number;
+    rows: number;
+  };
+  cellDimensions: {
+    width: number;
+    height: number;
+  };
+  utilization: number; // 0-1, percentage of grid cells used
+  aspectRatio: number;
+  sortingApplied: string;
+  groupingApplied: string;
+}
+
+interface GridLayoutOptions {
+  width?: number;
+  height?: number;
+  columns?: number;
+  rows?: number;
+  cellWidth?: number;
+  cellHeight?: number;
+  padding?: number;
+  autoSize?: boolean;
+  aspectRatio?: number;
+  sortBy?: 'level' | 'section' | 'difficulty' | 'none';
+  groupBy?: 'section' | 'level' | 'none';
+  contentOptimized?: boolean;
+}
+```
+
+#### Grid Layout Features
+
+1. **Structured Positioning**: Nodes được đặt trong grid cells có tổ chức
+2. **Automatic Sizing**: Tự động tính toán kích thước grid tối ưu dựa trên content
+3. **Content Optimization**: Điều chỉnh cell sizes dựa trên node content và labels
+4. **Smart Organization**: Sắp xếp và nhóm nodes theo level, section hoặc difficulty
+5. **Aspect Ratio Control**: Duy trì tỷ lệ khung hình mong muốn cho layout
+
+#### Grid Layout Strategies
+
+```typescript
+// Basic grid layout
+const basicResult = applyGridLayout(graphData);
+
+// Content-optimized layout
+const contentResult = applyContentOptimizedGridLayout(graphData);
+
+// Auto-sized layout
+const autoResult = applyAutoSizedGridLayout(graphData);
+
+// Custom options layout
+const customLayout = createGridLayout({
+  columns: 4,
+  rows: 3,
+  cellWidth: 200,
+  cellHeight: 150,
+  padding: 20,
+  sortBy: 'level',
+  groupBy: 'section'
+});
 ```
 
 ## Resource Metadata
@@ -317,7 +1200,102 @@ type ResourceType =
   | 'documentation'
   | 'tutorial'
   | 'example'
-  | 'reference';
+  | 'reference'
+  | 'github'
+  | 'website'
+  | 'blog'
+  | 'podcast';
+```
+
+### 2. Advanced Resource Categorization System
+
+Hệ thống phân loại tài nguyên nâng cao sử dụng machine learning-like approach để tự động xác định loại tài nguyên dựa trên URL patterns, domain analysis và content features.
+
+```typescript
+interface ResourceFeatures {
+  // URL-based features
+  domain: string;
+  path: string;
+  fileExtension?: string;
+  
+  // Content-based features
+  titleKeywords: string[];
+  titleLength: number;
+  
+  // Pattern-based features
+  hasVideoIndicators: boolean;
+  hasCourseIndicators: boolean;
+  hasDocumentationIndicators: boolean;
+  hasTutorialIndicators: boolean;
+  hasToolIndicators: boolean;
+  hasBookIndicators: boolean;
+  hasBlogIndicators: boolean;
+  hasExampleIndicators: boolean;
+  hasGithubIndicators: boolean;
+  hasPodcastIndicators: boolean;
+  
+  // Quality indicators
+  isOfficialSource: boolean;
+  isEducationalDomain: boolean;
+  isCommercialPlatform: boolean;
+}
+
+interface CategoryScores {
+  github: number;
+  video: number;
+  course: number;
+  documentation: number;
+  tutorial: number;
+  tool: number;
+  book: number;
+  blog: number;
+  podcast: number;
+  example: number;
+  article: number;
+  website: number;
+  reference: number;
+}
+```
+
+#### Categorization Algorithm
+
+1. **Feature Extraction**: Trích xuất features từ URL và title
+2. **Score Calculation**: Tính điểm cho mỗi category dựa trên features
+3. **Best Category Selection**: Chọn category có điểm cao nhất
+
+#### Platform Recognition
+
+Hệ thống nhận diện các platform phổ biến:
+
+- **Video Platforms**: YouTube, Vimeo, Twitch, Dailymotion
+- **Course Platforms**: Udemy, Coursera, edX, Pluralsight, LinkedIn Learning
+- **Documentation Sites**: Official docs, MDN, W3C
+- **Tool Sites**: VS Code, JetBrains, Eclipse
+- **Book Platforms**: Amazon, O'Reilly, Manning, Packt
+- **Blog Platforms**: Medium, Dev.to, Hashnode, Substack
+- **Example Platforms**: CodePen, JSFiddle, CodeSandbox, StackBlitz
+
+### 3. Resource Cost và Difficulty Detection
+
+```typescript
+type ResourceCost = 'free' | 'paid' | 'subscription' | 'freemium';
+type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+
+// Automatic cost detection
+const detectResourceCost = (resource: ExtractedResource): ResourceCost => {
+  // Free platforms: GitHub, MDN, W3Schools
+  // Paid platforms: Udemy, Pluralsight
+  // Subscription: Netflix, LinkedIn Learning
+  // Default: free
+};
+
+// Automatic difficulty detection
+const detectResourceDifficulty = (resource: ExtractedResource): DifficultyLevel => {
+  // Keywords: beginner, intro, basic, getting started
+  // Keywords: advanced, expert, master, deep dive
+  // Keywords: intermediate, medium
+  // Default: intermediate
+};
 ```
 
 ## Progress Tracking Metadata
