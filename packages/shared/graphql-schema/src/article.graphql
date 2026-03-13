@@ -1,0 +1,67 @@
+# Article GraphQL Schema
+
+# Node interface for polymorphic node types
+interface Node {
+  id: ID!
+  slug: String!
+  title: String!
+  author: String!
+  createdAt: Float!
+  updatedAt: Float!
+  isPublished: Boolean!
+}
+
+# Article type implementing Node interface
+type Article implements Node {
+  id: ID!
+  slug: String!
+  title: String!
+  content: String!
+  author: String!
+  tags: [String!]!
+  createdAt: Float!
+  updatedAt: Float!
+  isPublished: Boolean!
+  isDeleted: Boolean!
+  readingTime: Int!
+  wordCount: Int!
+}
+
+input CreateArticleInput {
+  slug: String!
+  title: String!
+  content: String!
+  tags: [String!]!
+  isPublished: Boolean!
+}
+
+input UpdateArticleInput {
+  id: String!
+  slug: String
+  title: String
+  content: String
+  tags: [String]
+  isPublished: Boolean
+}
+
+type Query {
+  # Public query - returns only published articles
+  articles: [Article!]!
+  
+  # Admin query - returns all articles including drafts
+  articlesForAdmin: [Article!]!
+  
+  # Get single article by slug
+  article(slug: String!): Article
+}
+
+type Mutation {
+  # Create new article (admin only)
+  createArticle(input: CreateArticleInput!): Article!
+  
+  # Update existing article (admin only)
+  updateArticle(input: UpdateArticleInput!): Article!
+  
+  # Soft delete article (admin only)
+  deleteArticle(id: String!): Article!
+}

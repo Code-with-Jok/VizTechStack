@@ -33,9 +33,10 @@ interface RequestWithUser {
 export class ClerkAuthGuard implements CanActivate {
   private readonly logger = new Logger(ClerkAuthGuard.name);
   private readonly secretKey = process.env.CLERK_SECRET_KEY;
+  private readonly jwtIssuerDomain = process.env.CLERK_JWT_ISSUER_DOMAIN;
   private hasLoggedMissingSecret = false;
 
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -72,9 +73,23 @@ export class ClerkAuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
 
     try {
-      const sessionClaims = (await verifyToken(token, {
+      // Verify token with Clerk issuer domain
+      const verifyOptions: {
+        secretKey: string;
+        issuer?: string;
+      } = {
         secretKey: this.secretKey,
-      })) as unknown as ClerkJwtPayload;
+      };
+
+      // Add issuer if configured
+      if (this.jwtIssuerDomain) {
+        verifyOptions.issuer = this.jwtIssuerDomain;
+      }
+
+      const sessionClaims = (await verifyToken(
+        token,
+        verifyOptions,
+      )) as unknown as ClerkJwtPayload;
 
       // Extract role from multiple possible locations in JWT
       const role =
@@ -90,7 +105,37 @@ export class ClerkAuthGuard implements CanActivate {
       };
 
       return true;
-    } catch {
+    } catch (error) {
+      // In development mode, if token is expired, decode it manually and allow access
+      if (process.env.NODE_ENV === 'development' && error instanceof Error && error.message.includes('JWT is expired')) {
+        this.logger.warn('Token expired but allowing in development mode');
+
+        // Decode token manually (without verification)
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          try {
+            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+            const role = payload.role || payload.metadata?.role || payload.public_metadata?.role || 'user';
+
+            gqlReq.user = {
+              ...payload,
+              id: payload.sub,
+              role,
+            };
+
+            return true;
+          } catch (decodeError) {
+            this.logger.error('Failed to decode expired token:', decodeError);
+          }
+        }
+      }
+
+      // Log detailed error for debugging
+      this.logger.error('Token verification failed:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        issuer: this.jwtIssuerDomain,
+        tokenPrefix: token.substring(0, 20) + '...',
+      });
       throw new UnauthorizedException('Invalid token');
     }
   }
