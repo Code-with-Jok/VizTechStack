@@ -9,6 +9,24 @@ export default defineSchema({
     role: v.union(v.literal("user"), v.literal("admin")),
   }).index("by_email", ["email"]),
 
+  articles: defineTable({
+    slug: v.string(),
+    title: v.string(),
+    content: v.string(),
+    author: v.string(),
+    tags: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    isPublished: v.boolean(),
+    isDeleted: v.boolean(),
+    readingTime: v.number(),
+    wordCount: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_author", ["author"])
+    .index("by_published", ["isPublished", "createdAt"])
+    .index("by_tags", ["tags"]),
+
   guides: defineTable({
     slug: v.string(),
     title: v.string(),
@@ -39,6 +57,7 @@ export default defineSchema({
     edgesJson: v.optional(v.string()),
     createdAt: v.optional(v.number()),
     userId: v.optional(v.string()),
+    nodeCategory: v.optional(v.string()), // Legacy field from old data
   })
     .index("by_slug", ["slug"])
     .index("by_author", ["author"])

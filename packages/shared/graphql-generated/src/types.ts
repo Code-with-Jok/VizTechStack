@@ -14,6 +14,30 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type Article = Node & {
+  __typename?: 'Article';
+  author: Scalars['String']['output'];
+  content: Scalars['String']['output'];
+  createdAt: Scalars['Float']['output'];
+  id: Scalars['ID']['output'];
+  isDeleted: Scalars['Boolean']['output'];
+  isPublished: Scalars['Boolean']['output'];
+  readingTime: Scalars['Int']['output'];
+  slug: Scalars['String']['output'];
+  tags: Array<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['Float']['output'];
+  wordCount: Scalars['Int']['output'];
+};
+
+export type CreateArticleInput = {
+  content: Scalars['String']['input'];
+  isPublished: Scalars['Boolean']['input'];
+  slug: Scalars['String']['input'];
+  tags: Array<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
 export type CreateRoadmapInput = {
   content: Scalars['String']['input'];
   description: Scalars['String']['input'];
@@ -25,9 +49,17 @@ export type CreateRoadmapInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createArticle: Article;
   createRoadmap: Roadmap;
+  deleteArticle: Article;
   deleteRoadmap: Roadmap;
+  updateArticle: Article;
   updateRoadmap: Roadmap;
+};
+
+
+export type MutationCreateArticleArgs = {
+  input: CreateArticleInput;
 };
 
 
@@ -36,8 +68,18 @@ export type MutationCreateRoadmapArgs = {
 };
 
 
+export type MutationDeleteArticleArgs = {
+  id: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteRoadmapArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateArticleArgs = {
+  input: UpdateArticleInput;
 };
 
 
@@ -45,11 +87,29 @@ export type MutationUpdateRoadmapArgs = {
   input: UpdateRoadmapInput;
 };
 
+export type Node = {
+  author: Scalars['String']['output'];
+  createdAt: Scalars['Float']['output'];
+  id: Scalars['ID']['output'];
+  isPublished: Scalars['Boolean']['output'];
+  slug: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['Float']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  article?: Maybe<Article>;
+  articles: Array<Article>;
+  articlesForAdmin: Array<Article>;
   roadmap?: Maybe<Roadmap>;
   roadmaps: Array<Roadmap>;
   roadmapsForAdmin: Array<Roadmap>;
+};
+
+
+export type QueryArticleArgs = {
+  slug: Scalars['String']['input'];
 };
 
 
@@ -69,6 +129,15 @@ export type Roadmap = {
   tags: Array<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['Float']['output'];
+};
+
+export type UpdateArticleInput = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+  isPublished?: InputMaybe<Scalars['Boolean']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateRoadmapInput = {

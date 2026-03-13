@@ -1,15 +1,15 @@
 {
-  "enabled": true,
-  "name": "Cập nhật tài liệu sau task",
-  "description": "Tự động nhắc agent kiểm tra và cập nhật tài liệu (.docs, unit tests, e2e tests) nếu bị outdate sau khi hoàn thành một task",
-  "version": "1",
+  "enabled": false,
+  "name": "Cập nhật tài liệu sau Phase/Checkpoint",
+  "description": "Tự động nhắc agent kiểm tra và cập nhật tài liệu (.docs) sau khi hoàn thành Phase hoặc Checkpoint. Hook này đã được disable để tăng tốc độ thực thi - documentation sẽ được cập nhật trong Phase 6.",
+  "version": "2",
   "when": {
     "type": "postTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Task vừa hoàn thành. Hãy kiểm tra xem có tài liệu nào bị outdate không (trong thư mục .docs, unit tests, e2e tests). Nếu có, hãy cập nhật chúng để phản ánh đúng những thay đổi vừa thực hiện. QUAN TRỌNG: Tất cả tài liệu phải được viết bằng TIẾNG VIỆT."
+    "prompt": "Phase/Checkpoint vừa hoàn thành. Hãy kiểm tra xem có tài liệu nào bị outdate không (trong thư mục .docs). Nếu có, hãy cập nhật chúng để phản ánh đúng những thay đổi vừa thực hiện. QUAN TRỌNG: Tất cả tài liệu phải được viết bằng TIẾNG VIỆT."
   },
   "workspaceFolderName": "VizTechStack",
-  "shortName": "update-docs-after-task"
+  "shortName": "update-docs-after-phase"
 }

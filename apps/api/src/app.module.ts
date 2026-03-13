@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { HealthModule } from './modules/health/health.module';
 import { PingModule } from './modules/ping/ping.module';
 import { RoadmapModule } from './modules/roadmap/roadmap.module';
+import { ArticleModule } from './modules/article/article.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { RoadmapModule } from './modules/roadmap/roadmap.module';
     PingModule,
     HealthModule,
     RoadmapModule,
+    ArticleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
